@@ -27,7 +27,7 @@ if __name__ == '__main__':
         while not key:
             key = raw_input('TOOPHER_CONSUMER_KEY=')
         while not secret:
-            secret = raw_input('TOOPHER_CONSUMER_SECRET')
+            secret = raw_input('TOOPHER_CONSUMER_SECRET=')
             
     api = toopher.ToopherApi(key, secret)
     
