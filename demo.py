@@ -29,7 +29,7 @@ if __name__ == '__main__':
         while not secret:
             secret = raw_input('TOOPHER_CONSUMER_SECRET')
             
-    api = toopher.ToopherAPI(key, secret)
+    api = toopher.ToopherApi(key, secret)
     
     while True:
         print 'Step 1: Pair requester with phone'
