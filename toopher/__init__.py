@@ -1,13 +1,14 @@
 import urllib
 import json
 import oauth2
-
+import os
 BASE_URL = "https://api.toopher.com/v1"
 
 
 class ToopherApi(object):
     def __init__(self, key, secret):
         self.client = oauth2.Client(oauth2.Consumer(key, secret))
+	self.client.ca_certs = os.path.join(os.path.dirname(os.path.abspath(__file__ )), "toopher.pem")
 
     def pair(self, pairing_phrase, user_name):
         uri = BASE_URL + "/pairings/create"
