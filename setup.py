@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='toopher',
-    version='1.0.2',
+    version='1.0.3',
     author='Toopher, Inc.',
     author_email='support@toopher.com',
     url='https://dev.toopher.com',
