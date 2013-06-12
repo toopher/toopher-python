@@ -18,7 +18,8 @@ setup(
         'Topic :: Security',
         'Topic :: Software Development :: Libraries :: Python Modules',
         ],
-    packages=['toopher',],
+    packages=['toopher'],
+    package_data = {'toopher': ['toopher.pem']},
     test_suite='tests',
     install_requires=[
         'oauth2',
