@@ -1,14 +1,9 @@
 #!/usr/bin/env python
-try:
-    from setuptools import setup
-except ImportError:
-    from distribute_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup
+from setuptools import setup
 
 setup(
     name='toopher',
-    version='1.0.3',
+    version='1.0.4',
     author='Toopher, Inc.',
     author_email='support@toopher.com',
     url='https://dev.toopher.com',
