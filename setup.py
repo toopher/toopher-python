@@ -6,8 +6,6 @@ except ImportError:
     use_setuptools()
     from setuptools import setup
 
-from setuptools import setup
-
 setup(
     name='toopher',
     version='1.0.3',
