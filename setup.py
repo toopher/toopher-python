@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='toopher',
-    version='1.0.3',
+    version='1.0.4',
     author='Toopher, Inc.',
     author_email='support@toopher.com',
     url='https://dev.toopher.com',
