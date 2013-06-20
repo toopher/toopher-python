@@ -28,6 +28,9 @@ if __name__ == '__main__':
             key = raw_input('TOOPHER_CONSUMER_KEY=')
         while not secret:
             secret = raw_input('TOOPHER_CONSUMER_SECRET=')
+
+    if os.environ.get('TOOPHER_BASE_URL'):
+        toopher.BASE_URL = os.environ.get('TOOPHER_BASE_URL').rstrip('/')
             
     api = toopher.ToopherApi(key, secret)
     
