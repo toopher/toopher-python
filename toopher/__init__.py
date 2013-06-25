@@ -33,7 +33,7 @@ class ToopherApi(object):
         if isinstance(automation_allowed, bool):
             params['automation_allowed'] = automation_allowed
         if isinstance(challenge_required, bool):
-           params['challenge_required'] = challenge_required
+            params['challenge_required'] = challenge_required
         result = self._request(uri, "POST", params)
         return AuthenticationStatus(result)
 
