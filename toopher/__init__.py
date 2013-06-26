@@ -4,16 +4,25 @@ import oauth2
 import os
 BASE_URL = "https://api.toopher.com/v1"
 
+LOCATION_RESOLUTION_NONE = 0
+LOCATION_RESOLUTION_COUNTRY = 10
+LOCATION_RESOLUTION_ADMINISTRATIVE_AREA = 20
+LOCATION_RESOLUTION_LOCALITY = 30
+LOCATION_RESOLUTION_THOROUGHFARE = 40
+LOCATION_RESOLUTION_MAX = 99
 
 class ToopherApi(object):
     def __init__(self, key, secret):
         self.client = oauth2.Client(oauth2.Consumer(key, secret))
         self.client.ca_certs = os.path.join(os.path.dirname(os.path.abspath(__file__)), "toopher.pem")
 
-    def pair(self, pairing_phrase, user_name):
+    def pair(self, pairing_phrase, user_name, required_location_in_response_granularity = LOCATION_RESOLUTION_NONE):
         uri = BASE_URL + "/pairings/create"
         params = {'pairing_phrase': pairing_phrase,
                   'user_name': user_name}
+
+        if required_location_in_response_granularity:
+            params['required_location_in_response_granularity'] = required_location_in_response_granularity
         
         result = self._request(uri, "POST", params)
         return PairingStatus(result)
@@ -83,6 +92,8 @@ class AuthenticationStatus(object):
             self.granted = json_response['granted']
             self.automated = json_response['automated']
             self.reason = json_response['reason']
+            if 'reported_authenticator_location' in json_response:
+                self.reported_authenticator_location = json_response['reported_authenticator_location']
             
             terminal = json_response['terminal']
             self.terminal_id = terminal['id']
