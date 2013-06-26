@@ -24,7 +24,7 @@ class ToopherApi(object):
         result = self._request(uri, "GET")
         return PairingStatus(result)
 
-    def authenticate(self, pairing_id, terminal_name, action_name=None, automation_allowed=None, challenge_required=None):
+    def authenticate(self, pairing_id, terminal_name, action_name=None, automation_allowed=True, challenge_required=False):
         uri = BASE_URL + "/authentication_requests/initiate"
         params = {'pairing_id': pairing_id,
                   'terminal_name': terminal_name}
