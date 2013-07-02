@@ -82,10 +82,13 @@ if __name__ == '__main__':
         if not terminal_name:
             terminal_name = DEFAULT_TERMINAL_NAME
             
+        location_in_response = False
+        if location_resolution:
+            location_in_response = raw_input('Request location information in authentication response? y/[N]: ').lower().startswith('y')
         print 'Sending authentication request...'
         
         try:
-            request_status = api.authenticate(pairing_id, terminal_name)
+            request_status = api.authenticate(pairing_id, terminal_name, location_in_response_requested=location_in_response)
             request_id = request_status.id
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
