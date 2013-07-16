@@ -28,6 +28,9 @@ if __name__ == '__main__':
             key = raw_input('TOOPHER_CONSUMER_KEY=')
         while not secret:
             secret = raw_input('TOOPHER_CONSUMER_SECRET=')
+
+    if os.environ.get('TOOPHER_BASE_URL'):
+        toopher.BASE_URL = os.environ.get('TOOPHER_BASE_URL').rstrip('/')
             
     api = toopher.ToopherApi(key, secret)
     
@@ -44,10 +47,12 @@ if __name__ == '__main__':
         if not user_name:
             user_name = DEFAULT_USERNAME
             
+        location_resolution = raw_input('Enter required location resolution [0..100]: ')
+
         print 'Sending pairing request...'
         
         try:
-            pairing_status = api.pair(pairing_phrase, user_name)
+            pairing_status = api.pair(pairing_phrase, user_name, location_resolution)
             pairing_id = pairing_status.id
             break
         except ToopherApiError, e:
@@ -77,10 +82,13 @@ if __name__ == '__main__':
         if not terminal_name:
             terminal_name = DEFAULT_TERMINAL_NAME
             
+        location_in_response = False
+        if location_resolution:
+            location_in_response = raw_input('Request location information in authentication response? y/[N]: ').lower().startswith('y')
         print 'Sending authentication request...'
         
         try:
-            request_status = api.authenticate(pairing_id, terminal_name)
+            request_status = api.authenticate(pairing_id, terminal_name, location_in_response_requested=location_in_response)
             request_id = request_status.id
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
@@ -102,6 +110,10 @@ if __name__ == '__main__':
                 automation = 'automatically ' if request_status.automated else ''
                 result = 'granted' if request_status.granted else 'denied'
                 print 'The request was ' + automation + result + "!"
+                if hasattr(request_status, 'reported_authenticator_location'):
+                    print 'The Authenticator submitted the following location information!:'
+                    for key in request_status.reported_authenticator_location:
+                        print '\t{0} : {1}'.format(key, request_status.reported_authenticator_location[key])
                 break
             
         raw_input('Press return to authenticate again, or Ctrl-C to exit')
