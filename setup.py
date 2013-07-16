@@ -1,8 +1,9 @@
+#!/usr/bin/env python
 from setuptools import setup
 
 setup(
     name='toopher',
-    version='1.0.2',
+    version='1.0.4',
     author='Toopher, Inc.',
     author_email='support@toopher.com',
     url='https://dev.toopher.com',
@@ -16,7 +17,8 @@ setup(
         'Topic :: Security',
         'Topic :: Software Development :: Libraries :: Python Modules',
         ],
-    packages=['toopher',],
+    packages=['toopher'],
+    package_data = {'toopher': ['toopher.pem']},
     test_suite='tests',
     install_requires=[
         'oauth2',
