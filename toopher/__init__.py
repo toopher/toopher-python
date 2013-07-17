@@ -24,13 +24,16 @@ class ToopherApi(object):
         result = self._request(uri, "GET")
         return PairingStatus(result)
 
-    def authenticate(self, pairing_id, terminal_name, action_name=None):
+    def authenticate(self, pairing_id, terminal_name, action_name=None, automation_allowed=True, challenge_required=False):
         uri = BASE_URL + "/authentication_requests/initiate"
         params = {'pairing_id': pairing_id,
                   'terminal_name': terminal_name}
         if action_name:
             params['action_name'] = action_name
-            
+        if isinstance(automation_allowed, bool):
+            params['automation_allowed'] = automation_allowed
+        if isinstance(challenge_required, bool):
+            params['challenge_required'] = challenge_required
         result = self._request(uri, "POST", params)
         return AuthenticationStatus(result)
 
