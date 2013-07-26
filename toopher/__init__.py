@@ -10,10 +10,12 @@ class ToopherApi(object):
         self.client = oauth2.Client(oauth2.Consumer(key, secret))
         self.client.ca_certs = os.path.join(os.path.dirname(os.path.abspath(__file__)), "toopher.pem")
 
-    def pair(self, pairing_phrase, user_name):
+    def pair(self, pairing_phrase, user_name, **kwargs):
         uri = BASE_URL + "/pairings/create"
         params = {'pairing_phrase': pairing_phrase,
                   'user_name': user_name}
+
+        params.update(kwargs)
         
         result = self._request(uri, "POST", params)
         return PairingStatus(result)
@@ -24,12 +26,14 @@ class ToopherApi(object):
         result = self._request(uri, "GET")
         return PairingStatus(result)
 
-    def authenticate(self, pairing_id, terminal_name, action_name=None):
+    def authenticate(self, pairing_id, terminal_name, action_name=None, **kwargs):
         uri = BASE_URL + "/authentication_requests/initiate"
         params = {'pairing_id': pairing_id,
                   'terminal_name': terminal_name}
         if action_name:
             params['action_name'] = action_name
+
+        params.update(kwargs)
             
         result = self._request(uri, "POST", params)
         return AuthenticationStatus(result)
@@ -70,9 +74,14 @@ class PairingStatus(object):
             self.user_name = user['name']
         except Exception:
             raise ToopherApiError("Could not parse pairing status from response")
+
+        self._raw_data = json_response
         
     def __nonzero__(self):
         return self.enabled
+
+    def __getattr__(self, name):
+        return self._raw_data.get(name)
 
 
 class AuthenticationStatus(object):
@@ -90,8 +99,13 @@ class AuthenticationStatus(object):
         except Exception:
             raise ToopherApiError("Could not parse authentication status from response")
 
+        self._raw_data = json_response
+
     def __nonzero__(self):
         return self.granted
+
+    def __getattr__(self, name):
+        return self._raw_data.get(name)
 
 
 class ToopherApiError(Exception): pass

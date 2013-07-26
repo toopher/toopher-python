@@ -1,5 +1,6 @@
 import os
 import sys
+import uuid
 
 import toopher
 from toopher import ToopherApiError
@@ -29,6 +30,9 @@ if __name__ == '__main__':
         while not secret:
             secret = raw_input('TOOPHER_CONSUMER_SECRET=')
             
+    if os.environ.get('TOOPHER_BASE_URL'):
+        toopher.BASE_URL = os.environ.get('TOOPHER_BASE_URL').rstrip('/')
+
     api = toopher.ToopherApi(key, secret)
     
     while True:
@@ -69,6 +73,8 @@ if __name__ == '__main__':
             raise
             print 'Could not check pairing status (reason: %s)' % e
             
+    terminal_extras = {}
+
     while True:
         print 'Step 2: Authenticate log in'
         print_sep()
@@ -76,11 +82,16 @@ if __name__ == '__main__':
         terminal_name = raw_input('Enter a terminal name for this authentication request [%s]: ' % DEFAULT_TERMINAL_NAME)
         if not terminal_name:
             terminal_name = DEFAULT_TERMINAL_NAME
+
+        if terminal_name in terminal_extras:
+            terminal_extra = terminal_extras[terminal_name]
+        else:
+            terminal_extra = terminal_extras[terminal_name] = uuid.uuid4()
             
         print 'Sending authentication request...'
         
         try:
-            request_status = api.authenticate(pairing_id, terminal_name)
+            request_status = api.authenticate(pairing_id, terminal_name, terminal_name_extra=terminal_extra)
             request_id = request_status.id
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
