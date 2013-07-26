@@ -2,40 +2,46 @@ import urllib
 import json
 import oauth2
 import os
-BASE_URL = "https://api.toopher.com/v1"
+DEFAULT_BASE_URL = "https://api.toopher.com/v1"
 
 
 class ToopherApi(object):
-    def __init__(self, key, secret):
+    def __init__(self, key, secret, api_url=None):
         self.client = oauth2.Client(oauth2.Consumer(key, secret))
         self.client.ca_certs = os.path.join(os.path.dirname(os.path.abspath(__file__)), "toopher.pem")
+        base_url = api_url if api_url else DEFAULT_BASE_URL
+        self.base_url = base_url.rstrip('/')
 
-    def pair(self, pairing_phrase, user_name):
-        uri = BASE_URL + "/pairings/create"
+    def pair(self, pairing_phrase, user_name, **kwargs):
+        uri = self.base_url + "/pairings/create"
         params = {'pairing_phrase': pairing_phrase,
                   'user_name': user_name}
+
+        params.update(kwargs)
         
         result = self._request(uri, "POST", params)
         return PairingStatus(result)
         
     def get_pairing_status(self, pairing_id):
-        uri = BASE_URL + "/pairings/" + pairing_id
+        uri = self.base_url + "/pairings/" + pairing_id
         
         result = self._request(uri, "GET")
         return PairingStatus(result)
 
-    def authenticate(self, pairing_id, terminal_name, action_name=None):
-        uri = BASE_URL + "/authentication_requests/initiate"
+    def authenticate(self, pairing_id, terminal_name, action_name=None, **kwargs):
+        uri = self.base_url + "/authentication_requests/initiate"
         params = {'pairing_id': pairing_id,
                   'terminal_name': terminal_name}
         if action_name:
             params['action_name'] = action_name
+
+        params.update(kwargs)
             
         result = self._request(uri, "POST", params)
         return AuthenticationStatus(result)
 
     def get_authentication_status(self, authentication_request_id):
-        uri = BASE_URL + "/authentication_requests/" + authentication_request_id
+        uri = self.base_url + "/authentication_requests/" + authentication_request_id
         
         result = self._request(uri, "GET")
         return AuthenticationStatus(result)
@@ -68,11 +74,16 @@ class PairingStatus(object):
             user = json_response['user']
             self.user_id = user['id']
             self.user_name = user['name']
-        except Exception:
-            raise ToopherApiError("Could not parse pairing status from response")
+        except Exception as e:
+            raise ToopherApiError("Could not parse pairing status from response" + e.message)
+
+        self._raw_data = json_response
         
     def __nonzero__(self):
         return self.enabled
+
+    def __getattr__(self, name):
+        return self._raw_data[name]
 
 
 class AuthenticationStatus(object):
@@ -90,8 +101,13 @@ class AuthenticationStatus(object):
         except Exception:
             raise ToopherApiError("Could not parse authentication status from response")
 
+        self._raw_data = json_response
+
     def __nonzero__(self):
         return self.granted
+
+    def __getattr__(self, name):
+        return self._raw_data[name]
 
 
 class ToopherApiError(Exception): pass
