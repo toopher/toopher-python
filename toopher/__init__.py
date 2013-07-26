@@ -74,8 +74,8 @@ class PairingStatus(object):
             user = json_response['user']
             self.user_id = user['id']
             self.user_name = user['name']
-        except Exception:
-            raise ToopherApiError("Could not parse pairing status from response")
+        except Exception as e:
+            raise ToopherApiError("Could not parse pairing status from response" + e.message)
 
         self._raw_data = json_response
         
@@ -83,7 +83,7 @@ class PairingStatus(object):
         return self.enabled
 
     def __getattr__(self, name):
-        return self._raw_data.get(name)
+        return self._raw_data[name]
 
 
 class AuthenticationStatus(object):
@@ -107,7 +107,7 @@ class AuthenticationStatus(object):
         return self.granted
 
     def __getattr__(self, name):
-        return self._raw_data.get(name)
+        return self._raw_data[name]
 
 
 class ToopherApiError(Exception): pass
