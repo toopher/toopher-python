@@ -30,10 +30,7 @@ if __name__ == '__main__':
         while not secret:
             secret = raw_input('TOOPHER_CONSUMER_SECRET=')
             
-    if os.environ.get('TOOPHER_BASE_URL'):
-        toopher.BASE_URL = os.environ.get('TOOPHER_BASE_URL').rstrip('/')
-
-    api = toopher.ToopherApi(key, secret)
+    api = toopher.ToopherApi(key, secret, os.environ.get('TOOPHER_BASE_URL'))
     
     while True:
         print 'Step 1: Pair requester with phone'
