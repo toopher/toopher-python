@@ -21,6 +21,17 @@ class ToopherApi(object):
         
         result = self._request(uri, "POST", params)
         return PairingStatus(result)
+
+    def pair_sms(self, phone_number, user_name, phone_country=None):
+        uri = BASE_URL + "/pairings/create/sms"
+        params = {'phone_number': phone_number,
+                  'user_name': user_name}
+       
+        if phone_country:
+            params['phone_country'] = phone_country
+
+        result = self._request(uri, "POST", params)
+        return PairingStatus(result)
         
     def get_pairing_status(self, pairing_id):
         uri = self.base_url + "/pairings/" + pairing_id
@@ -44,6 +55,12 @@ class ToopherApi(object):
         uri = self.base_url + "/authentication_requests/" + authentication_request_id
         
         result = self._request(uri, "GET")
+        return AuthenticationStatus(result)
+
+    def authenticate_with_otp(self, authentication_request_id, otp):
+        uri = BASE_URL + "/authentication_requests/" + authentication_request_id + '/otp_auth'
+        params = {'otp' : otp}
+        result = self._request(uri, "POST", params)
         return AuthenticationStatus(result)
     
     def _request(self, uri, method, params=None):
