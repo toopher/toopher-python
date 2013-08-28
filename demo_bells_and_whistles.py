@@ -4,6 +4,7 @@ import uuid
 
 import toopher
 from toopher import ToopherApiError
+import argparse
 
 DEFAULT_USERNAME = 'demo@toopher.com'
 DEFAULT_TERMINAL_NAME = 'my computer'
@@ -13,6 +14,13 @@ def print_sep(char='-'):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Toopher Library Usage Demo')
+    parser.add_argument('--sms', dest='sms_authentication', action='store_true',
+                    help='Use SMS Authentication mode (SMS messages instead of Smartphone push)')
+    parser.add_argument('--sms-inband-reply', dest='sms_inband_reply', action='store_true',
+                    help='Send a OTP to user over SMS for entry through the website (instead of prompting them to reply via SMS).  This option only makes sense if --sms is also supplied.')
+    args = parser.parse_args()
+
     print_sep('=')
     print 'Library Usage Demo'
     print_sep('=')
@@ -35,11 +43,20 @@ if __name__ == '__main__':
     while True:
         print 'Step 1: Pair requester with phone'
         print_sep('-')
-        print 'Pairing phrases are generated on the mobile app'
-        pairing_phrase = raw_input('Enter pairing phrase: ')
-        while not pairing_phrase:
-            print 'Please enter a pairing phrase to continue'
-            pairing_phrase = raw_input('Enter pairing phrase: ')
+        if args.sms_authentication:
+            pair_func = api.pair_sms
+            pair_help = 'Non-US numbers should start with a "+" and include the country code.'
+            pair_type = 'mobile number'
+        else:
+            pair_func = api.pair
+            pair_help = 'Pairing phrases are generated on the mobile app'
+            pair_type = 'pairing phrase'
+        
+        print pair_help
+        pairing_key = raw_input('Enter {0}: '.format(pair_type))
+        while not pairing_key:
+            print 'Please enter a {0} to continue'.format(pair_type)
+            pairing_key = raw_input('Enter {0}: '.format(pair_type))
             
         user_name = raw_input('Enter a username for this pairing [%s]: ' % DEFAULT_USERNAME)
         if not user_name:
@@ -48,7 +65,7 @@ if __name__ == '__main__':
         print 'Sending pairing request...'
         
         try:
-            pairing_status = api.pair(pairing_phrase, user_name)
+            pairing_status = pair_func(pairing_key, user_name)
             pairing_id = pairing_status.id
             break
         except ToopherApiError, e:
@@ -88,18 +105,25 @@ if __name__ == '__main__':
         print 'Sending authentication request...'
         
         try:
-            request_status = api.authenticate(pairing_id, terminal_name, terminal_name_extra=terminal_extra)
+            request_status = api.authenticate(pairing_id, terminal_name, terminal_name_extra=terminal_extra, use_sms_inband_reply=args.sms_inband_reply)
             request_id = request_status.id
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
             continue
         
         while True:
-            raw_input('Response to authentication request on phone (if prompted) and then press return to continue.')
+            if args.sms_inband_reply:
+                otp = raw_input('Enter the One-Time-Password that was sent to your phone to continue: ')
+            else:
+                otp = None
+                raw_input('Response to authentication request on phone (if prompted) and then press return to continue.')
             print 'Checking status of authentication request...'
             
             try:
-                request_status = api.get_authentication_status(request_id)
+                if otp:
+                    request_status = api.authenticate_with_otp(request_id, otp)
+                else:
+                    request_status = api.get_authentication_status(request_id)
             except ToopherApiError, e:
                 print 'Could not check authentication status (reason: %s)' % e
                 continue
