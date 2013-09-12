@@ -3,6 +3,7 @@ import json
 import oauth2
 import os
 DEFAULT_BASE_URL = "https://api.toopher.com/v1"
+VERSION = "1.0.6"
 
 
 class ToopherApi(object):
