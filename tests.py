@@ -8,10 +8,11 @@ class HttpClientMock(object):
     def __init__(self, paths):
         self.paths = paths
 
-    def request(self, uri, method, data):
+    def request(self, uri, method, data, headers):
         self.last_called_uri = uri
         self.last_called_method = method
         self.last_called_data = urlparse.parse_qs(data)
+        self.last_called_headers = headers
 
         if uri in self.paths:
             return self.paths[uri]
