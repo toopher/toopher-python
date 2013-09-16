@@ -2,6 +2,7 @@ import urllib
 import json
 import oauth2
 import os
+import sys
 DEFAULT_BASE_URL = "https://api.toopher.com/v1"
 VERSION = "1.0.6"
 
@@ -66,7 +67,7 @@ class ToopherApi(object):
 
     def _request(self, uri, method, params=None):
         data = urllib.urlencode(params or {})
-        header_data = {'User-Agent':'Toopher-Python/{}'.format(VERSION)}
+        header_data = {'User-Agent':'Toopher-Python/{} (Python {})'.format(VERSION, sys.version.split()[0])}
 
         resp, content = self.client.request(uri, method, data, headers=header_data)
         if resp['status'] != '200':
