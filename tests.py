@@ -8,10 +8,11 @@ class HttpClientMock(object):
     def __init__(self, paths):
         self.paths = paths
 
-    def request(self, uri, method, data):
+    def request(self, uri, method, data, headers):
         self.last_called_uri = uri
         self.last_called_method = method
         self.last_called_data = urlparse.parse_qs(data)
+        self.last_called_headers = headers
 
         if uri in self.paths:
             return self.paths[uri]
@@ -25,6 +26,20 @@ class ToopherTests(unittest.TestCase):
             api = toopher.ToopherApi()
 
         api = toopher.ToopherApi('key', 'secret', api_url='http://testonly')
+
+    def test_version_number_in_library(self):
+        major, minor, patch = toopher.VERSION.split('.')
+        self.assertGreaterEqual(int(major), 1)
+        self.assertGreaterEqual(int(minor), 0)
+        self.assertGreaterEqual(int(patch), 0)
+
+    def test_version_number_in_setup(self):
+        ''' Ensure that the setup.py file has the same version number as the toopher/__init__.py file '''
+        for line in open('setup.py'):
+            if "version" in line:
+                # in setup.py the version is written as "version='1.0.6'," so we need to remove version=' and ',
+                version_number = line.strip().replace("version='", "").replace("',", "")
+                self.assertEqual(version_number, toopher.VERSION)
 
     def test_create_pairing(self):
         api = toopher.ToopherApi('key', 'secret', api_url='http://testonly')
@@ -40,7 +55,7 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(api.client.last_called_data['pairing_phrase'], ['awkward turtle'])
         with self.assertRaises(KeyError):
             self.assertEqual(api.client.last_called_data['test_param'], ['42'])
-    
+
     def test_pairing_status(self):
         api = toopher.ToopherApi('key', 'secret', api_url='http://testonly')
         api.client = HttpClientMock({
@@ -74,7 +89,6 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(api.client.last_called_data['terminal_name'], ['test terminal'])
         with self.assertRaises(KeyError):
             self.assertEqual(api.client.last_called_data['test_param'], ['42'])
-
 
     def test_authentication_status(self):
         api = toopher.ToopherApi('key', 'secret', api_url='http://testonly')
@@ -142,7 +156,6 @@ class ToopherTests(unittest.TestCase):
         self.assertTrue(pairing.enabled)
 
         self.assertEqual(pairing.random_key, "84")
-
 
     def test_access_arbitrary_keys_in_authentication_status(self):
         api = toopher.ToopherApi('key', 'secret', api_url='http://testonly')
