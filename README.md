@@ -1,5 +1,7 @@
 #ToopherPython
 
+[![Build Status](https://travis-ci.org/toopher/toopher-python.png?branch=master)](https://travis-ci.org/toopher/toopher-python)
+
 #### Introduction
 ToopherPython is a Toopher API library that simplifies the task of interfacing with the Toopher API from Python code.  This project wrangles all the required OAuth and JSON functionality so you can focus on just using the API.
 
