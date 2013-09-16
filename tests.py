@@ -28,7 +28,10 @@ class ToopherTests(unittest.TestCase):
         api = toopher.ToopherApi('key', 'secret', api_url='http://testonly')
 
     def test_version_number_in_library(self):
-        self.assertGreaterEqual(toopher.VERSION, "1.0.6")
+        major, minor, patch = toopher.VERSION.split('.')
+        self.assertGreaterEqual(int(major), 1)
+        self.assertGreaterEqual(int(minor), 0)
+        self.assertGreaterEqual(int(patch), 0)
 
     def test_version_number_in_setup(self):
         ''' Ensure that the setup.py file has the same version number as the toopher/__init__.py file '''
