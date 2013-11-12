@@ -1,4 +1,4 @@
-import os
+import os.path
 import requests_oauthlib
 import sys
 
@@ -30,6 +30,13 @@ class ToopherApi(object):
         params.update(kwargs)
 
         result = self._request(uri, "POST", params)
+        return PairingStatus(result)
+
+    def pair_qr(self, user_name, **kwargs):
+        uri = self.base_url + '/pairings/create/qr'
+        params = {'user_name': user_name}
+        params.update(kwargs)
+        result = self._request(uri, 'POST', params)
         return PairingStatus(result)
 
     def pair_sms(self, phone_number, user_name, phone_country=None):
