@@ -23,6 +23,13 @@ class ToopherApi(object):
         base_url = api_url if api_url else DEFAULT_BASE_URL
         self.base_url = base_url.rstrip('/')
 
+    def upgrade(self, user_name, label, secret, **kwargs):
+        uri = self.base_url + '/pairings/upgrade'
+        params = {'user_name': user_name, 'label': label, 'secret': secret}
+        params.update(kwargs)
+        result = self._request(uri, 'POST', params)
+        return result
+
     def pair(self, pairing_phrase, user_name, **kwargs):
         uri = self.base_url + "/pairings/create"
         params = {'pairing_phrase': pairing_phrase,
