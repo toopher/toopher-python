@@ -92,8 +92,6 @@ class ToopherApi(object):
         response, content = self.client.request(uri, method, data, headers=header_data)
         try:
             content = json.loads(content)
-            import pprint
-            pprint.pprint(content)
         except ValueError:
             raise ToopherApiError('Response from server could not be decoded as JSON.')
 
