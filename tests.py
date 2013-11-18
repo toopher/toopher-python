@@ -1,8 +1,8 @@
-import unittest
+import json
 import os
-import urlparse
-
 import toopher
+import unittest
+import urlparse
 
 class HttpClientMock(object):
     def __init__(self, paths):
@@ -176,6 +176,56 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(auth_request.terminal_name, 'test terminal')
 
         self.assertEqual(auth_request.random_key, "84")
+
+    def test_disabled_user_raises_correct_error(self):
+        api = toopher.ToopherApi('key', 'secret', api_url='https://toopher.test/v1')
+        api.client = HttpClientMock({
+            'https://toopher.test/v1/authentication_requests/initiate':
+                ({'status': 409}, json.dumps(
+                    {'error_code': 704,
+                     'error_message': 'disabled user'}))})
+        with self.assertRaises(toopher.UserDisabledError):
+            auth_request = api.authenticate_by_user_name('disabled user', 'terminal name')
+
+    def test_unknown_user_raises_correct_error(self):
+        api = toopher.ToopherApi('key', 'secret', api_url='https://toopher.test/v1')
+        api.client = HttpClientMock({
+            'https://toopher.test/v1/authentication_requests/initiate':
+                ({'status': 409}, json.dumps(
+                    {'error_code': 705,
+                     'error_message': 'unknown user'}))})
+        with self.assertRaises(toopher.UnknownUserError):
+            auth_request = api.authenticate_by_user_name('unknown user', 'terminal name')
+
+    def test_unknown_terminal_raises_correct_error(self):
+        api = toopher.ToopherApi('key', 'secret', api_url='https://toopher.test/v1')
+        api.client = HttpClientMock({
+            'https://toopher.test/v1/authentication_requests/initiate':
+                ({'status': 409}, json.dumps(
+                    {'error_code': 706,
+                     'error_message': 'unknown terminal'}))})
+        with self.assertRaises(toopher.UnknownTerminalError):
+            auth_request = api.authenticate_by_user_name('user', 'unknown terminal name')
+
+    def test_disabled_pairing_raises_correct_error(self):
+        api = toopher.ToopherApi('key', 'secret', api_url='https://toopher.test/v1')
+        api.client = HttpClientMock({
+            'https://toopher.test/v1/authentication_requests/initiate':
+                ({'status': 409}, json.dumps(
+                    {'error_code': 601,
+                     'error_message': 'pairing has been deactivated'}))})
+        with self.assertRaises(toopher.PairingDeactivatedError):
+            auth_request = api.authenticate_by_user_name('user', 'terminal name')
+
+    def test_disabled_pairing_raises_correct_error(self):
+        api = toopher.ToopherApi('key', 'secret', api_url='https://toopher.test/v1')
+        api.client = HttpClientMock({
+            'https://toopher.test/v1/authentication_requests/initiate':
+                ({'status': 409}, json.dumps(
+                    {'error_code': 601,
+                     'error_message': 'pairing has not been authorized'}))})
+        with self.assertRaises(toopher.PairingDeactivatedError):
+            auth_request = api.authenticate_by_user_name('user', 'terminal name')
 
 def main():
     unittest.main()

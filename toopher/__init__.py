@@ -73,7 +73,7 @@ class ToopherApi(object):
         result = self._request(uri, "POST", params)
         return AuthenticationStatus(result)
 
-    def authenticate_by_user_name(self, user_name, terminal_name_extra, action_name, **kwargs):
+    def authenticate_by_user_name(self, user_name, terminal_name_extra, action_name=None, **kwargs):
         kwargs.update(user_name=user_name, terminal_name_extra=terminal_name_extra)
         return self.authenticate('', '', action_name, **kwargs)
 
@@ -83,7 +83,18 @@ class ToopherApi(object):
                   'name': terminal_name,
                   'name_extra': terminal_name_extra}
         result = self._request(uri, 'POST', params)
-        return
+
+    def set_enable_toopher_for_user(self, user_name, enabled):
+        uri = self.base_url + '/users'
+        users = self._request(uri, 'GET')
+        if len(users) > 1:
+            raise ToopherApiException('Multiple users with name = {}'.format(user_name))
+        elif not len(users):
+            raise ToopherApiException('No users with name = {}'.format(user_name))
+
+        uri = self.base_url + '/users/' + users[0]['id']
+        params = {'disable_toopher_auth': bool(enabled)}
+        result = self._request(uri, 'POST', params)
 
     def _request(self, uri, method, params=None):
         data = urllib.urlencode(params or {})
