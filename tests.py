@@ -194,7 +194,7 @@ class ToopherTests(unittest.TestCase):
                 ({'status': 409}, json.dumps(
                     {'error_code': 705,
                      'error_message': 'unknown user'}))})
-        with self.assertRaises(toopher.UnknownUserError):
+        with self.assertRaises(toopher.UserUnknownError):
             auth_request = api.authenticate_by_user_name('unknown user', 'terminal name')
 
     def test_unknown_terminal_raises_correct_error(self):
@@ -204,7 +204,7 @@ class ToopherTests(unittest.TestCase):
                 ({'status': 409}, json.dumps(
                     {'error_code': 706,
                      'error_message': 'unknown terminal'}))})
-        with self.assertRaises(toopher.UnknownTerminalError):
+        with self.assertRaises(toopher.TerminalUnknownError):
             auth_request = api.authenticate_by_user_name('user', 'unknown terminal name')
 
     def test_disabled_pairing_raises_correct_error(self):

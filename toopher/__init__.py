@@ -8,12 +8,12 @@ VERSION = "1.0.6"
 
 class ToopherApiError(Exception): pass
 class UserDisabledError(ToopherApiError): pass
-class UnknownUserError(ToopherApiError): pass
-class UnknownTerminalError(ToopherApiError): pass
+class UserUnknownError(ToopherApiError): pass
+class TerminalUnknownError(ToopherApiError): pass
 class PairingDeactivatedError(ToopherApiError): pass
 error_codes_to_errors = {704: UserDisabledError,
-                         705: UnknownUserError,
-                         706: UnknownTerminalError}
+                         705: UserUnknownError,
+                         706: TerminalUnknownError}
 
 class ToopherApi(object):
     def __init__(self, key, secret, api_url=None):
@@ -77,11 +77,11 @@ class ToopherApi(object):
         kwargs.update(user_name=user_name, terminal_name_extra=terminal_name_extra)
         return self.authenticate('', '', action_name, **kwargs)
 
-    def assign_friendly_name_to_terminal(self, user_name, terminal_name, terminal_name_extra):
+    def create_user_terminal(self, user_name, terminal_name, requester_terminal_id):
         uri = self.base_url + '/user_terminals/create'
         params = {'user_name': user_name,
                   'name': terminal_name,
-                  'name_extra': terminal_name_extra}
+                  'name_extra': requester_terminal_id}
         result = self._request(uri, 'POST', params)
 
     def set_enable_toopher_for_user(self, user_name, enabled):
