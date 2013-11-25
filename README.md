@@ -44,6 +44,37 @@ if (auth_status.pending == false and auth_status.granted == true):
 #### Handling Errors
 If any request runs into an error a `ToopherApiError` will be thrown with more details on what went wrong.
 
+#### Zero-Storage usage option
+Requesters can choose to integrate the Toopher API in a way does not require storing any per-user data such as Pairing ID and Terminal ID - all of the storage
+is handled by the Toopher API Web Service, allowing your local database to remain unchanged.  If the Toopher API needs more data, it will `die()` with a specific
+error string that allows your code to respond appropriately.
+
+```python
+try:
+    # optimistically try to authenticate against Toopher API with username and a Terminal Identifier
+    # Terminal Identifer is typically a randomly generated secure browser cookie.  It does not
+    # need to be human-readable
+    auth = api.authenticate_by_user_name("username@yourservice.com", "<terminal identifier>")
+
+    # if you got here, everything is good!  poll the auth request status as described above
+    # there are four distinct errors ToopherAPI can return if it needs more data
+except UserDisabledError:
+    # you have marked this user as disabled in the Toopher API.
+except UnknownUserError:
+    # This user has not yet paired a mobile device with their account.  Pair them
+    # using api.pair() as described above, then re-try authentication
+except UnknownTerminalError:
+    # This user has not assigned a "Friendly Name" to this terminal identifier.
+    # Prompt them to enter a terminal name, then submit that "friendly name" to
+    # the Toopher API:
+    #   api.assign_user_friendly_name_to_terminal(user_name, terminal_friendly_name, terminal_identifier)
+    # Afterwards, re-try authentication
+except PairingDeactivatedError:
+    # this user does not have an active pairing,
+    # typically because they deleted the pairing.  You can prompt
+    # the user to re-pair with a new mobile device.
+```
+
 #### Dependencies
 This library uses the python-oauth2 library to handle OAuth signing and httplib2 to make the web requests.  If you install using pip (or easy_install) they'll be installed automatically for you. 
 

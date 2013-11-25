@@ -6,6 +6,14 @@ import sys
 DEFAULT_BASE_URL = "https://api.toopher.com/v1"
 VERSION = "1.0.6"
 
+class ToopherApiError(Exception): pass
+class UserDisabledError(ToopherApiError): pass
+class UserUnknownError(ToopherApiError): pass
+class TerminalUnknownError(ToopherApiError): pass
+class PairingDeactivatedError(ToopherApiError): pass
+error_codes_to_errors = {704: UserDisabledError,
+                         705: UserUnknownError,
+                         706: TerminalUnknownError}
 
 class ToopherApi(object):
     def __init__(self, key, secret, api_url=None):
@@ -25,7 +33,7 @@ class ToopherApi(object):
         return PairingStatus(result)
 
     def pair_sms(self, phone_number, user_name, phone_country=None):
-        uri = BASE_URL + "/pairings/create/sms"
+        uri = self.base_url + "/pairings/create/sms"
         params = {'phone_number': phone_number,
                   'user_name': user_name}
 
@@ -60,30 +68,62 @@ class ToopherApi(object):
         return AuthenticationStatus(result)
 
     def authenticate_with_otp(self, authentication_request_id, otp):
-        uri = BASE_URL + "/authentication_requests/" + authentication_request_id + '/otp_auth'
+        uri = self.base_url + "/authentication_requests/" + authentication_request_id + '/otp_auth'
         params = {'otp' : otp}
         result = self._request(uri, "POST", params)
         return AuthenticationStatus(result)
+
+    def authenticate_by_user_name(self, user_name, terminal_name_extra, action_name=None, **kwargs):
+        kwargs.update(user_name=user_name, terminal_name_extra=terminal_name_extra)
+        return self.authenticate('', '', action_name, **kwargs)
+
+    def create_user_terminal(self, user_name, terminal_name, requester_terminal_id):
+        uri = self.base_url + '/user_terminals/create'
+        params = {'user_name': user_name,
+                  'name': terminal_name,
+                  'name_extra': requester_terminal_id}
+        result = self._request(uri, 'POST', params)
+
+    def set_enable_toopher_for_user(self, user_name, enabled):
+        uri = self.base_url + '/users'
+        users = self._request(uri, 'GET')
+        if len(users) > 1:
+            raise ToopherApiException('Multiple users with name = {}'.format(user_name))
+        elif not len(users):
+            raise ToopherApiException('No users with name = {}'.format(user_name))
+
+        uri = self.base_url + '/users/' + users[0]['id']
+        params = {'disable_toopher_auth': bool(enabled)}
+        result = self._request(uri, 'POST', params)
 
     def _request(self, uri, method, params=None):
         data = urllib.urlencode(params or {})
         header_data = {'User-Agent':'Toopher-Python/{} (Python {})'.format(VERSION, sys.version.split()[0])}
 
-        resp, content = self.client.request(uri, method, data, headers=header_data)
-        if resp['status'] != '200':
-            try:
-                error_message = json.loads(content)['error_message']
-            except Exception:
-                error_message = content
-            raise ToopherApiError(error_message)
-
+        response, content = self.client.request(uri, method, data, headers=header_data)
         try:
-            result = json.loads(content)
-        except Exception, e:
-            raise ToopherApiError("Response from server could not be decoded as JSON: %s" % e)
+            content = json.loads(content)
+        except ValueError:
+            raise ToopherApiError('Response from server could not be decoded as JSON.')
 
-        return result
+        if int(response['status']) > 300:
+            self._parse_request_error(content)
 
+        return content
+
+    def _parse_request_error(self, content):
+        error_code = content['error_code']
+        error_message = content['error_message']
+        if error_code in error_codes_to_errors:
+            error = error_codes_to_errors[error_code]
+            raise error(error_message)
+
+        # TODO: Add an error code for PairingDeactivatedError.
+        if ('pairing has been deactivated' in error_message
+            or 'pairing has not been authorized' in error_message):
+            raise PairingDeactivatedError(error_message)
+
+        raise ToopherApiError(error_message)
 
 class PairingStatus(object):
     def __init__(self, json_response):
@@ -128,7 +168,3 @@ class AuthenticationStatus(object):
 
     def __getattr__(self, name):
         return self._raw_data[name]
-
-
-class ToopherApiError(Exception): pass
-
