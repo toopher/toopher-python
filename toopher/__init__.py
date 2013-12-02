@@ -4,7 +4,7 @@ import oauth2
 import os
 import sys
 DEFAULT_BASE_URL = "https://api.toopher.com/v1"
-VERSION = "1.0.6"
+VERSION = '1.1.0'
 
 class ToopherApiError(Exception): pass
 class UserDisabledError(ToopherApiError): pass
@@ -84,7 +84,7 @@ class ToopherApi(object):
                   'name_extra': requester_terminal_id}
         result = self._request(uri, 'POST', params)
 
-    def set_enable_toopher_for_user(self, user_name, enabled):
+    def set_toopher_enabled_for_user(self, user_name, enabled):
         uri = self.base_url + '/users'
         users = self._request(uri, 'GET')
         if len(users) > 1:
@@ -106,7 +106,7 @@ class ToopherApi(object):
         except ValueError:
             raise ToopherApiError('Response from server could not be decoded as JSON.')
 
-        if int(response['status']) > 300:
+        if int(response['status']) >= 400:
             self._parse_request_error(content)
 
         return content
