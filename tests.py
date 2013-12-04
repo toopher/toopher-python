@@ -253,6 +253,22 @@ class AuthenticationStatusTests(unittest.TestCase):
         denied = toopher.AuthenticationStatus(response)
         self.assertFalse(denied)
 
+class PairingStatusTests(unittest.TestCase):
+    def test_incomplete_response_raises_exception(self):
+        response = {'key': 'value'}
+        with self.assertRaises(toopher.ToopherApiError):
+            toopher.PairingStatus(response)
+
+    def test_nonzero_when_granted(self):
+        response = ddict()
+        response['enabled'] = True
+        allowed = toopher.PairingStatus(response)
+        self.assertTrue(allowed)
+
+        response['enabled'] = False
+        denied = toopher.PairingStatus(response)
+        self.assertFalse(denied)
+
 def main():
     unittest.main()
 
