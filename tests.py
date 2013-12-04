@@ -17,12 +17,12 @@ class HttpClientMock(object):
         if uri in self.paths:
             return ResponseMock(self.paths[uri])
         else:
-            return {'status': 400}, ''
+            return ResponseMock((400, '{}'))
 
 class ResponseMock(requests.Response):
     def __init__(self, response):
         self.encoding = 'utf-8'
-        self.status_code = int(response[0]['status'])
+        self.status_code = int(response[0])
         self._content = response[1]
 
 class ToopherTests(unittest.TestCase):
@@ -51,8 +51,7 @@ class ToopherTests(unittest.TestCase):
     def test_create_pairing(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'pairings/create':(
-                {'status':'200'},
+            'pairings/create': (200,
                 '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}'
                 )
             })
@@ -66,8 +65,7 @@ class ToopherTests(unittest.TestCase):
     def test_pairing_status(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'pairings/1':(
-                {'status':'200'},
+            'pairings/1': (200,
                 '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}'
                 )
             })
@@ -85,8 +83,7 @@ class ToopherTests(unittest.TestCase):
     def test_create_authentication_request(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'authentication_requests/initiate':(
-                {'status':'200'},
+            'authentication_requests/initiate': (200,
                 '{"id":"1", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}}'
                 )
             })
@@ -100,8 +97,7 @@ class ToopherTests(unittest.TestCase):
     def test_authentication_status(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'authentication_requests/1':(
-                {'status':'200'},
+            'authentication_requests/1': (200,
                 '{"id":"1", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}}'
                 )
             })
@@ -121,8 +117,7 @@ class ToopherTests(unittest.TestCase):
     def test_pass_arbitrary_parameters_on_pair(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'pairings/create':(
-                {'status':'200'},
+            'pairings/create': (200,
                 '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}'
                 )
             })
@@ -135,8 +130,7 @@ class ToopherTests(unittest.TestCase):
     def test_pass_arbitrary_parameters_on_authenticate(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'authentication_requests/initiate':(
-                {'status':'200'},
+            'authentication_requests/initiate': (200,
                 '{"id":"1", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}}'
                 )
             })
@@ -149,8 +143,7 @@ class ToopherTests(unittest.TestCase):
     def test_access_arbitrary_keys_in_pairing_status(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'pairings/1':(
-                {'status':'200'},
+            'pairings/1': (200,
                 '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}, "random_key":"84"}'
                 )
             })
@@ -167,8 +160,7 @@ class ToopherTests(unittest.TestCase):
     def test_access_arbitrary_keys_in_authentication_status(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'authentication_requests/1':(
-                {'status':'200'},
+            'authentication_requests/1': (200,
                 '{"id":"1", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}, "random_key":"84"}'
                 )
             })
@@ -187,50 +179,50 @@ class ToopherTests(unittest.TestCase):
     def test_disabled_user_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'authentication_requests/initiate':
-                ({'status': 409}, json.dumps(
-                    {'error_code': 704,
-                     'error_message': 'disabled user'}))})
+            'authentication_requests/initiate': (409,
+                json.dumps({'error_code': 704,
+                            'error_message': 'disabled user'}))})
+
         with self.assertRaises(toopher.UserDisabledError):
             auth_request = api.authenticate_by_user_name('disabled user', 'terminal name')
 
     def test_unknown_user_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'authentication_requests/initiate':
-                ({'status': 409}, json.dumps(
-                    {'error_code': 705,
-                     'error_message': 'unknown user'}))})
+            'authentication_requests/initiate': (409,
+                json.dumps({'error_code': 705,
+                             'error_message': 'unknown user'}))})
+
         with self.assertRaises(toopher.UserUnknownError):
             auth_request = api.authenticate_by_user_name('unknown user', 'terminal name')
 
     def test_unknown_terminal_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'authentication_requests/initiate':
-                ({'status': 409}, json.dumps(
-                    {'error_code': 706,
-                     'error_message': 'unknown terminal'}))})
+            'authentication_requests/initiate': (409,
+                json.dumps({'error_code': 706,
+                            'error_message': 'unknown terminal'}))})
+
         with self.assertRaises(toopher.TerminalUnknownError):
             auth_request = api.authenticate_by_user_name('user', 'unknown terminal name')
 
     def test_deactivated_pairing_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'authentication_requests/initiate':
-                ({'status': 409}, json.dumps(
-                    {'error_code': 601,
-                     'error_message': 'pairing has been deactivated'}))})
+            'authentication_requests/initiate': (409,
+                json.dumps({'error_code': 601,
+                            'error_message': 'pairing has been deactivated'}))})
+
         with self.assertRaises(toopher.PairingDeactivatedError):
             auth_request = api.authenticate_by_user_name('user', 'terminal name')
 
     def test_unauthorized_pairing_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
-            'authentication_requests/initiate':
-                ({'status': 409}, json.dumps(
-                    {'error_code': 601,
-                     'error_message': 'pairing has not been authorized'}))})
+            'authentication_requests/initiate': (409,
+                json.dumps({'error_code': 601,
+                            'error_message': 'pairing has not been authorized'}))})
+
         with self.assertRaises(toopher.PairingDeactivatedError):
             auth_request = api.authenticate_by_user_name('user', 'terminal name')
 
