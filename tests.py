@@ -234,6 +234,25 @@ class ToopherTests(unittest.TestCase):
         with self.assertRaises(toopher.PairingDeactivatedError):
             auth_request = api.authenticate_by_user_name('user', 'terminal name')
 
+class ddict(dict):
+    def __getitem__(self, key):
+        try:
+            value = super(ddict, self).__getitem__(key)
+            return value
+        except KeyError as e:
+            return ddict()
+
+class AuthenticationStatusTests(unittest.TestCase):
+    def test_nonzero_when_granted(self):
+        response = ddict()
+        response['granted'] = True
+        allowed = toopher.AuthenticationStatus(response)
+        self.assertTrue(allowed)
+
+        response['granted'] = False
+        denied = toopher.AuthenticationStatus(response)
+        self.assertFalse(denied)
+
 def main():
     unittest.main()
 
