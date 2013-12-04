@@ -1,24 +1,28 @@
 import json
-import os
 import toopher
+import requests
 import unittest
-import urlparse
 
 class HttpClientMock(object):
     def __init__(self, paths):
         self.paths = paths
 
-    def request(self, uri, method, data, headers):
+    def request(self, method, uri, data=None, headers=None, params=None):
         self.last_called_uri = uri
         self.last_called_method = method
-        self.last_called_data = urlparse.parse_qs(data)
+        self.last_called_data = data if data else params
         self.last_called_headers = headers
 
         if uri in self.paths:
-            return self.paths[uri]
+            return ResponseMock(self.paths[uri])
         else:
-            return {'status':400}, None
+            return {'status': 400}, ''
 
+class ResponseMock(requests.Response):
+    def __init__(self, response):
+        self.encoding = 'utf-8'
+        self.status_code = int(response[0]['status'])
+        self._content = response[1]
 
 class ToopherTests(unittest.TestCase):
     def test_constructor(self):
@@ -52,7 +56,7 @@ class ToopherTests(unittest.TestCase):
         pairing = api.pair('awkward turtle', 'some user')
 
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['pairing_phrase'], ['awkward turtle'])
+        self.assertEqual(api.client.last_called_data['pairing_phrase'], 'awkward turtle')
         with self.assertRaises(KeyError):
             self.assertEqual(api.client.last_called_data['test_param'], ['42'])
 
@@ -85,10 +89,10 @@ class ToopherTests(unittest.TestCase):
             })
         auth_request = api.authenticate('1', 'test terminal')
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['pairing_id'], ['1'])
-        self.assertEqual(api.client.last_called_data['terminal_name'], ['test terminal'])
+        self.assertEqual(api.client.last_called_data['pairing_id'], '1')
+        self.assertEqual(api.client.last_called_data['terminal_name'], 'test terminal')
         with self.assertRaises(KeyError):
-            self.assertEqual(api.client.last_called_data['test_param'], ['42'])
+            self.assertEqual(api.client.last_called_data['test_param'], '42')
 
     def test_authentication_status(self):
         api = toopher.ToopherApi('key', 'secret', api_url='http://testonly')
@@ -122,8 +126,8 @@ class ToopherTests(unittest.TestCase):
         pairing = api.pair('awkward turtle', 'some user', test_param='42')
 
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['pairing_phrase'], ['awkward turtle'])
-        self.assertEqual(api.client.last_called_data['test_param'], ['42'])
+        self.assertEqual(api.client.last_called_data['pairing_phrase'], 'awkward turtle')
+        self.assertEqual(api.client.last_called_data['test_param'], '42')
 
     def test_pass_arbitrary_parameters_on_authenticate(self):
         api = toopher.ToopherApi('key', 'secret', api_url='http://testonly')
@@ -135,9 +139,9 @@ class ToopherTests(unittest.TestCase):
             })
         auth_request = api.authenticate('1', 'test terminal', test_param='42')
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['pairing_id'], ['1'])
-        self.assertEqual(api.client.last_called_data['terminal_name'], ['test terminal'])
-        self.assertEqual(api.client.last_called_data['test_param'], ['42'])
+        self.assertEqual(api.client.last_called_data['pairing_id'], '1')
+        self.assertEqual(api.client.last_called_data['terminal_name'], 'test terminal')
+        self.assertEqual(api.client.last_called_data['test_param'], '42')
 
     def test_access_arbitrary_keys_in_pairing_status(self):
         api = toopher.ToopherApi('key', 'secret', api_url='http://testonly')
