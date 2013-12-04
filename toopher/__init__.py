@@ -96,7 +96,7 @@ class ToopherApi(object):
             raise ToopherApiError('No users with name = {}'.format(user_name))
 
         uri = self.base_url + '/users/' + users[0]['id']
-        params = {'disable_toopher_auth': bool(enabled)}
+        params = {'disable_toopher_auth': not enabled}
         self._request(uri, 'POST', params)
 
     def _request(self, uri, method, params=None):
