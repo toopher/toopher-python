@@ -251,11 +251,11 @@ class ZeroStorageTests(unittest.TestCase):
 
         api.set_toopher_enabled_for_user('user_name', True)
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertTrue(api.client.last_called_data['disable_toopher_auth'])
+        self.assertFalse(api.client.last_called_data['disable_toopher_auth'])
 
         api.set_toopher_enabled_for_user('user_name', False)
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertFalse(api.client.last_called_data['disable_toopher_auth'])
+        self.assertTrue(api.client.last_called_data['disable_toopher_auth'])
 
     def test_enable_toopher_multiple_users(self):
         api = toopher.ToopherApi('key', 'secret')
