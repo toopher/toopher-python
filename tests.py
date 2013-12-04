@@ -221,7 +221,7 @@ class ToopherTests(unittest.TestCase):
         with self.assertRaises(toopher.PairingDeactivatedError):
             auth_request = api.authenticate_by_user_name('user', 'terminal name')
 
-    def test_disabled_pairing_raises_correct_error(self):
+    def test_unauthorized_pairing_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret', api_url='https://toopher.test/v1')
         api.client = HttpClientMock({
             'https://toopher.test/v1/authentication_requests/initiate':
