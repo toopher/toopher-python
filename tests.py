@@ -205,6 +205,17 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(last_called_data['user_name'], 'user_name')
         self.assertEqual(last_called_data['phone_country'], 'phone_country')
 
+    def test_upgrade(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({'pairings/upgrade': (200, '{}')})
+
+        api.upgrade('user_name', 'label', 'secret')
+        last_called_data = api.client.last_called_data
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(last_called_data['user_name'], 'user_name')
+        self.assertEqual(last_called_data['label'], 'label')
+        self.assertEqual(last_called_data['secret'], 'secret')
+
     def test_authenticate_with_otp(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
