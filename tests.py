@@ -176,6 +176,13 @@ class ToopherTests(unittest.TestCase):
 
         self.assertEqual(auth_request.random_key, "84")
 
+class ZeroStorageTests(unittest.TestCase):
+    def test_create_user_terminal(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({'user_terminals/create': (200, '{}')})
+
+        api.create_user_terminal('user_name', 'terminal_name', 'requester_terminal_id')
+
     def test_disabled_user_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
@@ -225,13 +232,6 @@ class ToopherTests(unittest.TestCase):
 
         with self.assertRaises(toopher.PairingDeactivatedError):
             auth_request = api.authenticate_by_user_name('user', 'terminal name')
-
-class ZeroStorageTests(unittest.TestCase):
-    def test_create_user_terminal(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({'user_terminals/create': (200, '{}')})
-
-        api.create_user_terminal('user_name', 'terminal_name', 'requester_terminal_id')
 
 class ddict(dict):
     def __getitem__(self, key):
