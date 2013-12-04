@@ -46,8 +46,8 @@ If any request runs into an error a `ToopherApiError` will be thrown with more d
 
 #### Zero-Storage usage option
 Requesters can choose to integrate the Toopher API in a way does not require storing any per-user data such as Pairing ID and Terminal ID - all of the storage
-is handled by the Toopher API Web Service, allowing your local database to remain unchanged.  If the Toopher API needs more data, it will `die()` with a specific
-error string that allows your code to respond appropriately.
+is handled by the Toopher API Web Service, allowing your local database to remain unchanged.  If the Toopher API needs more data, it will `raise()` a specific
+error that allows your code to respond appropriately.
 
 ```python
 try:
