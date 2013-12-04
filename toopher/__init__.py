@@ -1,4 +1,3 @@
-import json
 import os
 import requests_oauthlib
 import sys
@@ -84,7 +83,7 @@ class ToopherApi(object):
         params = {'user_name': user_name,
                   'name': terminal_name,
                   'name_extra': requester_terminal_id}
-        result = self._request(uri, 'POST', params)
+        self._request(uri, 'POST', params)
 
     def set_toopher_enabled_for_user(self, user_name, enabled):
         uri = self.base_url + '/users'
@@ -92,13 +91,13 @@ class ToopherApi(object):
         users = self._request(uri, 'GET', params)
 
         if len(users) > 1:
-            raise ToopherApiException('Multiple users with name = {}'.format(user_name))
+            raise ToopherApiError('Multiple users with name = {}'.format(user_name))
         elif not len(users):
-            raise ToopherApiException('No users with name = {}'.format(user_name))
+            raise ToopherApiError('No users with name = {}'.format(user_name))
 
         uri = self.base_url + '/users/' + users[0]['id']
         params = {'disable_toopher_auth': bool(enabled)}
-        result = self._request(uri, 'POST', params)
+        self._request(uri, 'POST', params)
 
     def _request(self, uri, method, params=None):
         data = {'params' if method == 'GET' else 'data': params}
