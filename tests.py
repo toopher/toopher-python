@@ -94,6 +94,14 @@ class ToopherTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.assertEqual(api.client.last_called_data['test_param'], '42')
 
+        api.authenticate('pairing_id', 'terminal_name', 'action_name')
+
+        last_called_data = api.client.last_called_data
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(last_called_data['pairing_id'], 'pairing_id')
+        self.assertEqual(last_called_data['terminal_name'], 'terminal_name')
+        self.assertEqual(last_called_data['action_name'], 'action_name')
+
     def test_authentication_status(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
@@ -176,12 +184,93 @@ class ToopherTests(unittest.TestCase):
 
         self.assertEqual(auth_request.random_key, "84")
 
+    def test_pair_sms(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'pairings/create/sms': (200,
+                json.dumps({'id': 'id',
+                            'enabled': True,
+                            'user': {'id': 'id', 'name': 'name'}}))})
+
+        api.pair_sms('phone_number', 'user_name')
+        last_called_data = api.client.last_called_data
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(last_called_data['phone_number'], 'phone_number')
+        self.assertEqual(last_called_data['user_name'], 'user_name')
+
+        api.pair_sms('phone_number', 'user_name', 'phone_country')
+        last_called_data = api.client.last_called_data
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(last_called_data['phone_number'], 'phone_number')
+        self.assertEqual(last_called_data['user_name'], 'user_name')
+        self.assertEqual(last_called_data['phone_country'], 'phone_country')
+
+    def test_authenticate_with_otp(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'authentication_requests/id/otp_auth': (200,
+                json.dumps({'id': 'id',
+                            'pending': False,
+                            'granted': False,
+                            'automated': False,
+                            'reason': 'it is a test',
+                            'terminal': {'id': 'id', 'name': 'name'}}))})
+
+        api.authenticate_with_otp('id', 'otp')
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(api.client.last_called_data['otp'], 'otp')
+
+    def test_unrecognized_error_still_raises_error(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'authentication_requests/initiate': (409,
+                json.dumps({'error_code': 42,
+                            'error_message': 'what'}))})
+
+        with self.assertRaises(toopher.ToopherApiError):
+            api.authenticate_by_user_name('user_name', 'terminal_name')
+
 class ZeroStorageTests(unittest.TestCase):
     def test_create_user_terminal(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({'user_terminals/create': (200, '{}')})
 
         api.create_user_terminal('user_name', 'terminal_name', 'requester_terminal_id')
+
+        last_called_data = api.client.last_called_data
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(last_called_data['user_name'], 'user_name')
+        self.assertEqual(last_called_data['name'], 'terminal_name')
+        self.assertEqual(last_called_data['name_extra'], 'requester_terminal_id')
+
+    def test_enable_toopher_for_user(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'users': (200, json.dumps([{'id': 'user_id', 'name': 'user_name'}])),
+            'users/user_id': (200, json.dumps({'name': 'user_name'}))})
+
+        api.set_toopher_enabled_for_user('user_name', True)
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertTrue(api.client.last_called_data['disable_toopher_auth'])
+
+        api.set_toopher_enabled_for_user('user_name', False)
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertFalse(api.client.last_called_data['disable_toopher_auth'])
+
+    def test_enable_toopher_multiple_users(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({'users': (200,
+            json.dumps([{'name': 'first user'}, {'name': 'second user'}]))})
+
+        with self.assertRaises(toopher.ToopherApiError):
+            api.set_toopher_enabled_for_user('multiple users', True)
+
+    def test_enable_toopher_no_users(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({'users': (200, '[]')})
+
+        with self.assertRaises(toopher.ToopherApiError):
+            api.set_toopher_enabled_for_user('no users', True)
 
     def test_disabled_user_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
