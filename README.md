@@ -54,7 +54,7 @@ try:
     # optimistically try to authenticate against Toopher API with username and a Terminal Identifier
     # Terminal Identifer is typically a randomly generated secure browser cookie.  It does not
     # need to be human-readable
-    auth = api.authenticate_by_user_name("username@yourservice.com", "<terminal identifier>")
+    auth = api.authenticate_by_user_name(user_name, requester_terminal_id)
 
     # if you got here, everything is good!  poll the auth request status as described above
     # there are four distinct errors ToopherAPI can return if it needs more data
@@ -67,7 +67,7 @@ except UnknownTerminalError:
     # This user has not assigned a "Friendly Name" to this terminal identifier.
     # Prompt them to enter a terminal name, then submit that "friendly name" to
     # the Toopher API:
-    #   api.assign_user_friendly_name_to_terminal(user_name, terminal_friendly_name, terminal_identifier)
+    #   api.create_user_terminal(user_name, terminal_name, requester_terminal_id)
     # Afterwards, re-try authentication
 except PairingDeactivatedError:
     # this user does not have an active pairing,

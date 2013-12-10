@@ -1,10 +1,9 @@
-import urllib
-import json
-import oauth2
 import os
+import requests_oauthlib
 import sys
+
 DEFAULT_BASE_URL = "https://api.toopher.com/v1"
-VERSION = "1.0.6"
+VERSION = '1.1.0'
 
 class ToopherApiError(Exception): pass
 class UserDisabledError(ToopherApiError): pass
@@ -17,8 +16,10 @@ error_codes_to_errors = {704: UserDisabledError,
 
 class ToopherApi(object):
     def __init__(self, key, secret, api_url=None):
-        self.client = oauth2.Client(oauth2.Consumer(key, secret))
-        self.client.ca_certs = os.path.join(os.path.dirname(os.path.abspath(__file__)), "toopher.pem")
+        self.client = requests_oauthlib.OAuth1Session(key, client_secret=secret)
+        self.client.cert = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'toopher.pem')
+        self.client.verify = True
+
         base_url = api_url if api_url else DEFAULT_BASE_URL
         self.base_url = base_url.rstrip('/')
 
@@ -82,31 +83,33 @@ class ToopherApi(object):
         params = {'user_name': user_name,
                   'name': terminal_name,
                   'name_extra': requester_terminal_id}
-        result = self._request(uri, 'POST', params)
+        self._request(uri, 'POST', params)
 
-    def set_enable_toopher_for_user(self, user_name, enabled):
+    def set_toopher_enabled_for_user(self, user_name, enabled):
         uri = self.base_url + '/users'
-        users = self._request(uri, 'GET')
+        params = {'name': user_name}
+        users = self._request(uri, 'GET', params)
+
         if len(users) > 1:
-            raise ToopherApiException('Multiple users with name = {}'.format(user_name))
+            raise ToopherApiError('Multiple users with name = {}'.format(user_name))
         elif not len(users):
-            raise ToopherApiException('No users with name = {}'.format(user_name))
+            raise ToopherApiError('No users with name = {}'.format(user_name))
 
         uri = self.base_url + '/users/' + users[0]['id']
-        params = {'disable_toopher_auth': bool(enabled)}
-        result = self._request(uri, 'POST', params)
+        params = {'disable_toopher_auth': not enabled}
+        self._request(uri, 'POST', params)
 
     def _request(self, uri, method, params=None):
-        data = urllib.urlencode(params or {})
+        data = {'params' if method == 'GET' else 'data': params}
         header_data = {'User-Agent':'Toopher-Python/{} (Python {})'.format(VERSION, sys.version.split()[0])}
 
-        response, content = self.client.request(uri, method, data, headers=header_data)
+        response = self.client.request(method, uri, headers=header_data, **data)
         try:
-            content = json.loads(content)
+            content = response.json()
         except ValueError:
             raise ToopherApiError('Response from server could not be decoded as JSON.')
 
-        if int(response['status']) > 300:
+        if response.status_code >= 400:
             self._parse_request_error(content)
 
         return content
