@@ -307,7 +307,7 @@ class ZeroStorageTests(unittest.TestCase):
         api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
                 json.dumps({'error_code': 601,
-                            'error_message': 'pairing has been deactivated'}))})
+                            'error_message': 'Pairing has been deactivated'}))})
 
         with self.assertRaises(toopher.PairingDeactivatedError):
             auth_request = api.authenticate_by_user_name('user', 'terminal name')
@@ -317,7 +317,7 @@ class ZeroStorageTests(unittest.TestCase):
         api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
                 json.dumps({'error_code': 601,
-                            'error_message': 'pairing has not been authorized'}))})
+                            'error_message': 'Pairing has not been authorized'}))})
 
         with self.assertRaises(toopher.PairingDeactivatedError):
             auth_request = api.authenticate_by_user_name('user', 'terminal name')
