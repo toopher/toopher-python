@@ -17,7 +17,6 @@ error_codes_to_errors = {704: UserDisabledError,
 class ToopherApi(object):
     def __init__(self, key, secret, api_url=None):
         self.client = requests_oauthlib.OAuth1Session(key, client_secret=secret)
-        self.client.cert = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'toopher.pem')
         self.client.verify = True
 
         base_url = api_url if api_url else DEFAULT_BASE_URL
