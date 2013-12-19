@@ -121,8 +121,8 @@ class ToopherApi(object):
             raise error(error_message)
 
         # TODO: Add an error code for PairingDeactivatedError.
-        if ('pairing has been deactivated' in error_message
-            or 'pairing has not been authorized' in error_message):
+        if ('pairing has been deactivated' in error_message.lower()
+            or 'pairing has not been authorized' in error_message.lower()):
             raise PairingDeactivatedError(error_message)
 
         raise ToopherApiError(error_message)
