@@ -37,9 +37,9 @@ class ToopherTests(unittest.TestCase):
 
     def test_version_number_in_library(self):
         major, minor, patch = toopher.VERSION.split('.')
-        self.assertGreaterEqual(int(major), 1)
-        self.assertGreaterEqual(int(minor), 0)
-        self.assertGreaterEqual(int(patch), 0)
+        self.assertTrue(int(major) >= 1)
+        self.assertTrue(int(minor) >= 0)
+        self.assertTrue(int(patch) >= 0)
 
     def test_version_number_in_setup(self):
         ''' Ensure that the setup.py file has the same version number as the toopher/__init__.py file '''
