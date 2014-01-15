@@ -53,10 +53,10 @@ if __name__ == '__main__':
             pair_type = 'pairing phrase'
         
         print pair_help
-        pairing_key = raw_input('Enter {0}: '.format(pair_type))
+        pairing_key = raw_input('Enter %s: ' % pair_type)
         while not pairing_key:
-            print 'Please enter a {0} to continue'.format(pair_type)
-            pairing_key = raw_input('Enter {0}: '.format(pair_type))
+            print 'Please enter a %s to continue' % pair_type
+            pairing_key = raw_input('Enter %s: ' % pair_type)
             
         user_name = raw_input('Enter a username for this pairing [%s]: ' % DEFAULT_USERNAME)
         if not user_name:
