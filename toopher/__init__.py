@@ -90,9 +90,9 @@ class ToopherApi(object):
         users = self._request(uri, 'GET', params)
 
         if len(users) > 1:
-            raise ToopherApiError('Multiple users with name = {}'.format(user_name))
+            raise ToopherApiError('Multiple users with name = %s' % user_name)
         elif not len(users):
-            raise ToopherApiError('No users with name = {}'.format(user_name))
+            raise ToopherApiError('No users with name = %s' % user_name)
 
         uri = self.base_url + '/users/' + users[0]['id']
         params = {'disable_toopher_auth': not enabled}
@@ -100,7 +100,7 @@ class ToopherApi(object):
 
     def _request(self, uri, method, params=None):
         data = {'params' if method == 'GET' else 'data': params}
-        header_data = {'User-Agent':'Toopher-Python/{} (Python {})'.format(VERSION, sys.version.split()[0])}
+        header_data = {'User-Agent':'Toopher-Python/%s (Python %s)' % (VERSION, sys.version.split()[0])}
 
         response = self.client.request(method, uri, headers=header_data, **data)
         try:

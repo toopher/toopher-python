@@ -29,16 +29,17 @@ class ToopherTests(unittest.TestCase):
     toopher.DEFAULT_BASE_URL = 'https://api.toopher.test/v1'
 
     def test_constructor(self):
-        with self.assertRaises(TypeError):
+        def fn():
             api = toopher.ToopherApi()
+        self.assertRaises(TypeError, fn)
 
         api = toopher.ToopherApi('key', 'secret')
 
     def test_version_number_in_library(self):
         major, minor, patch = toopher.VERSION.split('.')
-        self.assertGreaterEqual(int(major), 1)
-        self.assertGreaterEqual(int(minor), 0)
-        self.assertGreaterEqual(int(patch), 0)
+        self.assertTrue(int(major) >= 1)
+        self.assertTrue(int(minor) >= 0)
+        self.assertTrue(int(patch) >= 0)
 
     def test_version_number_in_setup(self):
         ''' Ensure that the setup.py file has the same version number as the toopher/__init__.py file '''
@@ -59,8 +60,10 @@ class ToopherTests(unittest.TestCase):
 
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertEqual(api.client.last_called_data['pairing_phrase'], 'awkward turtle')
-        with self.assertRaises(KeyError):
+
+        def fn():
             self.assertEqual(api.client.last_called_data['test_param'], ['42'])
+        self.assertRaises(KeyError, fn)
 
     def test_pairing_status(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -77,8 +80,9 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(pairing.user_id, '1')
         self.assertTrue(pairing.enabled)
 
-        with self.assertRaises(KeyError):
+        def fn():
             foo = pairing.random_key
+        self.assertRaises(KeyError, fn)
 
     def test_create_authentication_request(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -91,8 +95,10 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertEqual(api.client.last_called_data['pairing_id'], '1')
         self.assertEqual(api.client.last_called_data['terminal_name'], 'test terminal')
-        with self.assertRaises(KeyError):
+
+        def fn():
             self.assertEqual(api.client.last_called_data['test_param'], '42')
+        self.assertRaises(KeyError, fn)
 
         api.authenticate('pairing_id', 'terminal_name', 'action_name')
 
@@ -119,8 +125,9 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(auth_request.terminal_id, '1')
         self.assertEqual(auth_request.terminal_name, 'test terminal')
 
-        with self.assertRaises(KeyError):
+        def fn():
             foo = auth_request.random_key
+        self.assertRaises(KeyError, fn)
 
     def test_pass_arbitrary_parameters_on_pair(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -227,8 +234,9 @@ class ToopherTests(unittest.TestCase):
                 json.dumps({'error_code': 42,
                             'error_message': 'what'}))})
 
-        with self.assertRaises(toopher.ToopherApiError):
+        def fn():
             api.authenticate_by_user_name('user_name', 'terminal_name')
+        self.assertRaises(toopher.ToopherApiError, fn)
 
 class ZeroStorageTests(unittest.TestCase):
     def test_create_user_terminal(self):
@@ -262,15 +270,17 @@ class ZeroStorageTests(unittest.TestCase):
         api.client = HttpClientMock({'users': (200,
             json.dumps([{'name': 'first user'}, {'name': 'second user'}]))})
 
-        with self.assertRaises(toopher.ToopherApiError):
+        def fn():
             api.set_toopher_enabled_for_user('multiple users', True)
+        self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_enable_toopher_no_users(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({'users': (200, '[]')})
 
-        with self.assertRaises(toopher.ToopherApiError):
+        def fn():
             api.set_toopher_enabled_for_user('no users', True)
+        self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_disabled_user_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -279,8 +289,9 @@ class ZeroStorageTests(unittest.TestCase):
                 json.dumps({'error_code': 704,
                             'error_message': 'disabled user'}))})
 
-        with self.assertRaises(toopher.UserDisabledError):
+        def fn():
             auth_request = api.authenticate_by_user_name('disabled user', 'terminal name')
+        self.assertRaises(toopher.UserDisabledError, fn)
 
     def test_unknown_user_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -289,8 +300,9 @@ class ZeroStorageTests(unittest.TestCase):
                 json.dumps({'error_code': 705,
                              'error_message': 'unknown user'}))})
 
-        with self.assertRaises(toopher.UserUnknownError):
+        def fn():
             auth_request = api.authenticate_by_user_name('unknown user', 'terminal name')
+        self.assertRaises(toopher.UserUnknownError, fn)
 
     def test_unknown_terminal_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -299,8 +311,9 @@ class ZeroStorageTests(unittest.TestCase):
                 json.dumps({'error_code': 706,
                             'error_message': 'unknown terminal'}))})
 
-        with self.assertRaises(toopher.TerminalUnknownError):
+        def fn():
             auth_request = api.authenticate_by_user_name('user', 'unknown terminal name')
+        self.assertRaises(toopher.TerminalUnknownError, fn)
 
     def test_deactivated_pairing_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -309,8 +322,9 @@ class ZeroStorageTests(unittest.TestCase):
                 json.dumps({'error_code': 601,
                             'error_message': 'Pairing has been deactivated'}))})
 
-        with self.assertRaises(toopher.PairingDeactivatedError):
+        def fn():
             auth_request = api.authenticate_by_user_name('user', 'terminal name')
+        self.assertRaises(toopher.PairingDeactivatedError, fn)
 
     def test_unauthorized_pairing_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -319,8 +333,9 @@ class ZeroStorageTests(unittest.TestCase):
                 json.dumps({'error_code': 601,
                             'error_message': 'Pairing has not been authorized'}))})
 
-        with self.assertRaises(toopher.PairingDeactivatedError):
+        def fn():
             auth_request = api.authenticate_by_user_name('user', 'terminal name')
+        self.assertRaises(toopher.PairingDeactivatedError, fn)
 
 class ddict(dict):
     def __getitem__(self, key):
@@ -344,8 +359,9 @@ class AuthenticationStatusTests(unittest.TestCase):
 class PairingStatusTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
-        with self.assertRaises(toopher.ToopherApiError):
+        def fn():
             toopher.PairingStatus(response)
+        self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_nonzero_when_granted(self):
         response = ddict()
