@@ -82,7 +82,7 @@ class ToopherTests(unittest.TestCase):
 
         def fn():
             foo = pairing.random_key
-        self.assertRaises(KeyError, fn)
+        self.assertRaises(AttributeError, fn)
 
     def test_create_authentication_request(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -127,7 +127,7 @@ class ToopherTests(unittest.TestCase):
 
         def fn():
             foo = auth_request.random_key
-        self.assertRaises(KeyError, fn)
+        self.assertRaises(AttributeError, fn)
 
     def test_pass_arbitrary_parameters_on_pair(self):
         api = toopher.ToopherApi('key', 'secret')
