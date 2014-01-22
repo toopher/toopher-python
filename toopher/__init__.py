@@ -145,7 +145,10 @@ class PairingStatus(object):
         return self.enabled
 
     def __getattr__(self, name):
-        return self._raw_data[name]
+        try:
+            return self._raw_data[name]
+        except KeyError:
+            raise AttributeError(name)
 
 
 class AuthenticationStatus(object):
@@ -169,4 +172,10 @@ class AuthenticationStatus(object):
         return self.granted
 
     def __getattr__(self, name):
-        return self._raw_data[name]
+        try:
+            return self._raw_data[name]
+        except KeyError:
+            raise AttributeError(name)
+
+
+class ToopherApiError(Exception): pass
