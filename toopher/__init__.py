@@ -145,10 +145,10 @@ class PairingStatus(object):
         return self.enabled
 
     def __getattr__(self, name):
-        try:
+        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
+            return super(PairingStatus, self).__getattr__(name)
+        else:
             return self._raw_data[name]
-        except KeyError:
-            raise AttributeError(name)
 
 
 class AuthenticationStatus(object):
@@ -172,10 +172,10 @@ class AuthenticationStatus(object):
         return self.granted
 
     def __getattr__(self, name):
-        try:
+        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
+            return super(AuthenticationStatus, self).__getattr__(name)
+        else:
             return self._raw_data[name]
-        except KeyError:
-            raise AttributeError(name)
 
 
 class ToopherApiError(Exception): pass
