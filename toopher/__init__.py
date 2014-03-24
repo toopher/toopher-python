@@ -1,8 +1,16 @@
 import os
+from oauthlib import oauth1
+import urllib
+import hashlib
+import hmac
+import base64
+import time
 import requests_oauthlib
 import sys
 
 DEFAULT_BASE_URL = "https://api.toopher.com/v1"
+DEFAULT_IFRAME_TTL = 100
+IFRAME_VERSION = '2'
 VERSION = '1.1.0'
 
 class ToopherApiError(Exception): pass
@@ -13,6 +21,82 @@ class PairingDeactivatedError(ToopherApiError): pass
 error_codes_to_errors = {704: UserDisabledError,
                          705: UserUnknownError,
                          706: TerminalUnknownError}
+
+class SignatureValidationError(Exception): pass
+
+class ToopherIframe(object):
+
+    def __init__(self, key, secret, api_uri=None):
+        self.secret = secret
+        self.client = oauth1.Client(key, client_secret=secret, signature_type=oauth1.SIGNATURE_TYPE_QUERY)
+        self.client.nonce = '12345678'
+        api_uri = api_uri if api_uri else DEFAULT_BASE_URL
+        self.base_uri = api_uri.rstrip('/')
+
+    def pair_uri(self, username, reset_email, ttl = DEFAULT_IFRAME_TTL):
+        params = {
+                'v':IFRAME_VERSION,
+                'username':username,
+                'reset_email':reset_email
+                }
+        return self.get_oauth_uri(self.base_uri + '/web/pair', params, ttl)[0]
+
+    def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL):
+        params = {
+                'v':IFRAME_VERSION,
+                'username':username,
+                'reset_email':reset_email,
+                'action_name':action_name,
+                'automation_allowed':automation_allowed,
+                'challenge_required':challenge_required,
+                'session_token':request_token,
+                'requester_metadata':requester_metadata
+                }
+        return self.get_oauth_uri(self.base_uri + '/web/auth', params, ttl)[0]
+
+    def login_uri(self, username, reset_email, request_token):
+        return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL)
+
+    def validate(self, data, request_token=None, ttl=DEFAULT_IFRAME_TTL):
+        missing_keys = []
+        for required_key in ('toopher_sig', 'timestamp', 'session_token'):
+            if not required_key in data:
+                missing_keys.append(required_key)
+
+        if missing_keys:
+            raise SignatureValidationError("Missing required keys: {0}".format(missing_keys))
+        
+        if request_token:
+            if request_token != data.get('session_token'):
+                raise SignatureValidationError("Session token does not match expected value!")
+
+        maybe_sig = data['toopher_sig']
+        del data['toopher_sig']
+        signature_valid = False
+        try:
+            computed_signature  =self.signature(data)
+            signature_valid = maybe_sig == computed_signature
+        except Exception, e:
+            raise SignatureValidationError("Error while calculating signature", e)
+
+        if not signature_valid:
+            raise SignatureValidationError("Computed signature does not match submitted signature: {0} vs {1}".format(computed_signature, maybe_sig))
+
+        ttl_valid = int(time.time()) - int(data['timestamp']) < ttl
+        if not ttl_valid:
+            raise SignatureValidationError("TTL expired")
+
+        return data
+
+    def signature(self, data):
+        to_sign = urllib.urlencode(sorted(data.items())).encode('utf-8')
+        secret = self.client.client_secret.encode('utf-8')
+        return base64.b64encode(hmac.new(secret, to_sign, hashlib.sha1).digest())
+
+    def get_oauth_uri(self, uri, params, ttl):
+        params['expires'] = str(int(time.time()) + ttl)
+        return self.client.sign(uri + '?' + urllib.urlencode(params))
+
 
 class ToopherApi(object):
     def __init__(self, key, secret, api_url=None):
