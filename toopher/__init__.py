@@ -18,9 +18,16 @@ class UserDisabledError(ToopherApiError): pass
 class UserUnknownError(ToopherApiError): pass
 class TerminalUnknownError(ToopherApiError): pass
 class PairingDeactivatedError(ToopherApiError): pass
-error_codes_to_errors = {704: UserDisabledError,
-                         705: UserUnknownError,
-                         706: TerminalUnknownError}
+
+ERROR_CODE_USER_DISABLED = 704
+ERROR_CODE_USER_UNKNOWN = 705
+ERROR_CODE_TERMINAL_UNKNOWN = 706
+ERROR_CODE_PAIRING_DEACTIVATED = 707
+
+error_codes_to_errors = {ERROR_CODE_USER_DISABLED: UserDisabledError,
+                         ERROR_CODE_USER_UNKNOWN: UserUnknownError,
+                         ERROR_CODE_TERMINAL_UNKNOWN: TerminalUnknownError,
+                         ERROR_CODE_PAIRING_DEACTIVATED: PairingDeactivatedError}
 
 class SignatureValidationError(Exception): pass
 
@@ -203,9 +210,7 @@ class ToopherApi(object):
             error = error_codes_to_errors[error_code]
             raise error(error_message)
 
-        # TODO: Add an error code for PairingDeactivatedError.
-        if ('pairing has been deactivated' in error_message.lower()
-            or 'pairing has not been authorized' in error_message.lower()):
+        if 'pairing has not been authorized' in error_message.lower():
             raise PairingDeactivatedError(error_message)
 
         raise ToopherApiError(error_message)

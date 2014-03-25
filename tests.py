@@ -353,7 +353,7 @@ class ZeroStorageTests(unittest.TestCase):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
-                json.dumps({'error_code': 601,
+                json.dumps({'error_code': 707,
                             'error_message': 'Pairing has been deactivated'}))})
 
         def fn():
