@@ -37,7 +37,6 @@ class ToopherIframeTests(unittest.TestCase):
     def tearDown(self):
         time.time = self.old_time
 
-
     def test_validate_good_signature_is_successful(self):
         data = {
                 'foo':'bar',
@@ -58,7 +57,6 @@ class ToopherIframeTests(unittest.TestCase):
         expected = 'https://api.toopher.test/v1/web/auth?username=jdoe&automation_allowed=True&reset_email=jdoe%40example.com&session_token=s9s7vsb&v=2&requester_metadata=None&challenge_required=False&expires=1100&action_name=Log+In&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=bpgdxhHLDwpYsbru%2Bnz2p9pFlr4%3D'
         self.assertEqual(expected, self.iframe_api.login_uri('jdoe', 'jdoe@example.com', ToopherIframeTests.request_token))
 
-        
 
 class ToopherTests(unittest.TestCase):
     toopher.DEFAULT_BASE_URL = 'https://api.toopher.test/v1'
