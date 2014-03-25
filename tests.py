@@ -31,6 +31,7 @@ class ToopherIframeTests(unittest.TestCase):
 
     def setUp(self):
         self.iframe_api = toopher.ToopherIframe('abcdefg', 'hijklmnop')
+        self.iframe_api.client.nonce = '12345678'
         self.old_time = time.time
         time.time = lambda:1000
 

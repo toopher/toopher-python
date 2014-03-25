@@ -29,7 +29,6 @@ class ToopherIframe(object):
     def __init__(self, key, secret, api_uri=None):
         self.secret = secret
         self.client = oauth1.Client(key, client_secret=secret, signature_type=oauth1.SIGNATURE_TYPE_QUERY)
-        self.client.nonce = '12345678'
         api_uri = api_uri if api_uri else DEFAULT_BASE_URL
         self.base_uri = api_uri.rstrip('/')
 
