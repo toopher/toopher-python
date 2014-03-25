@@ -39,7 +39,7 @@ class ToopherIframe(object):
                 'username':username,
                 'reset_email':reset_email
                 }
-        return self.get_oauth_uri(self.base_uri + '/web/pair', params, ttl)[0]
+        return self.get_oauth_uri(self.base_uri + '/web/pair', params, ttl)
 
     def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL):
         params = {
@@ -52,7 +52,7 @@ class ToopherIframe(object):
                 'session_token':request_token,
                 'requester_metadata':requester_metadata
                 }
-        return self.get_oauth_uri(self.base_uri + '/web/auth', params, ttl)[0]
+        return self.get_oauth_uri(self.base_uri + '/web/auth', params, ttl)
 
     def login_uri(self, username, reset_email, request_token):
         return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL)
@@ -95,7 +95,7 @@ class ToopherIframe(object):
 
     def get_oauth_uri(self, uri, params, ttl):
         params['expires'] = str(int(time.time()) + ttl)
-        return self.client.sign(uri + '?' + urllib.urlencode(params))
+        return self.client.sign(uri + '?' + urllib.urlencode(params))[0]
 
 
 class ToopherApi(object):
