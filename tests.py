@@ -49,6 +49,18 @@ class ToopherIframeTests(unittest.TestCase):
             self.iframe_api.validate(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
             self.fail()
+
+    def test_arrays_get_flattened_for_validate(self):
+        data = {
+                'foo': [ 'bar' ],
+                'timestamp': [ '1000' ],
+                'session_token': [ ToopherIframeTests.request_token ],
+                'toopher_sig':[ '6d2c7GlQssGmeYYGpcf+V/kirOI=' ]
+                }
+        try:
+            self.iframe_api.validate(data, ToopherIframeTests.request_token)
+        except toopher.SignatureValidationError:
+            self.fail()
     
     def test_get_pair_uri(self):
         expected = 'https://api.toopher.test/v1/web/pair?username=jdoe&reset_email=jdoe%40example.com&expires=1100&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=UGlgBEUF6UZEhYPxevJeagqy6D4%3D'

@@ -64,6 +64,10 @@ class ToopherIframe(object):
         return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL)
 
     def validate(self, data, request_token=None, ttl=DEFAULT_IFRAME_TTL):
+        # flatten data if necessary
+        if hasattr(data.values()[0], '__iter__'):
+            data = dict((k,v[0]) for (k,v) in data.items())
+
         missing_keys = []
         for required_key in ('toopher_sig', 'timestamp', 'session_token'):
             if not required_key in data:
