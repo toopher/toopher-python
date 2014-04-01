@@ -61,7 +61,7 @@ class ToopherIframeTests(unittest.TestCase):
             self.iframe_api.validate(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
             self.fail()
-    
+
     def test_get_pair_uri(self):
         expected = 'https://api.toopher.test/v1/web/pair?username=jdoe&reset_email=jdoe%40example.com&expires=1100&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=UGlgBEUF6UZEhYPxevJeagqy6D4%3D'
         self.assertEqual(expected, self.iframe_api.pair_uri('jdoe', 'jdoe@example.com'))
@@ -273,6 +273,16 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertEqual(api.client.last_called_data['otp'], 'otp')
 
+    def test_bad_response_raises_correct_error(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'authentication_requests/initiate': (200,
+                'lol if you think this is json')})
+
+        def fn():
+          api.authenticate_by_user_name('user_name', 'terminal_name')
+        self.assertRaises(toopher.ToopherApiError, fn)
+
     def test_unrecognized_error_still_raises_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
@@ -327,6 +337,8 @@ class ZeroStorageTests(unittest.TestCase):
         def fn():
             api.set_toopher_enabled_for_user('no users', True)
         self.assertRaises(toopher.ToopherApiError, fn)
+
+
 
     def test_disabled_user_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -392,6 +404,12 @@ class ddict(dict):
             return ddict()
 
 class AuthenticationStatusTests(unittest.TestCase):
+    def test_incomplete_response_raises_exception(self):
+        response = {'key': 'value'}
+        def fn():
+            toopher.AuthenticationStatus(response)
+        self.assertRaises(toopher.ToopherApiError, fn)
+
     def test_nonzero_when_granted(self):
         response = ddict()
         response['granted'] = True
@@ -424,4 +442,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
