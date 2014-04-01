@@ -2,6 +2,7 @@ import json
 import toopher
 import requests
 import unittest
+import time
 
 class HttpClientMock(object):
     def __init__(self, paths):
@@ -24,6 +25,51 @@ class ResponseMock(requests.Response):
         self.encoding = 'utf-8'
         self.status_code = int(response[0])
         self._content = response[1]
+
+class ToopherIframeTests(unittest.TestCase):
+    request_token = 's9s7vsb'
+
+    def setUp(self):
+        self.iframe_api = toopher.ToopherIframe('abcdefg', 'hijklmnop')
+        self.iframe_api.client.nonce = '12345678'
+        self.old_time = time.time
+        time.time = lambda:1000
+
+    def tearDown(self):
+        time.time = self.old_time
+
+    def test_validate_good_signature_is_successful(self):
+        data = {
+                'foo':'bar',
+                'timestamp':'1000',
+                'session_token':ToopherIframeTests.request_token,
+                'toopher_sig':'6d2c7GlQssGmeYYGpcf+V/kirOI='
+                }
+        try:
+            self.iframe_api.validate(data, ToopherIframeTests.request_token)
+        except toopher.SignatureValidationError:
+            self.fail()
+
+    def test_arrays_get_flattened_for_validate(self):
+        data = {
+                'foo': [ 'bar' ],
+                'timestamp': [ '1000' ],
+                'session_token': [ ToopherIframeTests.request_token ],
+                'toopher_sig':[ '6d2c7GlQssGmeYYGpcf+V/kirOI=' ]
+                }
+        try:
+            self.iframe_api.validate(data, ToopherIframeTests.request_token)
+        except toopher.SignatureValidationError:
+            self.fail()
+
+    def test_get_pair_uri(self):
+        expected = 'https://api.toopher.test/v1/web/pair?username=jdoe&reset_email=jdoe%40example.com&expires=1100&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=UGlgBEUF6UZEhYPxevJeagqy6D4%3D'
+        self.assertEqual(expected, self.iframe_api.pair_uri('jdoe', 'jdoe@example.com'))
+
+    def test_get_login_uri(self):
+        expected = 'https://api.toopher.test/v1/web/auth?username=jdoe&automation_allowed=True&reset_email=jdoe%40example.com&session_token=s9s7vsb&v=2&requester_metadata=None&challenge_required=False&expires=1100&action_name=Log+In&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=bpgdxhHLDwpYsbru%2Bnz2p9pFlr4%3D'
+        self.assertEqual(expected, self.iframe_api.login_uri('jdoe', 'jdoe@example.com', ToopherIframeTests.request_token))
+
 
 class ToopherTests(unittest.TestCase):
     toopher.DEFAULT_BASE_URL = 'https://api.toopher.test/v1'
@@ -227,6 +273,16 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertEqual(api.client.last_called_data['otp'], 'otp')
 
+    def test_bad_response_raises_correct_error(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'authentication_requests/initiate': (200,
+                'lol if you think this is json')})
+
+        def fn():
+          api.authenticate_by_user_name('user_name', 'terminal_name')
+        self.assertRaises(toopher.ToopherApiError, fn)
+
     def test_unrecognized_error_still_raises_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
@@ -282,6 +338,8 @@ class ZeroStorageTests(unittest.TestCase):
             api.set_toopher_enabled_for_user('no users', True)
         self.assertRaises(toopher.ToopherApiError, fn)
 
+
+
     def test_disabled_user_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
@@ -319,7 +377,7 @@ class ZeroStorageTests(unittest.TestCase):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
-                json.dumps({'error_code': 601,
+                json.dumps({'error_code': 707,
                             'error_message': 'Pairing has been deactivated'}))})
 
         def fn():
@@ -346,6 +404,12 @@ class ddict(dict):
             return ddict()
 
 class AuthenticationStatusTests(unittest.TestCase):
+    def test_incomplete_response_raises_exception(self):
+        response = {'key': 'value'}
+        def fn():
+            toopher.AuthenticationStatus(response)
+        self.assertRaises(toopher.ToopherApiError, fn)
+
     def test_nonzero_when_granted(self):
         response = ddict()
         response['granted'] = True
@@ -378,4 +442,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
