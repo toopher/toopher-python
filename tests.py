@@ -70,7 +70,6 @@ class ToopherIframeTests(unittest.TestCase):
                 ('session_token', ToopherIframeTests.request_token),
                 ('toopher_sig', '6d2c7GlQssGmeYYGpcf+V/kirOI=')
                 ])
-        import pdb; pdb.set_trace()
         try:
             self.iframe_api.validate(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
