@@ -88,17 +88,17 @@ try:
         error_code = validated_data['error_code']
         # check for API errors
 
-        if error_code == ToopherIframe.ERROR_CODE_PAIRING_DEACTIVATED:
+        if error_code == toopher.ERROR_CODE_PAIRING_DEACTIVATED:
             # User deleted the pairing on their mobile device.
             # 
             # Your server should display a Toopher Pairing iframe so their account can be re-paired
             #
-        elif error_code == ToopherIframe.ERROR_CODE_USER_OPT_OUT:
+        elif error_code == toopher.ERROR_CODE_USER_OPT_OUT:
             # User has been marked as "Opt-Out" in the Toopher API
             #
             # If your service allows opt-out, the user should be granted access.
             #
-        elif error_code == ToopherIframe.ERROR_CODE_USER_UNKNOWN:
+        elif error_code == toopher.ERROR_CODE_USER_UNKNOWN:
             # User has never authenticated with Toopher on this server
             #
             # Your server should display a Toopher Pairing iframe so their account can be paired
