@@ -93,7 +93,7 @@ try:
             # 
             # Your server should display a Toopher Pairing iframe so their account can be re-paired
             #
-        elif error_code == toopher.ERROR_CODE_USER_OPT_OUT:
+        elif error_code == toopher.ERROR_CODE_USER_DISABLED:
             # User has been marked as "Opt-Out" in the Toopher API
             #
             # If your service allows opt-out, the user should be granted access.
