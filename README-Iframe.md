@@ -66,7 +66,7 @@ For the simple case of authenticating a user at login, a `login_uri` helper meth
 In this example, `data` is a `dict` of the form data POSTed to your server from the Toopher Authentication iframe.  You should replace the commented blocks with code appropriate for the condition described in the comment.
 
     request_token = request.session.get('ToopherRequestToken')
-    // invalidate the Request Token to guard against replay attacks
+    # invalidate the Request Token to guard against replay attacks
     if 'ToopherRequestToken' in request.session:
         del request.session['ToopherRequestToken']
 
