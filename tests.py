@@ -3,6 +3,7 @@ import toopher
 import requests
 import unittest
 import time
+import werkzeug.datastructures
 
 class HttpClientMock(object):
     def __init__(self, paths):
@@ -57,6 +58,19 @@ class ToopherIframeTests(unittest.TestCase):
                 'session_token': [ ToopherIframeTests.request_token ],
                 'toopher_sig':[ '6d2c7GlQssGmeYYGpcf+V/kirOI=' ]
                 }
+        try:
+            self.iframe_api.validate(data, ToopherIframeTests.request_token)
+        except toopher.SignatureValidationError:
+            self.fail()
+
+    def test_immutable_dictionaries_get_copied_for_validate(self):
+        data = werkzeug.datastructures.ImmutableMultiDict([
+                ('foo', 'bar'),
+                ('timestamp', '1000'),
+                ('session_token', ToopherIframeTests.request_token),
+                ('toopher_sig', '6d2c7GlQssGmeYYGpcf+V/kirOI=')
+                ])
+        import pdb; pdb.set_trace()
         try:
             self.iframe_api.validate(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
