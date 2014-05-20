@@ -64,6 +64,9 @@ class ToopherIframe(object):
         return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL)
 
     def validate(self, data, request_token=None, ttl=DEFAULT_IFRAME_TTL):
+        # make a mutable copy of the data
+        data = dict(data)
+
         # flatten data if necessary
         if hasattr(data.values()[0], '__iter__'):
             data = dict((k,v[0]) for (k,v) in data.items())
@@ -75,7 +78,7 @@ class ToopherIframe(object):
 
         if missing_keys:
             raise SignatureValidationError("Missing required keys: {0}".format(missing_keys))
-        
+
         if request_token:
             if request_token != data.get('session_token'):
                 raise SignatureValidationError("Session token does not match expected value!")
