@@ -3,6 +3,7 @@ import toopher
 import requests
 import unittest
 import time
+import werkzeug.datastructures
 
 class HttpClientMock(object):
     def __init__(self, paths):
@@ -57,6 +58,18 @@ class ToopherIframeTests(unittest.TestCase):
                 'session_token': [ ToopherIframeTests.request_token ],
                 'toopher_sig':[ '6d2c7GlQssGmeYYGpcf+V/kirOI=' ]
                 }
+        try:
+            self.iframe_api.validate(data, ToopherIframeTests.request_token)
+        except toopher.SignatureValidationError:
+            self.fail()
+
+    def test_immutable_dictionaries_get_copied_for_validate(self):
+        data = werkzeug.datastructures.ImmutableMultiDict([
+                ('foo', 'bar'),
+                ('timestamp', '1000'),
+                ('session_token', ToopherIframeTests.request_token),
+                ('toopher_sig', '6d2c7GlQssGmeYYGpcf+V/kirOI=')
+                ])
         try:
             self.iframe_api.validate(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
@@ -236,6 +249,18 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(auth_request.terminal_name, 'test terminal')
 
         self.assertEqual(auth_request.random_key, "84")
+
+    def test_pair_qr(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'pairings/create/qr': (200,
+                json.dumps({'id': 'id',
+                            'enabled': True,
+                            'user': {'id': 'id', 'name': 'name'}}))})
+
+        api.pair_qr('user_name')
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(api.client.last_called_data['user_name'], 'user_name')
 
     def test_pair_sms(self):
         api = toopher.ToopherApi('key', 'secret')
