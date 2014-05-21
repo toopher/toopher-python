@@ -58,7 +58,7 @@ class ToopherIframe(object):
                 'session_token':request_token,
                 'requester_metadata':requester_metadata
                 }
-        return self.get_oauth_uri(self.base_uri + '/web/auth', params, ttl)
+        return self.get_oauth_uri(self.base_uri + '/web/authenticate', params, ttl)
 
     def login_uri(self, username, reset_email, request_token):
         return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL)
