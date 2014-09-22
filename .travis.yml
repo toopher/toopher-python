@@ -1,9 +1,9 @@
 language: python
 python:
-  - "2.7"
-# command to install dependencies
+  - 2.6
 install:
-#  - pip install -r requirements.txt --use-mirrors
-  - pip install toopher
-# command to run tests
-script: python tests.py
+  - pip install -r requirements.txt --use-mirrors
+script:
+  nosetests tests.py --with-coverage --cover-package=toopher
+after_success:
+  coveralls
