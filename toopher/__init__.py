@@ -47,6 +47,14 @@ class ToopherIframe(object):
                 }
         return self.get_oauth_uri(self.base_uri + '/web/pair', params, ttl)
 
+    def manage_user_uri(self, username, reset_email, ttl = DEFAULT_IFRAME_TTL):
+        params = {
+                'v':IFRAME_VERSION,
+                'username':username,
+                'reset_email':reset_email
+                }
+        return self.get_oauth_uri(self.base_uri + '/web/manage_user', params, ttl)
+
     def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL):
         params = {
                 'v':IFRAME_VERSION,
