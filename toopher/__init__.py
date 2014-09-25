@@ -55,7 +55,7 @@ class ToopherIframe(object):
                 }
         return self.get_oauth_uri(self.base_uri + '/web/manage_user', params, ttl)
 
-    def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL):
+    def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL, allow_inline_pairing=True):
         params = {
                 'v':IFRAME_VERSION,
                 'username':username,
@@ -64,12 +64,13 @@ class ToopherIframe(object):
                 'automation_allowed':automation_allowed,
                 'challenge_required':challenge_required,
                 'session_token':request_token,
-                'requester_metadata':requester_metadata
+                'requester_metadata':requester_metadata,
+                'allow_inline_pairing':allow_inline_pairing
                 }
         return self.get_oauth_uri(self.base_uri + '/web/authenticate', params, ttl)
 
-    def login_uri(self, username, reset_email, request_token):
-        return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL)
+    def login_uri(self, username, reset_email, request_token, **kwargs):
+        return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL, **kwargs)
 
     def validate(self, data, request_token=None, ttl=DEFAULT_IFRAME_TTL):
         # make a mutable copy of the data
