@@ -1,5 +1,8 @@
 # ToopherAPI Python Client
 
+#### Python Version
+>=2.6.0
+
 #### Installing Dependencies
 Toopher uses [pip](https://pypi.python.org/pypi/pip) to install packages.
 
