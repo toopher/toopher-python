@@ -3,9 +3,9 @@ from setuptools import setup
 
 setup(
     name='toopher',
-    version='1.0.5',
+    version='1.1.0',
     author='Toopher, Inc.',
-    author_email='support@toopher.com',
+    author_email='dev@toopher.com',
     url='https://dev.toopher.com',
     description='Wrapper library for the Toopher authentication API',
     classifiers=[
@@ -18,9 +18,6 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         ],
     packages=['toopher'],
-    package_data = {'toopher': ['toopher.pem']},
     test_suite='tests',
-    install_requires=[
-        'oauth2',
-        ]
+    install_requires=['requests-oauthlib>=0.4.0']
 )
