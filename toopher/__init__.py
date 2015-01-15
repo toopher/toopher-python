@@ -359,4 +359,7 @@ class AuthenticationRequest(object):
         result = api._request(url, "POST", params)
         return AuthenticationRequest(result)
 
+    def refresh_from_server(self, api):
+        return api.get_authentication_request_by_id(self.id)
+
 class ToopherApiError(Exception): pass

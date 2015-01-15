@@ -460,6 +460,36 @@ class AuthenticationRequestTests(unittest.TestCase):
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertEqual(api.client.last_called_data['otp'], 'otp')
 
+    def test_refresh_from_server(self):
+        response = {'id':'id',
+                    'pending':False,
+                    'granted':True,
+                    'automated': False,
+                    'reason': 'it is a test',
+                    'terminal': {'name':'name', 'id':'id'}}
+        auth_request = toopher.AuthenticationRequest(response)
+
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'authentication_requests/{0}'.format(auth_request.id): (200,
+                json.dumps({'id': auth_request.id,
+                            'pending': False,
+                            'granted': True,
+                            'automated': False,
+                            'reason': 'it is a test',
+                            'terminal': {'id': 'id', 'name': 'name'}}))})
+        auth_request = auth_request.refresh_from_server(api)
+        self.assertEqual(api.client.last_called_method, 'GET')
+
+        self.assertEqual(auth_request.id, 'id')
+        self.assertFalse(auth_request.pending, False)
+        self.assertTrue(auth_request.granted)
+        self.assertFalse(auth_request.automated)
+        self.assertEqual(auth_request.reason, 'it is a test')
+        self.assertEqual(auth_request.terminal_id, 'id')
+        self.assertEqual(auth_request.terminal_name, 'name')
+        
+
 class PairingTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
