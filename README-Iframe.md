@@ -57,7 +57,7 @@ request.session['ToopherRequestToken'] = request_token
 The Toopher Authentication API provides the requester a rich set of controls over authentication parameters.
 
 ```python
-auth_iframe_url = iframe_api.auth_uri(username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl);
+auth_iframe_url = iframe_api.get_auth_url(username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl);
 ```
 
 For the simple case of authenticating a user at login, a `login_uri` helper method is available:

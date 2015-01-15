@@ -84,13 +84,14 @@ class ToopherIframeTests(unittest.TestCase):
         expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=jdoe%40example.com&expires=1100&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=sV8qoKnxJ3fxfP6AHNa0eNFxzJs%3D'
         self.assertEqual(expected, self.iframe_api.get_user_management_url('jdoe', 'jdoe@example.com'))
 
-    def test_get_login_uri(self):
+    # Failing this test b/c allow_inline_pairing is defaulting to False when action_name is 'Log In'
+    def test_get_login_url(self):
         expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&automation_allowed=True&reset_email=jdoe%40example.com&session_token=s9s7vsb&v=2&allow_inline_pairing=True&requester_metadata=None&challenge_required=False&expires=1100&action_name=Log+In&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=URVngBe35eP%2FiFOSQ5ZpuGEYcJs%3D'
-        self.assertEqual(expected, self.iframe_api.login_uri('jdoe', 'jdoe@example.com', ToopherIframeTests.request_token))
+        self.assertEqual(expected, self.iframe_api.get_auth_url('jdoe', 'jdoe@example.com', ToopherIframeTests.request_token))
 
-    def test_get_login_uri_without_inline_pairing(self):
+    def test_get_login_url_without_inline_pairing(self):
         expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&automation_allowed=True&reset_email=jdoe%40example.com&session_token=s9s7vsb&v=2&allow_inline_pairing=False&requester_metadata=None&challenge_required=False&expires=1100&action_name=Log+In&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=lbz2kuYG3BM2Y0mZLElbTiWPv8A%3D'
-        self.assertEqual(expected, self.iframe_api.login_uri('jdoe', 'jdoe@example.com', ToopherIframeTests.request_token, allow_inline_pairing=False))
+        self.assertEqual(expected, self.iframe_api.get_auth_url('jdoe', 'jdoe@example.com', ToopherIframeTests.request_token, allow_inline_pairing=False))
 
 
 class ToopherTests(unittest.TestCase):

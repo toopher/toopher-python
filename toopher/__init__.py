@@ -60,22 +60,44 @@ class ToopherIframe(object):
         # ttl = kwargs['ttl'] or DEFAULT_IFRAME_TTL
         return self.get_oauth_uri(self.base_uri + '/web/manage_user', params, DEFAULT_IFRAME_TTL)
 
-    def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL, allow_inline_pairing=True):
-        params = {
-                'v':IFRAME_VERSION,
-                'username':username,
-                'reset_email':reset_email,
-                'action_name':action_name,
-                'automation_allowed':automation_allowed,
-                'challenge_required':challenge_required,
-                'session_token':request_token,
-                'requester_metadata':requester_metadata,
-                'allow_inline_pairing':allow_inline_pairing
-                }
-        return self.get_oauth_uri(self.base_uri + '/web/authenticate', params, ttl)
+    # Params still TBD
+    def get_auth_url(self, username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs):
+        if not 'allow_inline_pairing' in kwargs:
+            kwargs['allow_inline_pairing'] = True
 
-    def login_uri(self, username, reset_email, request_token, **kwargs):
-        return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL, **kwargs)
+        params = {
+            'v':IFRAME_VERSION,
+            'username':username,
+            'reset_email':reset_email,
+            'action_name':action_name,
+            'automation_allowed':True,
+            'challenge_required':False,
+            'session_token':request_token,
+            'requester_metadata':requester_metadata,
+            'allow_inline_pairing': kwargs['allow_inline_pairing']
+        }
+
+        # can we just set ttl to DEFAULT_IFRAME_TTL
+        # ttl = kwargs['ttl'] or DEFAULT_IFRAME_TTL
+        return self.get_oauth_uri(self.base_uri + '/web/authenticate', params, DEFAULT_IFRAME_TTL)
+
+
+    # def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL, allow_inline_pairing=True):
+    #     params = {
+    #             'v':IFRAME_VERSION,
+    #             'username':username,
+    #             'reset_email':reset_email,
+    #             'action_name':action_name,
+    #             'automation_allowed':automation_allowed,
+    #             'challenge_required':challenge_required,
+    #             'session_token':request_token,
+    #             'requester_metadata':requester_metadata,
+    #             'allow_inline_pairing':allow_inline_pairing
+    #             }
+    #     return self.get_oauth_uri(self.base_uri + '/web/authenticate', params, ttl)
+    #
+    # def login_uri(self, username, reset_email, request_token, **kwargs):
+    #     return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL, **kwargs)
 
     def validate_postback(self, data, request_token=None):
         # make a mutable copy of the data
