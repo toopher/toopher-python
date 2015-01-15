@@ -551,6 +551,30 @@ class UserTerminalTests(unittest.TestCase):
             toopher.UserTerminal(response)
         self.assertRaises(toopher.ToopherApiError, fn)
 
+    def test_refresh_from_server(self):
+        response = {'id': 'id',
+                    'name': 'name',
+                    'name_extra': 'name_extra',
+                    'user': {'id': 'id', 'name': 'name'}}
+        user_terminal = toopher.UserTerminal(response)
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'user_terminals/{0}'.format(user_terminal.id): (200,
+                json.dumps({'id': 'id',
+                    'name': 'name changed',
+                    'name_extra': 'name_extra changed',
+                    'user': {'id': 'id', 'name': 'name changed'}}))})
+        user_terminal.refresh_from_server(api)
+        self.assertEqual(api.client.last_called_method, 'GET')
+
+
+        self.assertEqual(user_terminal.id, "id")
+        self.assertEqual(user_terminal.name, "name changed")
+        self.assertEqual(user_terminal.name_extra, "name_extra changed")
+        self.assertEqual(user_terminal.user_name, "name changed")
+        self.assertEqual(user_terminal.user_id, "id")
+
+
 def main():
     unittest.main()
 

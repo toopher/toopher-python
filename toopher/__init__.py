@@ -389,6 +389,13 @@ class UserTerminal(object):
         else:
             return self._raw_data[name]
 
+    def refresh_from_server(self, api):
+        url = api.base_url + '/user_terminals/' + self.id
+        result = api._request(url, "GET")
+        self.name = result["name"]
+        self.name_extra = result["name_extra"]
+        user = result["user"]
+        self.user_name = user["name"]
 
 
 class ToopherApiError(Exception): pass
