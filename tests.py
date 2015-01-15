@@ -349,17 +349,23 @@ class ZeroStorageTests(unittest.TestCase):
         self.assertEqual(user_terminal.user_name, "some user")
         self.assertEqual(user_terminal.user_id, "1")
 
-    def test_enable_toopher_for_user(self):
+    def test_enable_toopher_user(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'users': (200, json.dumps([{'id': 'user_id', 'name': 'user_name'}])),
             'users/user_id': (200, json.dumps({'name': 'user_name'}))})
 
-        api.set_toopher_enabled_for_user('user_name', True)
+        api.enable_user('user_name')
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertFalse(api.client.last_called_data['disable_toopher_auth'])
 
-        api.set_toopher_enabled_for_user('user_name', False)
+    def test_disable_toopher_user(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'users': (200, json.dumps([{'id': 'user_id', 'name': 'user_name'}])),
+            'users/user_id': (200, json.dumps({'name': 'user_name'}))})
+
+        api.disable_user('user_name')
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertTrue(api.client.last_called_data['disable_toopher_auth'])
 
@@ -369,7 +375,7 @@ class ZeroStorageTests(unittest.TestCase):
             json.dumps([{'name': 'first user'}, {'name': 'second user'}]))})
 
         def fn():
-            api.set_toopher_enabled_for_user('multiple users', True)
+            api.enable_user('multiple users')
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_enable_toopher_no_users(self):
@@ -377,7 +383,7 @@ class ZeroStorageTests(unittest.TestCase):
         api.client = HttpClientMock({'users': (200, '[]')})
 
         def fn():
-            api.set_toopher_enabled_for_user('no users', True)
+            api.enable_user('no users')
         self.assertRaises(toopher.ToopherApiError, fn)
 
 

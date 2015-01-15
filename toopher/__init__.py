@@ -265,20 +265,25 @@ class ToopherApi(object):
         result = self._request(url, "GET")
         return UserTerminal(result)
 
-
-    def set_toopher_enabled_for_user(self, user_name, enabled):
-        uri = self.base_url + '/users'
+    def _set_toopher_disabled_for_user(self, user_name, disable):
+        url = self.base_url + '/users'
         params = {'name': user_name}
-        users = self._request(uri, 'GET', params)
+        users = self._request(url, 'GET', params)
 
         if len(users) > 1:
             raise ToopherApiError('Multiple users with name = %s' % user_name)
         elif not len(users):
             raise ToopherApiError('No users with name = %s' % user_name)
 
-        uri = self.base_url + '/users/' + users[0]['id']
-        params = {'disable_toopher_auth': not enabled}
-        self._request(uri, 'POST', params)
+        url = self.base_url + '/users/' + users[0]['id']
+        params = {'disable_toopher_auth': disable}
+        self._request(url, 'POST', params)
+
+    def enable_user(self, username):
+        self._set_toopher_disabled_for_user(username, False)
+
+    def disable_user(self, username):
+        self._set_toopher_disabled_for_user(username, True)
 
     def _request(self, uri, method, params=None):
         data = {'params' if method == 'GET' else 'data': params}
