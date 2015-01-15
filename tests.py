@@ -672,6 +672,24 @@ class UserTests(unittest.TestCase):
             toopher.User(response)
         self.assertRaises(toopher.ToopherApiError, fn)
 
+    def test_refresh_from_server(self):
+        response = {'id': 'id',
+                    'name': 'name',
+                    'disable_toopher_auth': False}
+        user = toopher.User(response)
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'users/{0}'.format(user.id): (200,
+                json.dumps({'id': 'id',
+                            'name':'name CHANGED',
+                            'disable_toopher_auth':'true'}))})
+        user.refresh_from_server(api)
+
+        self.assertEqual(api.client.last_called_method, 'GET')
+        self.assertEqual(user.id, 'id')
+        self.assertEqual(user.name, 'name CHANGED')
+        self.assertTrue(user.disable_toopher_auth)
+
 def main():
     unittest.main()
 

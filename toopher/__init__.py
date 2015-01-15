@@ -469,5 +469,11 @@ class User(object):
         else:
             return self._raw_data[name]
 
+    def refresh_from_server(self, api):
+        url = api.base_url + '/users/' + self.id
+        result = api._request(url, 'GET')
+        self.name = result['name']
+        self.disable_toopher_auth = result['disable_toopher_auth']
+
 
 class ToopherApiError(Exception): pass
