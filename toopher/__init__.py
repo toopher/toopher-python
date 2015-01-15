@@ -4,6 +4,7 @@ import urllib
 import hashlib
 import hmac
 import base64
+import uuid
 import time
 import requests_oauthlib
 import sys
@@ -162,17 +163,33 @@ class ToopherApi(object):
         result = self._request(uri, "GET")
         return PairingStatus(result)
 
-    def authenticate(self, pairing_id, terminal_name, action_name=None, **kwargs):
-        uri = self.base_url + "/authentication_requests/initiate"
-        params = {'pairing_id': pairing_id,
-                  'terminal_name': terminal_name}
+    def authenticate(self, id_or_username, terminal_or_otp, action_name=None, **kwargs):
+        url = self.base_url + "/authentication_requests/initiate"
+        try:
+            uuid.UUID(id_or_username)
+            params = {'pairing_id': id_or_username,
+                      'terminal_name': terminal_or_otp}
+        except:
+            params = {'user_name': id_or_username,
+                      'terminal_name_extra': terminal_or_otp}
         if action_name:
             params['action_name'] = action_name
-
         params.update(kwargs)
 
-        result = self._request(uri, "POST", params)
+        result = self._request(url, "POST", params)
         return AuthenticationStatus(result)
+
+    # def authenticate(self, pairing_id, terminal_name, action_name=None, **kwargs):
+    #     uri = self.base_url + "/authentication_requests/initiate"
+    #     params = {'pairing_id': pairing_id,
+    #               'terminal_name': terminal_name}
+    #     if action_name:
+    #         params['action_name'] = action_name
+    #
+    #     params.update(kwargs)
+    #
+    #     result = self._request(uri, "POST", params)
+    #     return AuthenticationStatus(result)
 
     def get_authentication_status(self, authentication_request_id):
         uri = self.base_url + "/authentication_requests/" + authentication_request_id
@@ -186,9 +203,9 @@ class ToopherApi(object):
         result = self._request(uri, "POST", params)
         return AuthenticationStatus(result)
 
-    def authenticate_by_user_name(self, user_name, terminal_name_extra, action_name=None, **kwargs):
-        kwargs.update(user_name=user_name, terminal_name_extra=terminal_name_extra)
-        return self.authenticate('', '', action_name, **kwargs)
+    # def authenticate_by_user_name(self, user_name, terminal_name_extra, action_name=None, **kwargs):
+    #     kwargs.update(user_name=user_name, terminal_name_extra=terminal_name_extra)
+    #     return self.authenticate('', '', action_name, **kwargs)
 
     def create_user_terminal(self, user_name, terminal_name, requester_terminal_id):
         uri = self.base_url + '/user_terminals/create'
