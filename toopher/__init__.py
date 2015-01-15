@@ -40,25 +40,18 @@ class ToopherIframe(object):
         api_uri = api_uri if api_uri else DEFAULT_BASE_URL
         self.base_uri = api_uri.rstrip('/')
 
-    def get_pair_url(self, username, reset_email, **kwargs):
-        params = {
-                'v':IFRAME_VERSION,
-                'username':username,
-                'reset_email':reset_email
-                }
-        # can we just set ttl to DEFAULT_IFRAME_TTL
-        # ttl = kwargs['ttl'] or DEFAULT_IFRAME_TTL
-        return self.get_oauth_signed_url(self.base_uri + '/web/pair', params, DEFAULT_IFRAME_TTL)
-
     def get_user_management_url(self, username, reset_email, **kwargs):
+        if not 'ttl' in kwargs:
+            ttl = DEFAULT_IFRAME_TTL
+        else:
+            ttl = kwargs.pop('ttl')
+
         params = {
                 'v':IFRAME_VERSION,
                 'username':username,
                 'reset_email':reset_email
                 }
-        # can we just set ttl to DEFAULT_IFRAME_TTL
-        # ttl = kwargs['ttl'] or DEFAULT_IFRAME_TTL
-        return self.get_oauth_signed_url(self.base_uri + '/web/manage_user', params, DEFAULT_IFRAME_TTL)
+        return self.get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
 
     # Params still TBD
     def get_auth_url(self, username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs):
@@ -103,7 +96,12 @@ class ToopherIframe(object):
     # def login_uri(self, username, reset_email, request_token, **kwargs):
     #     return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL, **kwargs)
 
-    def validate_postback(self, data, request_token=None):
+    def validate_postback(self, data, request_token=None, **kwargs):
+        if not 'ttl' in kwargs:
+            ttl = DEFAULT_IFRAME_TTL
+        else:
+            ttl = kwargs.pop('ttl')
+
         # make a mutable copy of the data
         data = dict(data)
 
@@ -135,7 +133,7 @@ class ToopherIframe(object):
         if not signature_valid:
             raise SignatureValidationError("Computed signature does not match submitted signature: {0} vs {1}".format(computed_signature, maybe_sig))
 
-        ttl_valid = int(time.time()) - int(data['timestamp']) < DEFAULT_IFRAME_TTL
+        ttl_valid = int(time.time()) - int(data['timestamp']) < ttl
         if not ttl_valid:
             raise SignatureValidationError("TTL expired")
 
