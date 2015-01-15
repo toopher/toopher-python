@@ -48,8 +48,8 @@ if __name__ == '__main__':
         print 'Sending pairing request...'
         
         try:
-            pairing_status = api.pair(pairing_phrase, user_name)
-            pairing_id = pairing_status.id
+            pairing = api.pair(pairing_phrase, user_name)
+            pairing_id = pairing.id
             break
         except ToopherApiError, e:
             print 'The pairing phrase was not accepted (reason: %s)' % e
@@ -59,8 +59,8 @@ if __name__ == '__main__':
         print 'Checking status of pairing request...'
         
         try:
-            pairing_status = api.get_pairing_status(pairing_id)
-            if pairing_status.enabled:
+            pairing = api.get_pairing_by_id(pairing_id)
+            if pairing.enabled:
                 print 'Pairing complete'
                 print
                 break

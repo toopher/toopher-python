@@ -134,14 +134,14 @@ class ToopherTests(unittest.TestCase):
             self.assertEqual(api.client.last_called_data['test_param'], ['42'])
         self.assertRaises(KeyError, fn)
 
-    def test_pairing_status(self):
+    def test_pairing(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'pairings/1': (200,
                 '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}'
                 )
             })
-        pairing = api.get_pairing_status('1')
+        pairing = api.get_pairing_by_id('1')
         self.assertEqual(api.client.last_called_method, 'GET')
 
         self.assertEqual(pairing.id, '1')
@@ -226,14 +226,14 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(api.client.last_called_data['terminal_name'], 'test terminal')
         self.assertEqual(api.client.last_called_data['test_param'], '42')
 
-    def test_access_arbitrary_keys_in_pairing_status(self):
+    def test_access_arbitrary_keys_in_pairing(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'pairings/1': (200,
                 '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}, "random_key":"84"}'
                 )
             })
-        pairing = api.get_pairing_status('1')
+        pairing = api.get_pairing_by_id('1')
         self.assertEqual(api.client.last_called_method, 'GET')
 
         self.assertEqual(pairing.id, '1')
@@ -457,21 +457,21 @@ class AuthenticationRequestTests(unittest.TestCase):
         denied = toopher.AuthenticationRequest(response)
         self.assertFalse(denied)
 
-class PairingStatusTests(unittest.TestCase):
+class PairingTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
         def fn():
-            toopher.PairingStatus(response)
+            toopher.Pairing(response)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_nonzero_when_granted(self):
         response = ddict()
         response['enabled'] = True
-        allowed = toopher.PairingStatus(response)
+        allowed = toopher.Pairing(response)
         self.assertTrue(allowed)
 
         response['enabled'] = False
-        denied = toopher.PairingStatus(response)
+        denied = toopher.Pairing(response)
         self.assertFalse(denied)
 
 def main():

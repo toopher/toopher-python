@@ -171,7 +171,7 @@ class ToopherApi(object):
             url = self.base_url + "/pairings/create/qr"
 
         result = self._request(url, "POST", params)
-        return PairingStatus(result)
+        return Pairing(result)
 
     # def pair(self, pairing_phrase, user_name, **kwargs):
     #     uri = self.base_url + "/pairings/create"
@@ -181,14 +181,14 @@ class ToopherApi(object):
     #     params.update(kwargs)
     #
     #     result = self._request(uri, "POST", params)
-    #     return PairingStatus(result)
+    #     return Pairing(result)
     #
     # def pair_qr(self, user_name, **kwargs):
     #     uri = self.base_url + '/pairings/create/qr'
     #     params = {'user_name': user_name}
     #     params.update(kwargs)
     #     result = self._request(uri, 'POST', params)
-    #     return PairingStatus(result)
+    #     return Pairing(result)
     #
     # def pair_sms(self, phone_number, user_name, phone_country=None):
     #     uri = self.base_url + "/pairings/create/sms"
@@ -199,13 +199,13 @@ class ToopherApi(object):
     #         params['phone_country'] = phone_country
     #
     #     result = self._request(uri, "POST", params)
-    #     return PairingStatus(result)
+    #     return Pairing(result)
 
-    def get_pairing_status(self, pairing_id):
+    def get_pairing_by_id(self, pairing_id):
         uri = self.base_url + "/pairings/" + pairing_id
 
         result = self._request(uri, "GET")
-        return PairingStatus(result)
+        return Pairing(result)
 
     def authenticate(self, id_or_username, terminal, action_name=None, **kwargs):
         url = self.base_url + "/authentication_requests/initiate"
@@ -299,7 +299,7 @@ class ToopherApi(object):
 
         raise ToopherApiError(error_message)
 
-class PairingStatus(object):
+class Pairing(object):
     def __init__(self, json_response):
         try:
             self.id = json_response['id']
@@ -318,7 +318,7 @@ class PairingStatus(object):
 
     def __getattr__(self, name):
         if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
-            return super(PairingStatus, self).__getattr__(name)
+            return super(Pairing, self).__getattr__(name)
         else:
             return self._raw_data[name]
 

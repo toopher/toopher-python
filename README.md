@@ -30,10 +30,10 @@ import toopher
 api = toopher.ToopherApi("<your consumer key>", "<your consumer secret>")
 
 # Step 1 - Pair with their phone's Toopher app
-pairing_status = api.pair("pairing phrase", "username@yourservice.com")
+pairing = api.pair("pairing phrase", "username@yourservice.com")
 
 # Step 2 - Authenticate a log in
-auth = api.authenticate(pairing_status.id, "my computer")
+auth = api.authenticate(pairing.id, "my computer")
 
 # Once they've responded you can then check the status
 auth_request = api.get_authentication_request_by_id(auth.id)
