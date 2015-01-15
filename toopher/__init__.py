@@ -475,5 +475,13 @@ class User(object):
         self.name = result['name']
         self.disable_toopher_auth = result['disable_toopher_auth']
 
+    def enable(self, api):
+        api._set_toopher_disabled_for_user(self.name, False)
+        self.disable_toopher_auth = False
+
+    def disable(self, api):
+        api._set_toopher_disabled_for_user(self.name, True)
+        self.disable_toopher_auth = True
+
 
 class ToopherApiError(Exception): pass

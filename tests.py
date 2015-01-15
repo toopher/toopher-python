@@ -690,6 +690,36 @@ class UserTests(unittest.TestCase):
         self.assertEqual(user.name, 'name CHANGED')
         self.assertTrue(user.disable_toopher_auth)
 
+    def test_enable(self):
+        response = {'id': 'id',
+                    'name': 'name',
+                    'disable_toopher_auth': True}
+        user = toopher.User(response)
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'users': (200, json.dumps([{'id': 'user_id', 'name': 'user_name'}])),
+            'users/user_id': (200, json.dumps({'name': 'user_name'}))})
+        user.enable(api)
+
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertFalse(api.client.last_called_data['disable_toopher_auth'])
+        self.assertFalse(user.disable_toopher_auth)
+
+    def test_disable(self):
+        response = {'id': 'id',
+                    'name': 'name',
+                    'disable_toopher_auth': False}
+        user = toopher.User(response)
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'users': (200, json.dumps([{'id': 'user_id', 'name': 'user_name'}])),
+            'users/user_id': (200, json.dumps({'name': 'user_name'}))})
+        user.disable(api)
+
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertTrue(api.client.last_called_data['disable_toopher_auth'])
+        self.assertTrue(user.disable_toopher_auth)
+
 def main():
     unittest.main()
 
