@@ -50,13 +50,15 @@ class ToopherIframe(object):
         # ttl = kwargs['ttl'] or DEFAULT_IFRAME_TTL
         return self.get_oauth_uri(self.base_uri + '/web/pair', params, DEFAULT_IFRAME_TTL)
 
-    def manage_user_uri(self, username, reset_email, ttl=DEFAULT_IFRAME_TTL):
+    def get_user_management_url(self, username, reset_email, **kwargs):
         params = {
                 'v':IFRAME_VERSION,
                 'username':username,
                 'reset_email':reset_email
                 }
-        return self.get_oauth_uri(self.base_uri + '/web/manage_user', params, ttl)
+        # can we just set ttl to DEFAULT_IFRAME_TTL
+        # ttl = kwargs['ttl'] or DEFAULT_IFRAME_TTL
+        return self.get_oauth_uri(self.base_uri + '/web/manage_user', params, DEFAULT_IFRAME_TTL)
 
     def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL, allow_inline_pairing=True):
         params = {
