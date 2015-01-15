@@ -202,9 +202,9 @@ class ToopherApi(object):
     #     return Pairing(result)
 
     def get_pairing_by_id(self, pairing_id):
-        uri = self.base_url + "/pairings/" + pairing_id
+        url = self.base_url + "/pairings/" + pairing_id
 
-        result = self._request(uri, "GET")
+        result = self._request(url, "GET")
         return Pairing(result)
 
     def authenticate(self, id_or_username, terminal, action_name=None, **kwargs):
@@ -236,9 +236,9 @@ class ToopherApi(object):
     #     return AuthenticationStatus(result)
 
     def get_authentication_request_by_id(self, authentication_request_id):
-        uri = self.base_url + "/authentication_requests/" + authentication_request_id
+        url = self.base_url + "/authentication_requests/" + authentication_request_id
 
-        result = self._request(uri, "GET")
+        result = self._request(url, "GET")
         return AuthenticationRequest(result)
 
     # def authenticate_with_otp(self, authentication_request_id, otp):
@@ -252,11 +252,12 @@ class ToopherApi(object):
     #     return self.authenticate('', '', action_name, **kwargs)
 
     def create_user_terminal(self, user_name, terminal_name, requester_terminal_id):
-        uri = self.base_url + '/user_terminals/create'
+        url = self.base_url + '/user_terminals/create'
         params = {'user_name': user_name,
                   'name': terminal_name,
                   'name_extra': requester_terminal_id}
-        self._request(uri, 'POST', params)
+        self._request(url, 'POST', params)
+
 
     def set_toopher_enabled_for_user(self, user_name, enabled):
         uri = self.base_url + '/users'
