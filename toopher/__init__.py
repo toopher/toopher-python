@@ -51,7 +51,7 @@ class ToopherIframe(object):
                 'username':username,
                 'reset_email':reset_email
                 }
-        return self.get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
+        return self._get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
 
     # Params still TBD
     def get_auth_url(self, username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs):
@@ -76,7 +76,7 @@ class ToopherIframe(object):
         }
         params.update(kwargs)
 
-        return self.get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
+        return self._get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
 
 
     # def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL, allow_inline_pairing=True):
@@ -91,7 +91,7 @@ class ToopherIframe(object):
     #             'requester_metadata':requester_metadata,
     #             'allow_inline_pairing':allow_inline_pairing
     #             }
-    #     return self.get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
+    #     return self._get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
     #
     # def login_uri(self, username, reset_email, request_token, **kwargs):
     #     return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL, **kwargs)
@@ -144,7 +144,7 @@ class ToopherIframe(object):
         secret = self.client.client_secret.encode('utf-8')
         return base64.b64encode(hmac.new(secret, to_sign, hashlib.sha1).digest())
 
-    def get_oauth_signed_url(self, uri, params, ttl):
+    def _get_oauth_signed_url(self, uri, params, ttl):
         params['expires'] = str(int(time.time()) + ttl)
         return self.client.sign(uri + '?' + urllib.urlencode(params))[0]
 
