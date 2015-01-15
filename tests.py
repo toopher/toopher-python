@@ -325,6 +325,23 @@ class ZeroStorageTests(unittest.TestCase):
         self.assertEqual(last_called_data['name'], 'terminal_name')
         self.assertEqual(last_called_data['name_extra'], 'requester_terminal_id')
 
+    def test_get_user_terminal_by_id(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'user_terminals/1': (200,
+                '{"id":"1", "name":"name", "name_extra":"name_extra", "user":{"id":"1","name":"some user"}}'
+                )
+            })
+
+        user_terminal = api.get_user_terminal_by_id("1")
+
+        self.assertEqual(api.client.last_called_method, "GET")
+        self.assertEqual(user_terminal.id, "1")
+        self.assertEqual(user_terminal.name, "name")
+        self.assertEqual(user_terminal.name_extra, "name_extra")
+        self.assertEqual(user_terminal.user_name, "some user")
+        self.assertEqual(user_terminal.user_id, "1")
+
     def test_enable_toopher_for_user(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
