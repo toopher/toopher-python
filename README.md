@@ -36,8 +36,8 @@ pairing_status = api.pair("pairing phrase", "username@yourservice.com")
 auth = api.authenticate(pairing_status.id, "my computer")
 
 # Once they've responded you can then check the status
-auth_status = api.get_authentication_status(auth.id)
-if (auth_status.pending == False and auth_status.granted == True):
+auth_request = api.get_authentication_request_by_id(auth.id)
+if (auth_request.pending == False and auth_request.granted == True):
 	# Success!
 ```
 

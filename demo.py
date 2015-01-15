@@ -99,7 +99,7 @@ if __name__ == '__main__':
             print 'Checking status of authentication request...'
             
             try:
-                request_status = api.get_authentication_status(request_id)
+                request_status = api.get_authentication_request_by_id(request_id)
             except ToopherApiError, e:
                 print 'Could not check authentication status (reason: %s)' % e
                 continue

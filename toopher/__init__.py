@@ -221,7 +221,7 @@ class ToopherApi(object):
         params.update(kwargs)
 
         result = self._request(url, "POST", params)
-        return AuthenticationStatus(result)
+        return AuthenticationRequest(result)
 
     # def authenticate(self, pairing_id, terminal_name, action_name=None, **kwargs):
     #     uri = self.base_url + "/authentication_requests/initiate"
@@ -235,17 +235,17 @@ class ToopherApi(object):
     #     result = self._request(uri, "POST", params)
     #     return AuthenticationStatus(result)
 
-    def get_authentication_status(self, authentication_request_id):
+    def get_authentication_request_by_id(self, authentication_request_id):
         uri = self.base_url + "/authentication_requests/" + authentication_request_id
 
         result = self._request(uri, "GET")
-        return AuthenticationStatus(result)
+        return AuthenticationRequest(result)
 
     def authenticate_with_otp(self, authentication_request_id, otp):
         uri = self.base_url + "/authentication_requests/" + authentication_request_id + '/otp_auth'
         params = {'otp' : otp}
         result = self._request(uri, "POST", params)
-        return AuthenticationStatus(result)
+        return AuthenticationRequest(result)
 
     # def authenticate_by_user_name(self, user_name, terminal_name_extra, action_name=None, **kwargs):
     #     kwargs.update(user_name=user_name, terminal_name_extra=terminal_name_extra)
@@ -323,7 +323,7 @@ class PairingStatus(object):
             return self._raw_data[name]
 
 
-class AuthenticationStatus(object):
+class AuthenticationRequest(object):
     def __init__(self, json_response):
         try:
             self.id = json_response['id']
@@ -345,7 +345,7 @@ class AuthenticationStatus(object):
 
     def __getattr__(self, name):
         if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
-            return super(AuthenticationStatus, self).__getattr__(name)
+            return super(AuthenticationRequest, self).__getattr__(name)
         else:
             return self._raw_data[name]
 

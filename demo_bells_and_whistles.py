@@ -123,7 +123,7 @@ if __name__ == '__main__':
                 if otp:
                     request_status = api.authenticate_with_otp(request_id, otp)
                 else:
-                    request_status = api.get_authentication_status(request_id)
+                    request_status = api.get_authentication_request_by_id(request_id)
             except ToopherApiError, e:
                 print 'Could not check authentication status (reason: %s)' % e
                 continue

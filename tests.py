@@ -178,14 +178,14 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(last_called_data['terminal_name'], 'terminal_name')
         self.assertEqual(last_called_data['action_name'], 'action_name')
 
-    def test_authentication_status(self):
+    def test_authentication_request(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'authentication_requests/1': (200,
                 '{"id":"1", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}}'
                 )
             })
-        auth_request = api.get_authentication_status('1')
+        auth_request = api.get_authentication_request_by_id('1')
         self.assertEqual(api.client.last_called_method, 'GET')
         self.assertEqual(auth_request.id, '1')
         self.assertFalse(auth_request.pending, False)
@@ -243,14 +243,14 @@ class ToopherTests(unittest.TestCase):
 
         self.assertEqual(pairing.random_key, "84")
 
-    def test_access_arbitrary_keys_in_authentication_status(self):
+    def test_access_arbitrary_keys_in_authentication_request(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'authentication_requests/1': (200,
                 '{"id":"1", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}, "random_key":"84"}'
                 )
             })
-        auth_request = api.get_authentication_status('1')
+        auth_request = api.get_authentication_request_by_id('1')
         self.assertEqual(api.client.last_called_method, 'GET')
         self.assertEqual(auth_request.id, '1')
         self.assertFalse(auth_request.pending, False)
@@ -440,21 +440,21 @@ class ddict(dict):
         except KeyError as e:
             return ddict()
 
-class AuthenticationStatusTests(unittest.TestCase):
+class AuthenticationRequestTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
         def fn():
-            toopher.AuthenticationStatus(response)
+            toopher.AuthenticationRequest(response)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_nonzero_when_granted(self):
         response = ddict()
         response['granted'] = True
-        allowed = toopher.AuthenticationStatus(response)
+        allowed = toopher.AuthenticationRequest(response)
         self.assertTrue(allowed)
 
         response['granted'] = False
-        denied = toopher.AuthenticationStatus(response)
+        denied = toopher.AuthenticationRequest(response)
         self.assertFalse(denied)
 
 class PairingStatusTests(unittest.TestCase):
