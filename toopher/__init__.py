@@ -251,6 +251,13 @@ class ToopherApi(object):
     #     kwargs.update(user_name=user_name, terminal_name_extra=terminal_name_extra)
     #     return self.authenticate('', '', action_name, **kwargs)
 
+    def create_user(self, username, **kwargs):
+        url = self.base_url + '/users/create'
+        params = {'name': username}
+        params.update(kwargs)
+        result = self._request(url, 'POST', params)
+        return User(result)
+
     def create_user_terminal(self, user_name, terminal_name, requester_terminal_id):
         url = self.base_url + '/user_terminals/create'
         params = {'user_name': user_name,
@@ -439,6 +446,23 @@ class UserTerminal(object):
         self.name_extra = result["name_extra"]
         user = result["user"]
         self.user_name = user["name"]
+
+class User(object):
+    def __init__(self, json_response):
+        try:
+            self.id = json_response['id']
+            self.name = json_response['name']
+            self.disable_toopher_auth = json_response['disable_toopher_auth']
+        except Exception:
+            raise ToopherApiError("Could not parse user from response")
+
+        self._raw_data = json_response
+
+    def __getattr__(self, name):
+        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
+            return super(User, self).__getattr__(name)
+        else:
+            return self._raw_data[name]
 
 
 class ToopherApiError(Exception): pass

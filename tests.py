@@ -113,6 +113,19 @@ class ToopherTests(unittest.TestCase):
                 version_number = line.strip().replace("version='", "").replace("',", "")
                 self.assertEqual(version_number, toopher.VERSION)
 
+    def test_create_user(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'users/create': (200,
+                '{"id":"1", "name":"name", "disable_toopher_auth": false }'
+                )
+            })
+        user = api.create_user('name')
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(user.id, '1')
+        self.assertEqual(user.name, 'name')
+        self.assertFalse(user.disable_toopher_auth)
+
     def test_create_pairing(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
@@ -639,6 +652,12 @@ class UserTerminalTests(unittest.TestCase):
         self.assertEqual(user_terminal.user_name, "name changed")
         self.assertEqual(user_terminal.user_id, "id")
 
+class UserTests(unittest.TestCase):
+    def test_incomplete_response_raises_exception(self):
+        response = {'key': 'value'}
+        def fn():
+            toopher.User(response)
+        self.assertRaises(toopher.ToopherApiError, fn)
 
 def main():
     unittest.main()
