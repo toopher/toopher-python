@@ -258,6 +258,11 @@ class ToopherApi(object):
         result = self._request(url, 'POST', params)
         return User(result)
 
+    def get_user_by_id(self, user_id):
+        url = self.base_url + '/users/' + user_id
+        result = self._request(url, 'GET')
+        return User(result)
+
     def create_user_terminal(self, user_name, terminal_name, requester_terminal_id):
         url = self.base_url + '/user_terminals/create'
         params = {'user_name': user_name,

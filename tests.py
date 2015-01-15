@@ -126,6 +126,19 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(user.name, 'name')
         self.assertFalse(user.disable_toopher_auth)
 
+    def test_get_user_by_id(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'users/1': (200,
+                '{"id":"1", "name":"name", "disable_toopher_auth": false }'
+                )
+            })
+        user = api.get_user_by_id('1')
+        self.assertEqual(api.client.last_called_method, 'GET')
+        self.assertEqual(user.id, '1')
+        self.assertEqual(user.name, 'name')
+        self.assertFalse(user.disable_toopher_auth)
+
     def test_create_pairing(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
