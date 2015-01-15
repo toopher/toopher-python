@@ -291,21 +291,6 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(last_called_data['user_name'], 'user_name')
         self.assertEqual(last_called_data['phone_country'], '1')
 
-    def test_authenticate_with_otp(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'authentication_requests/id/otp_auth': (200,
-                json.dumps({'id': 'id',
-                            'pending': False,
-                            'granted': False,
-                            'automated': False,
-                            'reason': 'it is a test',
-                            'terminal': {'id': 'id', 'name': 'name'}}))})
-
-        api.authenticate_with_otp('id', 'otp')
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['otp'], 'otp')
-
     def test_bad_response_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
@@ -452,6 +437,28 @@ class AuthenticationRequestTests(unittest.TestCase):
         response['granted'] = False
         denied = toopher.AuthenticationRequest(response)
         self.assertFalse(denied)
+
+    def test_authenticate_with_otp(self):
+        response = {'id':'id',
+                    'pending':False,
+                    'granted':True,
+                    'automated': False,
+                    'reason': 'it is a test',
+                    'terminal': {'name':'name', 'id':'id'}}
+        auth_request = toopher.AuthenticationRequest(response)
+
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'authentication_requests/{0}/otp_auth'.format(auth_request.id): (200,
+                json.dumps({'id': auth_request.id,
+                            'pending': False,
+                            'granted': False,
+                            'automated': False,
+                            'reason': 'it is a test',
+                            'terminal': {'id': 'id', 'name': 'name'}}))})
+        auth_request.authenticate_with_otp('otp', api)
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(api.client.last_called_data['otp'], 'otp')
 
 class PairingTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):

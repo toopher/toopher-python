@@ -241,11 +241,11 @@ class ToopherApi(object):
         result = self._request(uri, "GET")
         return AuthenticationRequest(result)
 
-    def authenticate_with_otp(self, authentication_request_id, otp):
-        uri = self.base_url + "/authentication_requests/" + authentication_request_id + '/otp_auth'
-        params = {'otp' : otp}
-        result = self._request(uri, "POST", params)
-        return AuthenticationRequest(result)
+    # def authenticate_with_otp(self, authentication_request_id, otp):
+    #     uri = self.base_url + "/authentication_requests/" + authentication_request_id + '/otp_auth'
+    #     params = {'otp' : otp}
+    #     result = self._request(uri, "POST", params)
+    #     return AuthenticationRequest(result)
 
     # def authenticate_by_user_name(self, user_name, terminal_name_extra, action_name=None, **kwargs):
     #     kwargs.update(user_name=user_name, terminal_name_extra=terminal_name_extra)
@@ -349,5 +349,11 @@ class AuthenticationRequest(object):
         else:
             return self._raw_data[name]
 
+    def authenticate_with_otp(self, otp, api, **kwargs):
+        url = api.base_url + "/authentication_requests/" + self.id + '/otp_auth'
+        params = {'otp' : otp}
+        params.update(kwargs)
+        result = api._request(url, "POST", params)
+        return AuthenticationRequest(result)
 
 class ToopherApiError(Exception): pass
