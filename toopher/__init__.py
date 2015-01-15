@@ -64,22 +64,26 @@ class ToopherIframe(object):
     def get_auth_url(self, username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs):
         if not 'allow_inline_pairing' in kwargs:
             kwargs['allow_inline_pairing'] = True
+        if not 'automation_allowed' in kwargs:
+            kwargs['automation_allowed'] = True
+        if not 'challenge_required' in kwargs:
+            kwargs['challenge_required'] = False
+        if not 'ttl' in kwargs:
+            ttl = DEFAULT_IFRAME_TTL
+        else:
+            ttl = kwargs.pop('ttl')
 
         params = {
             'v':IFRAME_VERSION,
             'username':username,
             'reset_email':reset_email,
             'action_name':action_name,
-            'automation_allowed':True,
-            'challenge_required':False,
             'session_token':request_token,
-            'requester_metadata':requester_metadata,
-            'allow_inline_pairing': kwargs['allow_inline_pairing']
+            'requester_metadata':requester_metadata
         }
+        params.update(kwargs)
 
-        # can we just set ttl to DEFAULT_IFRAME_TTL
-        # ttl = kwargs['ttl'] or DEFAULT_IFRAME_TTL
-        return self.get_oauth_signed_url(self.base_uri + '/web/authenticate', params, DEFAULT_IFRAME_TTL)
+        return self.get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
 
 
     # def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL, allow_inline_pairing=True):
