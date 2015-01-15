@@ -477,6 +477,28 @@ class PairingTests(unittest.TestCase):
         denied = toopher.Pairing(response)
         self.assertFalse(denied)
 
+    def test_refresh_from_server(self):
+        response = {'id': 'id',
+                    'enabled': True,
+                    'user': {'id': 'id', 'name': 'name'}}
+        pairing = toopher.Pairing(response)
+
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'pairings/{0}'.format(pairing.id): (200,
+                json.dumps({'id': pairing.id,
+                    'enabled': True,
+                    'user': {'id': 'id', 'name': 'name'}}))})
+        pairing = pairing.refresh_from_server(api)
+        self.assertEqual(api.client.last_called_method, 'GET')
+
+        self.assertEqual(pairing.id, 'id')
+        self.assertEqual(pairing.user_name, 'name')
+        self.assertEqual(pairing.user_id, 'id')
+        self.assertTrue(pairing.enabled)
+
+
+
 def main():
     unittest.main()
 

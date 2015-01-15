@@ -322,6 +322,9 @@ class Pairing(object):
         else:
             return self._raw_data[name]
 
+    def refresh_from_server(self, api):
+        return api.get_pairing_by_id(self.id)
+
 
 class AuthenticationRequest(object):
     def __init__(self, json_response):
