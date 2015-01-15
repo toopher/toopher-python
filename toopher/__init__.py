@@ -285,6 +285,16 @@ class ToopherApi(object):
     def disable_user(self, username):
         self._set_toopher_disabled_for_user(username, True)
 
+    def get_pairing_reset_link(self, pairing_id, **kwargs):
+        if not 'security_question' in kwargs:
+            kwargs['security_question'] = None
+        if not 'security_answer' in kwargs:
+            kwargs['security_answer'] = None
+
+        url = self.base_url + '/pairings/' + pairing_id + '/generate_reset_link'
+        result = self._request(url, 'POST', kwargs)
+        return result['url']
+
     def _request(self, uri, method, params=None):
         data = {'params' if method == 'GET' else 'data': params}
         header_data = {'User-Agent':'Toopher-Python/%s (Python %s)' % (VERSION, sys.version.split()[0])}

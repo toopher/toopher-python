@@ -386,6 +386,14 @@ class ZeroStorageTests(unittest.TestCase):
             api.enable_user('no users')
         self.assertRaises(toopher.ToopherApiError, fn)
 
+    def test_get_pairing_reset_link(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'pairings/1/generate_reset_link': (200,
+            json.dumps({'url': 'http://api.toopher.test/v1/pairings/1/reset?reset_authorization=abcde'}))})
+
+        reset_link = api.get_pairing_reset_link('1')
+        self.assertEqual('http://api.toopher.test/v1/pairings/1/reset?reset_authorization=abcde', reset_link)
 
 
     def test_disabled_user_raises_correct_error(self):
