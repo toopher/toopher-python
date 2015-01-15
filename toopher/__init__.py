@@ -295,6 +295,13 @@ class ToopherApi(object):
         result = self._request(url, 'POST', kwargs)
         return result['url']
 
+    def email_pairing_reset_link_to_user(self, pairing_id, email, **kwargs):
+        params = {'reset_email': email}
+        params.update(kwargs)
+        url = self.base_url + '/pairings/' + pairing_id + '/send_reset_link'
+        self._request(url, 'POST', params)
+        return True #would raise error in _request if failed
+
     def _request(self, uri, method, params=None):
         data = {'params' if method == 'GET' else 'data': params}
         header_data = {'User-Agent':'Toopher-Python/%s (Python %s)' % (VERSION, sys.version.split()[0])}
