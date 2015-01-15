@@ -367,7 +367,15 @@ class AuthenticationRequest(object):
         return AuthenticationRequest(result)
 
     def refresh_from_server(self, api):
-        return api.get_authentication_request_by_id(self.id)
+        url = api.base_url + '/authentication_requests/' + self.id
+        result = api._request(url, 'GET')
+        self.pending = result['pending']
+        self.granted = result['granted']
+        self.automated = result['automated']
+        self.reason = result['reason']
+        terminal = result['terminal']
+        self.terminal_name = terminal['name']
+
 
 class UserTerminal(object):
     def __init__(self, json_response):

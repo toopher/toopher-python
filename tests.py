@@ -491,19 +491,19 @@ class AuthenticationRequestTests(unittest.TestCase):
                 json.dumps({'id': auth_request.id,
                             'pending': False,
                             'granted': True,
-                            'automated': False,
-                            'reason': 'it is a test',
-                            'terminal': {'id': 'id', 'name': 'name'}}))})
-        auth_request = auth_request.refresh_from_server(api)
+                            'automated': True,
+                            'reason': 'it is a test CHANGED',
+                            'terminal': {'id': 'id', 'name': 'name changed'}}))})
+        auth_request.refresh_from_server(api)
         self.assertEqual(api.client.last_called_method, 'GET')
 
         self.assertEqual(auth_request.id, 'id')
         self.assertFalse(auth_request.pending, False)
         self.assertTrue(auth_request.granted)
-        self.assertFalse(auth_request.automated)
-        self.assertEqual(auth_request.reason, 'it is a test')
+        self.assertTrue(auth_request.automated)
+        self.assertEqual(auth_request.reason, 'it is a test CHANGED')
         self.assertEqual(auth_request.terminal_id, 'id')
-        self.assertEqual(auth_request.terminal_name, 'name')
+        self.assertEqual(auth_request.terminal_name, 'name changed')
         
 
 class PairingTests(unittest.TestCase):
