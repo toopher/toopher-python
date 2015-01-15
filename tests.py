@@ -404,6 +404,42 @@ class ZeroStorageTests(unittest.TestCase):
         result = api.email_pairing_reset_link_to_user('1', 'email')
         self.assertTrue(result)
 
+    def test_get(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'pairings/1': (200,
+                '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}')})
+        result = api.get('/pairings/1')
+        self.assertEqual(api.client.last_called_method, 'GET')
+
+        self.assertEqual(result['id'], '1')
+        self.assertEqual(result['user']['name'], 'some user')
+        self.assertEqual(result['user']['id'], '1')
+        self.assertTrue(result['enabled'])
+
+    def test_post(self):
+        api = toopher.ToopherApi('key', 'secret')
+        api.client = HttpClientMock({
+            'user_terminals/create': (200,
+                                      json.dumps({
+                                          'id':'id',
+                                          'name':'terminal_name',
+                                          'name_extra':'requester_terminal_id',
+                                          'user': {'name':'user_name', 'id':'id'}
+                                      }))})
+
+        result = api.post('/user_terminals/create',
+                          name='terminal_name',
+                          name_extra='requester_terminal_id',
+                          user_name='user_name')
+
+        self.assertEqual(api.client.last_called_method, 'POST')
+        self.assertEqual(result['id'], 'id')
+        self.assertEqual(result['user']['name'], 'user_name')
+        self.assertEqual(result['user']['id'], 'id')
+        self.assertEqual(result['name'], 'terminal_name')
+        self.assertEqual(result['name_extra'], 'requester_terminal_id')
+
     def test_disabled_user_raises_correct_error(self):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({

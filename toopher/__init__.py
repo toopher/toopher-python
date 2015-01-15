@@ -302,6 +302,14 @@ class ToopherApi(object):
         self._request(url, 'POST', params)
         return True #would raise error in _request if failed
 
+    def get(self, endpoint, **kwargs):
+        url = self.base_url + endpoint
+        return self._request(url, 'GET', kwargs)
+
+    def post(self, endpoint, **kwargs):
+        url = self.base_url + endpoint
+        return self._request(url, 'POST', kwargs)
+
     def _request(self, uri, method, params=None):
         data = {'params' if method == 'GET' else 'data': params}
         header_data = {'User-Agent':'Toopher-Python/%s (Python %s)' % (VERSION, sys.version.split()[0])}
