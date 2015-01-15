@@ -76,9 +76,9 @@ class ToopherIframeTests(unittest.TestCase):
         except toopher.SignatureValidationError:
             self.fail()
 
-    def test_get_pair_uri(self):
+    def test_get_pair_url(self):
         expected = 'https://api.toopher.test/v1/web/pair?username=jdoe&reset_email=jdoe%40example.com&expires=1100&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=UGlgBEUF6UZEhYPxevJeagqy6D4%3D'
-        self.assertEqual(expected, self.iframe_api.pair_uri('jdoe', 'jdoe@example.com'))
+        self.assertEqual(expected, self.iframe_api.get_pair_url('jdoe', 'jdoe@example.com'))
 
     def test_get_manage_user_uri(self):
         expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=jdoe%40example.com&expires=1100&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=sV8qoKnxJ3fxfP6AHNa0eNFxzJs%3D'

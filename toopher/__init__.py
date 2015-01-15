@@ -40,13 +40,15 @@ class ToopherIframe(object):
         api_uri = api_uri if api_uri else DEFAULT_BASE_URL
         self.base_uri = api_uri.rstrip('/')
 
-    def pair_uri(self, username, reset_email, ttl = DEFAULT_IFRAME_TTL):
+    def get_pair_url(self, username, reset_email, **kwargs):
         params = {
                 'v':IFRAME_VERSION,
                 'username':username,
                 'reset_email':reset_email
                 }
-        return self.get_oauth_uri(self.base_uri + '/web/pair', params, ttl)
+        # can we just set ttl to DEFAULT_IFRAME_TTL
+        # ttl = kwargs['ttl'] or DEFAULT_IFRAME_TTL
+        return self.get_oauth_uri(self.base_uri + '/web/pair', params, DEFAULT_IFRAME_TTL)
 
     def manage_user_uri(self, username, reset_email, ttl=DEFAULT_IFRAME_TTL):
         params = {
