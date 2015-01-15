@@ -124,7 +124,7 @@ class ToopherTests(unittest.TestCase):
                 '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}'
                 )
             })
-        pairing = api.pair('awkward turtle', 'some user')
+        pairing = api.pair('some user', 'awkward turtle')
 
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertEqual(api.client.last_called_data['pairing_phrase'], 'awkward turtle')
@@ -205,7 +205,7 @@ class ToopherTests(unittest.TestCase):
                 '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}'
                 )
             })
-        pairing = api.pair('awkward turtle', 'some user', test_param='42')
+        pairing = api.pair('some user', 'awkward turtle', test_param='42')
 
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertEqual(api.client.last_called_data['pairing_phrase'], 'awkward turtle')
@@ -269,7 +269,7 @@ class ToopherTests(unittest.TestCase):
                             'enabled': True,
                             'user': {'id': 'id', 'name': 'name'}}))})
 
-        api.pair_qr('user_name')
+        api.pair('user_name')
         self.assertEqual(api.client.last_called_method, 'POST')
         self.assertEqual(api.client.last_called_data['user_name'], 'user_name')
 
@@ -281,18 +281,18 @@ class ToopherTests(unittest.TestCase):
                             'enabled': True,
                             'user': {'id': 'id', 'name': 'name'}}))})
 
-        api.pair_sms('phone_number', 'user_name')
+        api.pair('user_name', '555-555-5555')
         last_called_data = api.client.last_called_data
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(last_called_data['phone_number'], 'phone_number')
+        self.assertEqual(last_called_data['phone_number'], '555-555-5555')
         self.assertEqual(last_called_data['user_name'], 'user_name')
 
-        api.pair_sms('phone_number', 'user_name', 'phone_country')
+        api.pair('user_name', '555-555-5555', phone_country='1')
         last_called_data = api.client.last_called_data
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(last_called_data['phone_number'], 'phone_number')
+        self.assertEqual(last_called_data['phone_number'], '555-555-5555')
         self.assertEqual(last_called_data['user_name'], 'user_name')
-        self.assertEqual(last_called_data['phone_country'], 'phone_country')
+        self.assertEqual(last_called_data['phone_country'], '1')
 
     def test_authenticate_with_otp(self):
         api = toopher.ToopherApi('key', 'secret')

@@ -129,33 +129,49 @@ class ToopherApi(object):
         base_url = api_url if api_url else DEFAULT_BASE_URL
         self.base_url = base_url.rstrip('/')
 
-    def pair(self, pairing_phrase, user_name, **kwargs):
-        uri = self.base_url + "/pairings/create"
-        params = {'pairing_phrase': pairing_phrase,
-                  'user_name': user_name}
-
+    def pair(self, username, phrase_or_num=None, **kwargs):
+        params = {'user_name': username}
         params.update(kwargs)
+        if phrase_or_num:
+            if any(c.isdigit() for c in phrase_or_num):
+                url = self.base_url + "/pairings/create/sms"
+                params.update(phone_number=phrase_or_num)
+            else:
+                url = self.base_url + "/pairings/create"
+                params.update(pairing_phrase=phrase_or_num)
+        else:
+            url = self.base_url + "/pairings/create/qr"
 
-        result = self._request(uri, "POST", params)
+        result = self._request(url, "POST", params)
         return PairingStatus(result)
 
-    def pair_qr(self, user_name, **kwargs):
-        uri = self.base_url + '/pairings/create/qr'
-        params = {'user_name': user_name}
-        params.update(kwargs)
-        result = self._request(uri, 'POST', params)
-        return PairingStatus(result)
-
-    def pair_sms(self, phone_number, user_name, phone_country=None):
-        uri = self.base_url + "/pairings/create/sms"
-        params = {'phone_number': phone_number,
-                  'user_name': user_name}
-
-        if phone_country:
-            params['phone_country'] = phone_country
-
-        result = self._request(uri, "POST", params)
-        return PairingStatus(result)
+    # def pair(self, pairing_phrase, user_name, **kwargs):
+    #     uri = self.base_url + "/pairings/create"
+    #     params = {'pairing_phrase': pairing_phrase,
+    #               'user_name': user_name}
+    #
+    #     params.update(kwargs)
+    #
+    #     result = self._request(uri, "POST", params)
+    #     return PairingStatus(result)
+    #
+    # def pair_qr(self, user_name, **kwargs):
+    #     uri = self.base_url + '/pairings/create/qr'
+    #     params = {'user_name': user_name}
+    #     params.update(kwargs)
+    #     result = self._request(uri, 'POST', params)
+    #     return PairingStatus(result)
+    #
+    # def pair_sms(self, phone_number, user_name, phone_country=None):
+    #     uri = self.base_url + "/pairings/create/sms"
+    #     params = {'phone_number': phone_number,
+    #               'user_name': user_name}
+    #
+    #     if phone_country:
+    #         params['phone_country'] = phone_country
+    #
+    #     result = self._request(uri, "POST", params)
+    #     return PairingStatus(result)
 
     def get_pairing_status(self, pairing_id):
         uri = self.base_url + "/pairings/" + pairing_id
