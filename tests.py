@@ -314,15 +314,23 @@ class ToopherTests(unittest.TestCase):
 class ZeroStorageTests(unittest.TestCase):
     def test_create_user_terminal(self):
         api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({'user_terminals/create': (200, '{}')})
+        api.client = HttpClientMock({
+            'user_terminals/create': (200,
+                                      json.dumps({
+                                          'id':'id',
+                                          'name':'terminal_name',
+                                          'name_extra':'requester_terminal_id',
+                                          'user': {'name':'user_name', 'id':'id'}
+                                      }))})
 
-        api.create_user_terminal('user_name', 'terminal_name', 'requester_terminal_id')
+        user_terminal = api.create_user_terminal('user_name', 'terminal_name', 'requester_terminal_id')
 
-        last_called_data = api.client.last_called_data
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(last_called_data['user_name'], 'user_name')
-        self.assertEqual(last_called_data['name'], 'terminal_name')
-        self.assertEqual(last_called_data['name_extra'], 'requester_terminal_id')
+        self.assertEqual(user_terminal.id, 'id')
+        self.assertEqual(user_terminal.user_name, 'user_name')
+        self.assertEqual(user_terminal.user_id, 'id')
+        self.assertEqual(user_terminal.name, 'terminal_name')
+        self.assertEqual(user_terminal.name_extra, 'requester_terminal_id')
 
     def test_get_user_terminal_by_id(self):
         api = toopher.ToopherApi('key', 'secret')

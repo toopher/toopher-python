@@ -256,7 +256,8 @@ class ToopherApi(object):
         params = {'user_name': user_name,
                   'name': terminal_name,
                   'name_extra': requester_terminal_id}
-        self._request(url, 'POST', params)
+        result = self._request(url, 'POST', params)
+        return UserTerminal(result)
 
     def get_user_terminal_by_id(self, terminal_id):
         url = self.base_url + '/user_terminals/' + terminal_id
