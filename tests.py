@@ -48,7 +48,7 @@ class ToopherIframeTests(unittest.TestCase):
                 'toopher_sig':'6d2c7GlQssGmeYYGpcf+V/kirOI='
                 }
         try:
-            self.iframe_api.validate(data, ToopherIframeTests.request_token)
+            self.iframe_api.validate_postback(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
             self.fail()
 
@@ -60,7 +60,7 @@ class ToopherIframeTests(unittest.TestCase):
                 'toopher_sig':[ '6d2c7GlQssGmeYYGpcf+V/kirOI=' ]
                 }
         try:
-            self.iframe_api.validate(data, ToopherIframeTests.request_token)
+            self.iframe_api.validate_postback(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
             self.fail()
 
@@ -72,7 +72,7 @@ class ToopherIframeTests(unittest.TestCase):
                 ('toopher_sig', '6d2c7GlQssGmeYYGpcf+V/kirOI=')
                 ])
         try:
-            self.iframe_api.validate(data, ToopherIframeTests.request_token)
+            self.iframe_api.validate_postback(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
             self.fail()
 

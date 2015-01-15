@@ -73,7 +73,7 @@ class ToopherIframe(object):
     def login_uri(self, username, reset_email, request_token, **kwargs):
         return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL, **kwargs)
 
-    def validate(self, data, request_token=None, ttl=DEFAULT_IFRAME_TTL):
+    def validate_postback(self, data, request_token=None):
         # make a mutable copy of the data
         data = dict(data)
 
@@ -105,7 +105,7 @@ class ToopherIframe(object):
         if not signature_valid:
             raise SignatureValidationError("Computed signature does not match submitted signature: {0} vs {1}".format(computed_signature, maybe_sig))
 
-        ttl_valid = int(time.time()) - int(data['timestamp']) < ttl
+        ttl_valid = int(time.time()) - int(data['timestamp']) < DEFAULT_IFRAME_TTL
         if not ttl_valid:
             raise SignatureValidationError("TTL expired")
 
