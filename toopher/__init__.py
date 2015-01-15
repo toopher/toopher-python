@@ -258,6 +258,12 @@ class ToopherApi(object):
         result = self._request(url, 'POST', params)
         return User(result)
 
+    def reset_user(self, username):
+        url = self.base_url + '/users/reset'
+        params = {'name': username}
+        self._request(url, 'POST', params)
+        return True # would raise error in _request if failed
+
     def get_user_by_id(self, user_id):
         url = self.base_url + '/users/' + user_id
         result = self._request(url, 'GET')
@@ -483,6 +489,9 @@ class User(object):
     def disable(self, api):
         api._set_toopher_disabled_for_user(self.name, True)
         self.disable_toopher_auth = True
+
+    def reset(self, api):
+        return api.reset_user(self.name)
 
 
 class ToopherApiError(Exception): pass
