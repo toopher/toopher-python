@@ -527,7 +527,12 @@ class PairingTests(unittest.TestCase):
         self.assertEqual(pairing.user_id, 'id')
         self.assertTrue(pairing.enabled)
 
-
+class UserTerminalTests(unittest.TestCase):
+    def test_incomplete_response_raises_exception(self):
+        response = {'key': 'value'}
+        def fn():
+            toopher.UserTerminal(response)
+        self.assertRaises(toopher.ToopherApiError, fn)
 
 def main():
     unittest.main()

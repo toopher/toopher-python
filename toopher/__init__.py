@@ -363,4 +363,26 @@ class AuthenticationRequest(object):
     def refresh_from_server(self, api):
         return api.get_authentication_request_by_id(self.id)
 
+class UserTerminal(object):
+    def __init__(self, json_response):
+        try:
+            self.id = json_response['id']
+            self.name = json_response['name']
+            self.name_extra = json_response['name_extra']
+            user = json_response['user']
+            self.user_id = user['id']
+            self.user_name = user['name']
+        except Exception:
+            raise ToopherApiError("Could not parse user terminal from response")
+
+        self._raw_data = json_response
+
+    def __getattr__(self, name):
+        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
+            return super(UserTerminal, self).__getattr__(name)
+        else:
+            return self._raw_data[name]
+
+
+
 class ToopherApiError(Exception): pass
