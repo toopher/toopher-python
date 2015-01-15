@@ -330,7 +330,11 @@ class Pairing(object):
             return self._raw_data[name]
 
     def refresh_from_server(self, api):
-        return api.get_pairing_by_id(self.id)
+        url = api.base_url + '/pairings/' + self.id
+        result = api._request(url, 'GET')
+        self.enabled = result['enabled']
+        user = result['user']
+        self.user_name = user['name']
 
 
 class AuthenticationRequest(object):

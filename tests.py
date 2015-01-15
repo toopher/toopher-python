@@ -533,15 +533,15 @@ class PairingTests(unittest.TestCase):
         api.client = HttpClientMock({
             'pairings/{0}'.format(pairing.id): (200,
                 json.dumps({'id': pairing.id,
-                    'enabled': True,
-                    'user': {'id': 'id', 'name': 'name'}}))})
-        pairing = pairing.refresh_from_server(api)
+                    'enabled': False,
+                    'user': {'id': 'id', 'name': 'name changed'}}))})
+        pairing.refresh_from_server(api)
         self.assertEqual(api.client.last_called_method, 'GET')
 
         self.assertEqual(pairing.id, 'id')
-        self.assertEqual(pairing.user_name, 'name')
+        self.assertEqual(pairing.user_name, 'name changed')
         self.assertEqual(pairing.user_id, 'id')
-        self.assertTrue(pairing.enabled)
+        self.assertFalse(pairing.enabled)
 
 class UserTerminalTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
