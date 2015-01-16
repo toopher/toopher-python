@@ -9,16 +9,19 @@ import argparse
 DEFAULT_USERNAME = 'demo@toopher.com'
 DEFAULT_TERMINAL_NAME = 'my computer'
 
-def print_sep(char='-'):
+def print_horizontal_line(char='-'):
     print char*72
+
+def print_text_with_underline(text, char='-'):
+    print text
+    print_horizontal_line(char)
 
 def initialize_api():
     key = os.environ.get('TOOPHER_CONSUMER_KEY')
     secret = os.environ.get('TOOPHER_CONSUMER_SECRET')
     
     if not (key or secret):
-        print 'Setup Credentials (set environment variables to prevent prompting)'
-        print_sep()
+        print_text_with_underline('Setup Credentials (set environment variables to prevent prompting)')
         print 'Enter your requester credential details (from https://dev.toopher.com)'
         while not key:
             key = raw_input('TOOPHER_CONSUMER_KEY=')
@@ -29,8 +32,7 @@ def initialize_api():
 
 def pair_device_with_toopher(api):
     while True:
-        print 'Step 1: Pair requester with phone'
-        print_sep('-')
+        print_text_with_underline('Step 1: Pair requester with phone')
         if args.sms_authentication:
             pair_help = 'Non-US numbers should start with a "+" and include the country code.'
             pair_type = 'mobile number'
@@ -82,8 +84,7 @@ def authenticate_with_toopher(api, pairing):
     terminal_extras = {}
 
     while True:
-        print 'Step 2: Authenticate log in'
-        print_sep()
+        print_text_with_underline('Step 2: Authenticate log in')
         
         terminal_name = raw_input('Enter a terminal name for this authentication request [%s]: ' % DEFAULT_TERMINAL_NAME)
         if not terminal_name:
@@ -129,6 +130,7 @@ def authenticate_with_toopher(api, pairing):
                 break
             
         raw_input('Press return to authenticate again, or Ctrl-C to exit')
+        print
 
 def demo():
     api = initialize_api()
@@ -144,8 +146,6 @@ if __name__ == '__main__':
                     help='Send a OTP to user over SMS for entry through the website (instead of prompting them to reply via SMS).  This option only makes sense if --sms is also supplied.')
     args = parser.parse_args()
 
-    print_sep('=')
-    print 'Library Usage Demo'
-    print_sep('=')
-    print
+    print_horizontal_line('=')
+    print_text_with_underline('Library Usage Demo', '=')
     demo()
