@@ -293,6 +293,7 @@ class Pairing(object):
         try:
             self.id = json_response['id']
             self.enabled = json_response['enabled']
+            self.pending = json_response['pending']
 
             user = json_response['user']
             self.user_id = user['id']
@@ -315,6 +316,7 @@ class Pairing(object):
         url = api.base_url + '/pairings/' + self.id
         result = api._request(url, 'GET')
         self.enabled = result['enabled']
+        self.pending = result['pending']
         user = result['user']
         self.user_name = user['name']
 

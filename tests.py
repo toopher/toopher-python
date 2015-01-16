@@ -151,7 +151,7 @@ class ToopherTests(unittest.TestCase):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'pairings/create': (200,
-                '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}'
+                '{"id":"1", "enabled":true, "pending":true, "user":{"id":"1","name":"some user"}}'
                 )
             })
         pairing = api.pair('some user', 'awkward turtle')
@@ -167,7 +167,7 @@ class ToopherTests(unittest.TestCase):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'pairings/1': (200,
-                '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}'
+                '{"id":"1", "enabled":true, "pending":true, "user":{"id":"1","name":"some user"}}'
                 )
             })
         pairing = api.get_pairing_by_id('1')
@@ -177,6 +177,7 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(pairing.user_name, 'some user')
         self.assertEqual(pairing.user_id, '1')
         self.assertTrue(pairing.enabled)
+        self.assertTrue(pairing.pending)
 
         def fn():
             foo = pairing.random_key
@@ -232,7 +233,7 @@ class ToopherTests(unittest.TestCase):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'pairings/create': (200,
-                '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}'
+                '{"id":"1", "enabled":true, "pending":true, "user":{"id":"1","name":"some user"}}'
                 )
             })
         pairing = api.pair('some user', 'awkward turtle', test_param='42')
@@ -259,7 +260,7 @@ class ToopherTests(unittest.TestCase):
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'pairings/1': (200,
-                '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}, "random_key":"84"}'
+                '{"id":"1", "enabled":true, "pending":true, "user":{"id":"1","name":"some user"}, "random_key":"84"}'
                 )
             })
         pairing = api.get_pairing_by_id('1')
@@ -297,6 +298,7 @@ class ToopherTests(unittest.TestCase):
             'pairings/create/qr': (200,
                 json.dumps({'id': 'id',
                             'enabled': True,
+                            'pending': True,
                             'user': {'id': 'id', 'name': 'name'}}))})
 
         api.pair('user_name')
@@ -309,6 +311,7 @@ class ToopherTests(unittest.TestCase):
             'pairings/create/sms': (200,
                 json.dumps({'id': 'id',
                             'enabled': True,
+                            'pending': True,
                             'user': {'id': 'id', 'name': 'name'}}))})
 
         api.pair('user_name', '555-555-5555')
@@ -626,6 +629,7 @@ class PairingTests(unittest.TestCase):
     def test_refresh_from_server(self):
         response = {'id': 'id',
                     'enabled': True,
+                    'pending': True,
                     'user': {'id': 'id', 'name': 'name'}}
         pairing = toopher.Pairing(response)
 
@@ -634,6 +638,7 @@ class PairingTests(unittest.TestCase):
             'pairings/{0}'.format(pairing.id): (200,
                 json.dumps({'id': pairing.id,
                     'enabled': False,
+                    'pending': False,
                     'user': {'id': 'id', 'name': 'name changed'}}))})
         pairing.refresh_from_server(api)
         self.assertEqual(api.client.last_called_method, 'GET')
@@ -642,6 +647,7 @@ class PairingTests(unittest.TestCase):
         self.assertEqual(pairing.user_name, 'name changed')
         self.assertEqual(pairing.user_id, 'id')
         self.assertFalse(pairing.enabled)
+        self.assertFalse(pairing.pending)
 
 class UserTerminalTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
