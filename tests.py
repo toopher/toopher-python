@@ -22,11 +22,13 @@ class HttpClientMock(object):
         else:
             return ResponseMock((400, '{}'))
 
+
 class ResponseMock(requests.Response):
     def __init__(self, response):
         self.encoding = 'utf-8'
         self.status_code = int(response[0])
         self._content = response[1]
+
 
 class ToopherIframeTests(unittest.TestCase):
     request_token = 's9s7vsb'
@@ -348,6 +350,7 @@ class ToopherTests(unittest.TestCase):
             api.authenticate('user_name', 'terminal_name')
         self.assertRaises(toopher.ToopherApiError, fn)
 
+
 class ZeroStorageTests(unittest.TestCase):
     def test_create_user_terminal(self):
         api = toopher.ToopherApi('key', 'secret')
@@ -532,6 +535,7 @@ class ZeroStorageTests(unittest.TestCase):
             auth_request = api.authenticate('user', 'terminal name')
         self.assertRaises(toopher.PairingDeactivatedError, fn)
 
+
 class ddict(dict):
     def __getitem__(self, key):
         try:
@@ -539,6 +543,7 @@ class ddict(dict):
             return value
         except KeyError as e:
             return ddict()
+
 
 class AuthenticationRequestTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
@@ -649,6 +654,7 @@ class PairingTests(unittest.TestCase):
         self.assertFalse(pairing.enabled)
         self.assertFalse(pairing.pending)
 
+
 class UserTerminalTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
@@ -678,6 +684,7 @@ class UserTerminalTests(unittest.TestCase):
         self.assertEqual(user_terminal.name_extra, "name_extra changed")
         self.assertEqual(user_terminal.user_name, "name changed")
         self.assertEqual(user_terminal.user_id, "id")
+
 
 class UserTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):

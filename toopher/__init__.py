@@ -32,6 +32,7 @@ error_codes_to_errors = {ERROR_CODE_USER_DISABLED: UserDisabledError,
 
 class SignatureValidationError(Exception): pass
 
+
 class ToopherIframe(object):
 
     def __init__(self, key, secret, api_uri=None):
@@ -288,6 +289,7 @@ class ToopherApi(object):
 
         raise ToopherApiError(error_message)
 
+
 class Pairing(object):
     def __init__(self, json_response):
         try:
@@ -392,6 +394,7 @@ class UserTerminal(object):
         self.name_extra = result["name_extra"]
         user = result["user"]
         self.user_name = user["name"]
+
 
 class User(object):
     def __init__(self, json_response):
