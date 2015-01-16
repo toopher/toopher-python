@@ -40,21 +40,28 @@ def pair_device_with_toopher(api):
             pair_help = 'Pairing phrases are generated on the mobile app'
             pair_type = 'pairing phrase'
 
-        print pair_help
-        pairing_key = raw_input('Enter %s: ' % pair_type)
-        while not pairing_key:
-            print 'Please enter a %s to continue' % pair_type
+        if not args.qr_pairing:
+            print pair_help
             pairing_key = raw_input('Enter %s: ' % pair_type)
+            while not pairing_key:
+                print 'Please enter a %s to continue' % pair_type
+                pairing_key = raw_input('Enter %s: ' % pair_type)
 
         user_name = raw_input('Enter a username for this pairing [%s]: ' % DEFAULT_USERNAME)
         if not user_name:
             user_name = DEFAULT_USERNAME
             
-        print 'Sending pairing request...'
-        
+
         try:
-            pairing = api.pair(user_name, pairing_key)
-            pairing_id = pairing.id
+            if args.qr_pairing:
+                pairing = api.pair(user_name)
+                qr_image_data = pairing.get_qr_code_image(api)
+                with open('qr_demo.png', 'wb') as qr_image:
+                    qr_image.write(qr_image_data)
+                print 'Please open qr_demo.png to scan the QR code'
+            else:
+                print 'Sending pairing request...'
+                pairing = api.pair(user_name, pairing_key)
             break
         except ToopherApiError, e:
             print 'The pairing phrase was not accepted (reason: %s)' % e
@@ -144,6 +151,8 @@ if __name__ == '__main__':
                     help='Use SMS Authentication mode (SMS messages instead of Smartphone push)')
     parser.add_argument('--sms-inband-reply', dest='sms_inband_reply', action='store_true',
                     help='Send a OTP to user over SMS for entry through the website (instead of prompting them to reply via SMS).  This option only makes sense if --sms is also supplied.')
+    parser.add_argument('--qr', dest='qr_pairing', action='store_true',
+                    help='Use QR code for pairing')
     args = parser.parse_args()
 
     print_horizontal_line('=')
