@@ -54,7 +54,7 @@ def pair_device_with_toopher(api):
         print 'Checking status of pairing request...'
         
         try:
-            pairing = api.get_pairing_by_id(pairing_id)
+            pairing.refresh_from_server(api)
             if pairing.enabled:
                 print 'Pairing complete'
                 print
@@ -99,7 +99,7 @@ def authenticate_with_toopher(api, pairing):
             print 'Checking status of authentication request...'
             
             try:
-                auth_request_status = api.get_authentication_request_by_id(auth_request_id)
+                auth_request_status.refresh_from_server(api)
             except ToopherApiError, e:
                 print 'Could not check authentication status (reason: %s)' % e
                 continue
