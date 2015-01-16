@@ -11,6 +11,12 @@ DEFAULT_TERMINAL_NAME = 'my computer'
 def print_sep(char='-'):
     print char*72
 
+def print_text_with_underline(text):
+    print_sep('=')
+    print text
+    print_sep('=')
+    print
+
 def initialize_api():
     key = os.environ.get('TOOPHER_CONSUMER_KEY')
     secret = os.environ.get('TOOPHER_CONSUMER_SECRET')
@@ -29,7 +35,7 @@ def initialize_api():
 def pair_device_with_toopher(api):
     while True:
         print 'Step 1: Pair requester with phone'
-        print_sep('-')
+        print_sep()
         print 'Pairing phrases are generated on the mobile app'
         pairing_phrase = raw_input('Enter pairing phrase: ')
         while not pairing_phrase:
@@ -113,6 +119,7 @@ def authenticate_with_toopher(api, pairing):
                 break
             
         raw_input('Press return to authenticate again, or Ctrl-C to exit')
+        print
 
 def demo():
     api = initialize_api()
@@ -121,8 +128,5 @@ def demo():
        authenticate_with_toopher(api, pairing)
 
 if __name__ == '__main__':
-    print_sep('=')
-    print 'Library Usage Demo'
-    print_sep('=')
-    print
+    print_text_with_underline('Toopher Library Demo')
     demo()
