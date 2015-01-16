@@ -11,13 +11,7 @@ DEFAULT_TERMINAL_NAME = 'my computer'
 def print_sep(char='-'):
     print char*72
 
-
-if __name__ == '__main__':
-    print_sep('=')
-    print 'Library Usage Demo'
-    print_sep('=')
-    print
-    
+def initialize_api():
     key = os.environ.get('TOOPHER_CONSUMER_KEY')
     secret = os.environ.get('TOOPHER_CONSUMER_SECRET')
     
@@ -30,8 +24,9 @@ if __name__ == '__main__':
         while not secret:
             secret = raw_input('TOOPHER_CONSUMER_SECRET=')
             
-    api = toopher.ToopherApi(key, secret, os.environ.get('TOOPHER_BASE_URL'))
-    
+    return toopher.ToopherApi(key, secret, os.environ.get('TOOPHER_BASE_URL'))
+
+def pair_device_with_toopher(api):
     while True:
         print 'Step 1: Pair requester with phone'
         print_sep('-')
@@ -48,7 +43,7 @@ if __name__ == '__main__':
         print 'Sending pairing request...'
         
         try:
-            pairing = api.pair(pairing_phrase, user_name)
+            pairing = api.pair(user_name, pairing_phrase)
             pairing_id = pairing.id
             break
         except ToopherApiError, e:
@@ -64,14 +59,19 @@ if __name__ == '__main__':
                 print 'Pairing complete'
                 print
                 break
-            else:
+            elif pairing.pending:
                 print 'The pairing has not been authorized by the phone yet'
+            else:
+                print 'The pairing has been denied'
+                break
         except ToopherApiError, e:
             raise
             print 'Could not check pairing status (reason: %s)' % e
-            
-    terminal_extras = {}
 
+    return pairing
+
+def authenticate_with_toopher(api, pairing):
+    terminal_extras = {}
     while True:
         print 'Step 2: Authenticate log in'
         print_sep()
@@ -88,8 +88,8 @@ if __name__ == '__main__':
         print 'Sending authentication request...'
         
         try:
-            request_status = api.authenticate(pairing_id, terminal_name, terminal_name_extra=terminal_extra)
-            request_id = request_status.id
+            auth_request_status = api.authenticate(pairing.id, terminal_name, terminal_name_extra=terminal_extra)
+            auth_request_id = auth_request_status.id
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
             continue
@@ -99,17 +99,30 @@ if __name__ == '__main__':
             print 'Checking status of authentication request...'
             
             try:
-                request_status = api.get_authentication_request_by_id(request_id)
+                auth_request_status = api.get_authentication_request_by_id(auth_request_id)
             except ToopherApiError, e:
                 print 'Could not check authentication status (reason: %s)' % e
                 continue
             
-            if request_status.pending:
+            if auth_request_status.pending:
                 print 'The authentication request has not received a response from the phone yet.'
             else:
-                automation = 'automatically ' if request_status.automated else ''
-                result = 'granted' if request_status.granted else 'denied'
+                automation = 'automatically ' if auth_request_status.automated else ''
+                result = 'granted' if auth_request_status.granted else 'denied'
                 print 'The request was ' + automation + result + "!"
                 break
             
         raw_input('Press return to authenticate again, or Ctrl-C to exit')
+
+def demo():
+    api = initialize_api()
+    pairing = pair_device_with_toopher(api)
+    if pairing.enabled:
+       authenticate_with_toopher(api, pairing)
+
+if __name__ == '__main__':
+    print_sep('=')
+    print 'Library Usage Demo'
+    print_sep('=')
+    print
+    demo()
