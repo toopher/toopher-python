@@ -97,8 +97,8 @@ def authenticate_with_toopher(api, pairing):
         print 'Sending authentication request...'
         
         try:
-            auth_request_status = api.authenticate(pairing.id, terminal_name, terminal_name_extra=terminal_extra, use_sms_inband_reply=args.sms_inband_reply)
-            auth_request_id = auth_request_status.id
+            auth_request = api.authenticate(pairing.id, terminal_name, terminal_name_extra=terminal_extra, use_sms_inband_reply=args.sms_inband_reply)
+            auth_request_id = auth_request.id
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
             continue
@@ -113,18 +113,18 @@ def authenticate_with_toopher(api, pairing):
             
             try:
                 if otp:
-                    auth_request_status = auth_request_status.authenticate_with_otp(otp, api)
+                    auth_request = auth_request.authenticate_with_otp(otp, api)
                 else:
-                    auth_request_status.refresh_from_server(api)
+                    auth_request.refresh_from_server(api)
             except ToopherApiError, e:
-                print 'Could not check authentication status (reason: %s)' % e
+                print 'Could not check authentication request status (reason: %s)' % e
                 continue
             
-            if auth_request_status.pending:
+            if auth_request.pending:
                 print 'The authentication request has not received a response from the phone yet.'
             else:
-                automation = 'automatically ' if auth_request_status.automated else ''
-                result = 'granted' if auth_request_status.granted else 'denied'
+                automation = 'automatically ' if auth_request.automated else ''
+                result = 'granted' if auth_request.granted else 'denied'
                 print 'The request was ' + automation + result + "!"
                 break
             
