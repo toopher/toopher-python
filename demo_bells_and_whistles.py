@@ -32,15 +32,13 @@ def pair_device_with_toopher(api):
         print 'Step 1: Pair requester with phone'
         print_sep('-')
         if args.sms_authentication:
-            pair_help = 'If you are not in the US, please enter country code.'
+            pair_help = 'Non-US numbers should start with a "+" and include the country code.'
             pair_type = 'mobile number'
         else:
             pair_help = 'Pairing phrases are generated on the mobile app'
             pair_type = 'pairing phrase'
 
         print pair_help
-        if args.sms_authentication:
-            country_code = raw_input('Enter country code: ')
         pairing_key = raw_input('Enter %s: ' % pair_type)
         while not pairing_key:
             print 'Please enter a %s to continue' % pair_type
@@ -53,10 +51,7 @@ def pair_device_with_toopher(api):
         print 'Sending pairing request...'
         
         try:
-            if args.sms_authentication:
-                pairing = api.pair(user_name, pairing_key, country_code=country_code)
-            else:
-                pairing = api.pair(user_name, pairing_key)
+            pairing = api.pair(user_name, pairing_key)
             pairing_id = pairing.id
             break
         except ToopherApiError, e:
