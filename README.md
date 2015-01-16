@@ -30,10 +30,18 @@ import toopher
 api = toopher.ToopherApi("<your consumer key>", "<your consumer secret>")
 
 # Step 1 - Pair with their phone's Toopher app
-pairing = api.pair("pairing phrase", "username@yourservice.com")
+# With pairing phrase
+pairing = api.pair("username@yourservice.com", "pairing phrase")
+# With SMS (country_code optional)
+pairing = api.pair("username@yourservice.com", "555-555-5555", country_code="1")
+# With QR code
+pairing = api.pair("username@yourservice.com")
 
 # Step 2 - Authenticate a log in
+# With pairing_id
 auth = api.authenticate(pairing.id, "my computer")
+# With username
+auth = api.authenticate("username", "requester_terminal_id")
 
 # Once they've responded you can then check the status
 auth_request = api.get_authentication_request_by_id(auth.id)
@@ -54,9 +62,9 @@ try:
     # optimistically try to authenticate against Toopher API with username and a Terminal Identifier
     # Terminal Identifer is typically a randomly generated secure browser cookie.  It does not
     # need to be human-readable
-    auth = api.authenticate_by_user_name(user_name, requester_terminal_id)
+    auth = api.authenticate("username", "requester_terminal_id")
 
-    # if you got here, everything is good!  poll the auth request status as described above
+    # if you got here, everything is good!  poll the auth request as described above
     # there are four distinct errors ToopherAPI can return if it needs more data
 except UserDisabledError:
     # you have marked this user as disabled in the Toopher API.
@@ -67,7 +75,7 @@ except TerminalUnknownError:
     # This user has not assigned a "Friendly Name" to this terminal identifier.
     # Prompt them to enter a terminal name, then submit that "friendly name" to
     # the Toopher API:
-    #   api.create_user_terminal(user_name, terminal_name, requester_terminal_id)
+    #   api.create_user_terminal("username", "terminal_name", "requester_terminal_id")
     # Afterwards, re-try authentication
 except PairingDeactivatedError:
     # this user does not have an active pairing,
