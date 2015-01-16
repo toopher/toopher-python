@@ -277,6 +277,17 @@ class ToopherApi(object):
 
         return content
 
+    def _request_raw(self, uri, method, params=None):
+        data = {'params' if method == 'GET' else 'data': params}
+        header_data = {'User-Agent':'Toopher-Python/%s (Python %s)' % (VERSION, sys.version.split()[0])}
+
+        response = self.client.request(method, uri, headers=header_data, **data)
+
+        if response.status_code >= 400:
+            self._parse_request_error(content)
+
+        return response.content
+
     def _parse_request_error(self, content):
         error_code = content['error_code']
         error_message = content['error_message']
@@ -321,6 +332,10 @@ class Pairing(object):
         self.pending = result['pending']
         user = result['user']
         self.user_name = user['name']
+
+    def get_qr_code_image(self, api):
+        url = api.base_url + '/qr/pairings/' + self.id
+        return api._request_raw(url, 'GET')
 
 
 class AuthenticationRequest(object):

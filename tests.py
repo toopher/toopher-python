@@ -5,6 +5,7 @@ import unittest
 import uuid
 import time
 import werkzeug.datastructures
+from PIL import Image
 
 class HttpClientMock(object):
     def __init__(self, paths):
@@ -653,6 +654,29 @@ class PairingTests(unittest.TestCase):
         self.assertEqual(pairing.user_id, 'id')
         self.assertFalse(pairing.enabled)
         self.assertFalse(pairing.pending)
+
+    def test_get_qr_code_image(self):
+        response = {'id': 'id',
+                    'enabled': True,
+                    'pending': True,
+                    'user': {'id': 'id', 'name': 'name'}}
+        pairing = toopher.Pairing(response)
+
+        api = toopher.ToopherApi('key', 'secret')
+        with open('qr_image.png', 'rb') as qr_image:
+            api.client = HttpClientMock({
+                'qr/pairings/{}'.format(pairing.id): (200, qr_image.read())})
+
+            qr_image_data = pairing.get_qr_code_image(api)
+            self.assertEqual(api.client.last_called_method, 'GET')
+            with open('new_image.png', 'wb') as new_image:
+                new_image.write(qr_image_data)
+
+            im = Image.open('new_image.png')
+            try:
+                im.verify()
+            except:
+                self.assertTrue(False)
 
 
 class UserTerminalTests(unittest.TestCase):
