@@ -12,7 +12,7 @@ import sys
 DEFAULT_BASE_URL = "https://api.toopher.com/v1"
 DEFAULT_IFRAME_TTL = 100
 IFRAME_VERSION = '2'
-VERSION = '1.1.0'
+VERSION = '2.0.0'
 
 class ToopherApiError(Exception): pass
 class UserDisabledError(ToopherApiError): pass
