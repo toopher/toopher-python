@@ -5,6 +5,7 @@ import unittest
 import uuid
 import time
 import werkzeug.datastructures
+import os
 from PIL import Image
 
 class HttpClientMock(object):
@@ -677,6 +678,7 @@ class PairingTests(unittest.TestCase):
                 im.verify()
             except:
                 self.assertTrue(False)
+            os.remove('new_image.png')
 
 
 class UserTerminalTests(unittest.TestCase):
