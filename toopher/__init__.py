@@ -78,24 +78,6 @@ class ToopherIframe(object):
 
         return self._get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
 
-
-    # def auth_uri(self, username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl=DEFAULT_IFRAME_TTL, allow_inline_pairing=True):
-    #     params = {
-    #             'v':IFRAME_VERSION,
-    #             'username':username,
-    #             'reset_email':reset_email,
-    #             'action_name':action_name,
-    #             'automation_allowed':automation_allowed,
-    #             'challenge_required':challenge_required,
-    #             'session_token':request_token,
-    #             'requester_metadata':requester_metadata,
-    #             'allow_inline_pairing':allow_inline_pairing
-    #             }
-    #     return self._get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
-    #
-    # def login_uri(self, username, reset_email, request_token, **kwargs):
-    #     return self.auth_uri(username, reset_email, 'Log In', True, False, request_token, 'None', DEFAULT_IFRAME_TTL, **kwargs)
-
     def validate_postback(self, data, request_token=None, **kwargs):
         if not 'ttl' in kwargs:
             ttl = DEFAULT_IFRAME_TTL
@@ -173,34 +155,6 @@ class ToopherApi(object):
         result = self._request(url, "POST", params)
         return Pairing(result)
 
-    # def pair(self, pairing_phrase, user_name, **kwargs):
-    #     uri = self.base_url + "/pairings/create"
-    #     params = {'pairing_phrase': pairing_phrase,
-    #               'user_name': user_name}
-    #
-    #     params.update(kwargs)
-    #
-    #     result = self._request(uri, "POST", params)
-    #     return Pairing(result)
-    #
-    # def pair_qr(self, user_name, **kwargs):
-    #     uri = self.base_url + '/pairings/create/qr'
-    #     params = {'user_name': user_name}
-    #     params.update(kwargs)
-    #     result = self._request(uri, 'POST', params)
-    #     return Pairing(result)
-    #
-    # def pair_sms(self, phone_number, user_name, phone_country=None):
-    #     uri = self.base_url + "/pairings/create/sms"
-    #     params = {'phone_number': phone_number,
-    #               'user_name': user_name}
-    #
-    #     if phone_country:
-    #         params['phone_country'] = phone_country
-    #
-    #     result = self._request(uri, "POST", params)
-    #     return Pairing(result)
-
     def get_pairing_by_id(self, pairing_id):
         url = self.base_url + "/pairings/" + pairing_id
 
@@ -223,33 +177,11 @@ class ToopherApi(object):
         result = self._request(url, "POST", params)
         return AuthenticationRequest(result)
 
-    # def authenticate(self, pairing_id, terminal_name, action_name=None, **kwargs):
-    #     uri = self.base_url + "/authentication_requests/initiate"
-    #     params = {'pairing_id': pairing_id,
-    #               'terminal_name': terminal_name}
-    #     if action_name:
-    #         params['action_name'] = action_name
-    #
-    #     params.update(kwargs)
-    #
-    #     result = self._request(uri, "POST", params)
-    #     return AuthenticationStatus(result)
-
     def get_authentication_request_by_id(self, authentication_request_id):
         url = self.base_url + "/authentication_requests/" + authentication_request_id
 
         result = self._request(url, "GET")
         return AuthenticationRequest(result)
-
-    # def authenticate_with_otp(self, authentication_request_id, otp):
-    #     uri = self.base_url + "/authentication_requests/" + authentication_request_id + '/otp_auth'
-    #     params = {'otp' : otp}
-    #     result = self._request(uri, "POST", params)
-    #     return AuthenticationRequest(result)
-
-    # def authenticate_by_user_name(self, user_name, terminal_name_extra, action_name=None, **kwargs):
-    #     kwargs.update(user_name=user_name, terminal_name_extra=terminal_name_extra)
-    #     return self.authenticate('', '', action_name, **kwargs)
 
     def create_user(self, username, **kwargs):
         url = self.base_url + '/users/create'
