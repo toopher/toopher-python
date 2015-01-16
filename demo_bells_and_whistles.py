@@ -12,20 +12,7 @@ DEFAULT_TERMINAL_NAME = 'my computer'
 def print_sep(char='-'):
     print char*72
 
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Toopher Library Usage Demo')
-    parser.add_argument('--sms', dest='sms_authentication', action='store_true',
-                    help='Use SMS Authentication mode (SMS messages instead of Smartphone push)')
-    parser.add_argument('--sms-inband-reply', dest='sms_inband_reply', action='store_true',
-                    help='Send a OTP to user over SMS for entry through the website (instead of prompting them to reply via SMS).  This option only makes sense if --sms is also supplied.')
-    args = parser.parse_args()
-
-    print_sep('=')
-    print 'Library Usage Demo'
-    print_sep('=')
-    print
-    
+def initialize_api():
     key = os.environ.get('TOOPHER_CONSUMER_KEY')
     secret = os.environ.get('TOOPHER_CONSUMER_SECRET')
     
@@ -38,26 +25,27 @@ if __name__ == '__main__':
         while not secret:
             secret = raw_input('TOOPHER_CONSUMER_SECRET=')
             
-    api = toopher.ToopherApi(key, secret, os.environ.get('TOOPHER_BASE_URL'))
-    
+    return toopher.ToopherApi(key, secret, os.environ.get('TOOPHER_BASE_URL'))
+
+def pair_device_with_toopher(api):
     while True:
         print 'Step 1: Pair requester with phone'
         print_sep('-')
         if args.sms_authentication:
-            pair_func = api.pair_sms
-            pair_help = 'Non-US numbers should start with a "+" and include the country code.'
+            pair_help = 'If you are not in the US, please enter country code.'
             pair_type = 'mobile number'
         else:
-            pair_func = api.pair
             pair_help = 'Pairing phrases are generated on the mobile app'
             pair_type = 'pairing phrase'
-        
+
         print pair_help
+        if args.sms_authentication:
+            country_code = raw_input('Enter country code: ')
         pairing_key = raw_input('Enter %s: ' % pair_type)
         while not pairing_key:
             print 'Please enter a %s to continue' % pair_type
             pairing_key = raw_input('Enter %s: ' % pair_type)
-            
+
         user_name = raw_input('Enter a username for this pairing [%s]: ' % DEFAULT_USERNAME)
         if not user_name:
             user_name = DEFAULT_USERNAME
@@ -65,7 +53,10 @@ if __name__ == '__main__':
         print 'Sending pairing request...'
         
         try:
-            pairing = pair_func(pairing_key, user_name)
+            if args.sms_authentication:
+                pairing = api.pair(user_name, pairing_key, country_code=country_code)
+            else:
+                pairing = api.pair(user_name, pairing_key)
             pairing_id = pairing.id
             break
         except ToopherApiError, e:
@@ -81,12 +72,18 @@ if __name__ == '__main__':
                 print 'Pairing complete'
                 print
                 break
-            else:
+            elif pairing.pending:
                 print 'The pairing has not been authorized by the phone yet'
+            else:
+                print 'The pairing has been denied.'
+                break
         except ToopherApiError, e:
             raise
             print 'Could not check pairing status (reason: %s)' % e
-            
+
+    return pairing
+
+def authenticate_with_toopher(api, pairing):
     terminal_extras = {}
 
     while True:
@@ -105,8 +102,8 @@ if __name__ == '__main__':
         print 'Sending authentication request...'
         
         try:
-            request_status = api.authenticate(pairing_id, terminal_name, terminal_name_extra=terminal_extra, use_sms_inband_reply=args.sms_inband_reply)
-            request_id = request_status.id
+            auth_request_status = api.authenticate(pairing.id, terminal_name, terminal_name_extra=terminal_extra, use_sms_inband_reply=args.sms_inband_reply)
+            auth_request_id = auth_request_status.id
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
             continue
@@ -121,19 +118,39 @@ if __name__ == '__main__':
             
             try:
                 if otp:
-                    request_status = api.authenticate_with_otp(request_id, otp)
+                    auth_request_status = auth_request_status.authenticate_with_otp(otp, api)
                 else:
-                    request_status = api.get_authentication_request_by_id(request_id)
+                    auth_request_status = api.get_authentication_request_by_id(auth_request_id)
             except ToopherApiError, e:
                 print 'Could not check authentication status (reason: %s)' % e
                 continue
             
-            if request_status.pending:
+            if auth_request_status.pending:
                 print 'The authentication request has not received a response from the phone yet.'
             else:
-                automation = 'automatically ' if request_status.automated else ''
-                result = 'granted' if request_status.granted else 'denied'
+                automation = 'automatically ' if auth_request_status.automated else ''
+                result = 'granted' if auth_request_status.granted else 'denied'
                 print 'The request was ' + automation + result + "!"
                 break
             
         raw_input('Press return to authenticate again, or Ctrl-C to exit')
+
+def demo():
+    api = initialize_api()
+    pairing = pair_device_with_toopher(api)
+    if pairing.enabled:
+       authenticate_with_toopher(api, pairing)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Toopher Library Usage Demo')
+    parser.add_argument('--sms', dest='sms_authentication', action='store_true',
+                    help='Use SMS Authentication mode (SMS messages instead of Smartphone push)')
+    parser.add_argument('--sms-inband-reply', dest='sms_inband_reply', action='store_true',
+                    help='Send a OTP to user over SMS for entry through the website (instead of prompting them to reply via SMS).  This option only makes sense if --sms is also supplied.')
+    args = parser.parse_args()
+
+    print_sep('=')
+    print 'Library Usage Demo'
+    print_sep('=')
+    print
+    demo()
