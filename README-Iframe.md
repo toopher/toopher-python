@@ -18,12 +18,12 @@ We recommend using some form of primary authentication before initiating a Tooph
 ### Step 1: Embed a request in an `<iframe>`
 After verifying the user's primary authentication, but before Assuming the user's primary authentication checks out, the next step is to kickoff Toopher authentication.
 
-1. Generate a URI by specifying the request parameters to the library as detailed below
-1. Display a webpage to your user that embeds this URI within an iframe element.  The markup requirements for the iframe element are described in the "HTML Markup" section
+1. Generate a URL by specifying the request parameters to the library as detailed below
+1. Display a webpage to your user that embeds this URL within an iframe element.  The markup requirements for the iframe element are described in the "HTML Markup" section
 
 ### Step 2: Validate the result
 1. Toopher-iframe results posted back to server
-1. Server calls `ToopherIframe.validate()` to verify that result is valid.  `.validate()` returns a `Map` of trusted data if the signature is valid, or throws a `SignatureValidationError` if the signature is invalid.
+1. Server calls `ToopherIframe.validate_postback()` to verify that result is valid.  `.validate_postback()` returns a `Map` of trusted data if the signature is valid, or throws a `SignatureValidationError` if the signature is invalid.
 1. The server should check for possible errors returned by the API in the `error_code` map entry
 1. If no errors were returned, the result of the authentication is in the `granted` map entry
 
@@ -39,11 +39,11 @@ Pages that include the Toopher Authentication or Pairing iframe must include the
 <iframe id="toopher_iframe" src="{{IFRAME_REQUEST_URL}}" toopher_postback="{{POSTBACK_URL}}" style="display:inline-block; height:300px; width:100%;"></iframe>
 ```
 
-There is no difference in the markup required for a Pairing vs. an Authentication iframe request (the generated URI embeds all relevant information).
+There is no difference in the markup required for a Pairing vs. an Authentication iframe request (the generated URL embeds all relevant information).
 
 # Examples
 
-#### Generating an Authentication iframe URI
+#### Generating an Authentication iframe URL
 Every Toopher Authentication session should include a unique `request_token` - a randomized string that is included in the signed request to the Toopher API and returned in the signed response from the Toopher `<iframe>`.  To guard against potential replay attacks, your code should validate that the returned `request_token` is the same one used to create the request.
 
 Creating a random request token and storing it in the server-side session using Django:
@@ -55,21 +55,22 @@ request.session['ToopherRequestToken'] = request_token
 ```
 
 The Toopher Authentication API provides the requester a rich set of controls over authentication parameters.
+(Optional parameters are automation_allowed, challenge_required, and ttl)
 
 ```python
-auth_iframe_url = iframe_api.get_auth_url(username, reset_email, action_name, automation_allowed, challenge_required, request_token, requester_metadata, ttl);
+auth_iframe_url = iframe_api.get_auth_url(username, reset_email, request_token, action_name, requester_metadata, automation_allowed=automation_allowed, challenge_required=challenge_required, ttl=ttl);
 ```
 
-For the simple case of authenticating a user at login, a `login_uri` helper method is available:
+For the simple case of authenticating a user at login, use `get_auth_url` in this simple way:
 
 ```python
-login_iframe_url = iframe_api.login_uri(username, reset_email, request_token)
+login_iframe_url = iframe_api.get_auth_url(username, reset_email, request_token)
 ```
 
-#### Generating a Pairing iframe URI
+#### Generating a Pairing iframe URL
 
 ```python
-pair_iframe_url = iframe_api.pair_uri(username, reset_email)
+pair_iframe_url = iframe_api.get_user_management_url(username, reset_email)
 ```
 
 #### Validating postback data from Authentication iframe and parsing API errors
@@ -83,7 +84,7 @@ if 'ToopherRequestToken' in request.session:
     del request.session['ToopherRequestToken']
 
 try:
-    validated_data = iframe_api.validate(data, request_token)
+    validated_data = iframe_api.validate_postback(data, request_token)
     if 'error_code' in validated_data:
         error_code = validated_data['error_code']
         # check for API errors
