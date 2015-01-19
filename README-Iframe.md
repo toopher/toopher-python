@@ -70,7 +70,7 @@ login_iframe_url = iframe_api.get_auth_iframe_url(username, reset_email, request
 #### Generating a Pairing iframe URL
 
 ```python
-pair_iframe_url = iframe_api.get_user_management_url(username, reset_email)
+pair_iframe_url = iframe_api.get_user_management_iframe_url(username, reset_email)
 ```
 
 #### Validating postback data from Authentication iframe and parsing API errors

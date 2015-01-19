@@ -46,7 +46,7 @@ Toopher API
 ## get\_user\_management\_url
 
 ```python
-api.get_user_management_url(username, reset_email, **kwargs)
+api.get_user_management_iframe_url(username, reset_email, **kwargs)
 ```
 
 Retrieve OAuth-signed pairing IFrame URL.
