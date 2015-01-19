@@ -54,7 +54,7 @@ Retrieve OAuth-signed pairing IFrame URL.
 ## get\_auth\_url
 
 ```python
-api.get_auth_url(username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs)
+api.get_auth_iframe_url(username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs)
 ```
 
 Retrieve OAuth-signed combined pairing/authentication IFrame URL.

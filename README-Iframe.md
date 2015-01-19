@@ -58,13 +58,13 @@ The Toopher Authentication API provides the requester a rich set of controls ove
 (Optional parameters are automation_allowed, challenge_required, and ttl)
 
 ```python
-auth_iframe_url = iframe_api.get_auth_url(username, reset_email, request_token, action_name, requester_metadata, automation_allowed=automation_allowed, challenge_required=challenge_required, ttl=ttl);
+auth_iframe_url = iframe_api.get_auth_iframe_url(username, reset_email, request_token, action_name, requester_metadata, automation_allowed=automation_allowed, challenge_required=challenge_required, ttl=ttl);
 ```
 
-For the simple case of authenticating a user at login, use `get_auth_url` in this simple way:
+For the simple case of authenticating a user at login, use `get_auth_iframe_url` in this simple way:
 
 ```python
-login_iframe_url = iframe_api.get_auth_url(username, reset_email, request_token)
+login_iframe_url = iframe_api.get_auth_iframe_url(username, reset_email, request_token)
 ```
 
 #### Generating a Pairing iframe URL
