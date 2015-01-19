@@ -421,187 +421,244 @@ class ToopherTests(unittest.TestCase):
 
 
 class ZeroStorageTests(unittest.TestCase):
+    def setUp(self):
+        self.api = toopher.ToopherApi('key', 'secret')
+        self.id = str(uuid.uuid4())
+        self.terminal_name = 'terminal_name'
+        self.requester_terminal_id = 'requester_terminal_id'
+        self.user = {
+            'id': str(uuid.uuid4()),
+            'name': 'user_name'
+        }
+        self.user_id = self.user['id']
+        self.user_name = self.user['name']
+
     def test_create_user_terminal(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'user_terminals/create': (200,
-                                      json.dumps({
-                                          'id':'id',
-                                          'name':'terminal_name',
-                                          'name_extra':'requester_terminal_id',
-                                          'user': {'name':'user_name', 'id':'id'}
-                                      }))})
-
-        user_terminal = api.create_user_terminal('user_name', 'terminal_name', 'requester_terminal_id')
-
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(user_terminal.id, 'id')
-        self.assertEqual(user_terminal.user_name, 'user_name')
-        self.assertEqual(user_terminal.user_id, 'id')
-        self.assertEqual(user_terminal.name, 'terminal_name')
-        self.assertEqual(user_terminal.name_extra, 'requester_terminal_id')
+                json.dumps({
+                    'id': self.id,
+                    'name': self.terminal_name,
+                    'name_extra': self.requester_terminal_id,
+                    'user': self.user
+                })
+            )
+        })
+        user_terminal = self.api.create_user_terminal(self.user_name, self.terminal_name, self.requester_terminal_id)
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(user_terminal.id, self.id)
+        self.assertEqual(user_terminal.user_name, self.user_name)
+        self.assertEqual(user_terminal.user_id, self.user_id)
+        self.assertEqual(user_terminal.name, self.terminal_name)
+        self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
 
     def test_get_user_terminal_by_id(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'user_terminals/1': (200,
-                '{"id":"1", "name":"name", "name_extra":"name_extra", "user":{"id":"1","name":"some user"}}'
-                )
-            })
-
-        user_terminal = api.get_user_terminal_by_id("1")
-
-        self.assertEqual(api.client.last_called_method, "GET")
-        self.assertEqual(user_terminal.id, "1")
-        self.assertEqual(user_terminal.name, "name")
-        self.assertEqual(user_terminal.name_extra, "name_extra")
-        self.assertEqual(user_terminal.user_name, "some user")
-        self.assertEqual(user_terminal.user_id, "1")
+        self.api.client = HttpClientMock({
+            'user_terminals/{0}'.format(self.id): (200,
+                json.dumps({
+                    'id': self.id,
+                    'name': self.terminal_name,
+                    'name_extra': self.requester_terminal_id,
+                    'user': self.user
+                })
+            )
+        })
+        user_terminal = self.api.get_user_terminal_by_id(self.id)
+        self.assertEqual(self.api.client.last_called_method, "GET")
+        self.assertEqual(user_terminal.id, self.id)
+        self.assertEqual(user_terminal.name, self.terminal_name)
+        self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
+        self.assertEqual(user_terminal.user_name, self.user_name)
+        self.assertEqual(user_terminal.user_id, self.user_id)
 
     def test_enable_toopher_user(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'users': (200, json.dumps([{'id': 'user_id', 'name': 'user_name'}])),
-            'users/user_id': (200, json.dumps({'name': 'user_name'}))})
-
-        api.enable_user('user_name')
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertFalse(api.client.last_called_data['disable_toopher_auth'])
+        self.api.client = HttpClientMock({
+            'users': (200,
+                json.dumps([{
+                    'id': self.user_id,
+                    'name': self.user_name
+                }])
+            ),
+            'users/{0}'.format(self.user_id): (200,
+                json.dumps({
+                    'name': self.user_name
+                })
+            )
+        })
+        self.api.enable_user(self.user_name)
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertFalse(self.api.client.last_called_data['disable_toopher_auth'])
 
     def test_disable_toopher_user(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'users': (200, json.dumps([{'id': 'user_id', 'name': 'user_name'}])),
-            'users/user_id': (200, json.dumps({'name': 'user_name'}))})
-
-        api.disable_user('user_name')
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertTrue(api.client.last_called_data['disable_toopher_auth'])
+        self.api.client = HttpClientMock({
+            'users': (200,
+                json.dumps([{
+                    'id': self.user_id,
+                    'name': self.user_name
+                }])
+            ),
+            'users/{0}'.format(self.user_id): (200,
+                json.dumps({
+                    'name': self.user_name
+                })
+            )
+        })
+        self.api.disable_user(self.user_name)
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertTrue(self.api.client.last_called_data['disable_toopher_auth'])
 
     def test_enable_toopher_multiple_users(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({'users': (200,
-            json.dumps([{'name': 'first user'}, {'name': 'second user'}]))})
-
+        self.api.client = HttpClientMock({
+            'users': (200,
+                json.dumps([{
+                    'name': 'first user'
+                }, {
+                    'name': 'second user'
+                }])
+            )
+        })
         def fn():
-            api.enable_user('multiple users')
+            self.api.enable_user('multiple users')
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_enable_toopher_no_users(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({'users': (200, '[]')})
+        self.api.client = HttpClientMock({
+            'users': (200,
+                      '[]'
+            )
+        })
 
         def fn():
-            api.enable_user('no users')
+            self.api.enable_user('no users')
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_get_pairing_reset_link(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'pairings/1/generate_reset_link': (200,
-            json.dumps({'url': 'http://api.toopher.test/v1/pairings/1/reset?reset_authorization=abcde'}))})
-
-        reset_link = api.get_pairing_reset_link('1')
-        self.assertEqual('http://api.toopher.test/v1/pairings/1/reset?reset_authorization=abcde', reset_link)
+        self.api.client = HttpClientMock({
+            'pairings/{0}/generate_reset_link'.format(self.id): (200,
+                json.dumps({
+                    'url': 'http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id)
+                })
+            )
+        })
+        reset_link = self.api.get_pairing_reset_link(self.id)
+        self.assertEqual('http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id), reset_link)
 
     def test_email_pairing_reset_link_to_user(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'pairings/1/send_reset_link': (201, '[]')
+        self.api.client = HttpClientMock({
+            'pairings/{0}/send_reset_link'.format(self.id): (201,
+                                           '[]'
+            )
         })
-
-        result = api.email_pairing_reset_link_to_user('1', 'email')
+        result = self.api.email_pairing_reset_link_to_user(self.id, 'email')
         self.assertTrue(result)
 
     def test_get(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'pairings/1': (200,
-                '{"id":"1", "enabled":true, "user":{"id":"1","name":"some user"}}')})
-        result = api.get('/pairings/1')
-        self.assertEqual(api.client.last_called_method, 'GET')
-
-        self.assertEqual(result['id'], '1')
-        self.assertEqual(result['user']['name'], 'some user')
-        self.assertEqual(result['user']['id'], '1')
+        self.api.client = HttpClientMock({
+            'pairings/{0}'.format(self.id): (200,
+                json.dumps({
+                    'id': self.id,
+                    'enabled': True,
+                    'user': self.user
+                })
+            )
+        })
+        result = self.api.get('/pairings/{0}'.format(self.id))
+        self.assertEqual(self.api.client.last_called_method, 'GET')
+        self.assertEqual(result['id'], self.id)
+        self.assertEqual(result['user']['name'], self.user_name)
+        self.assertEqual(result['user']['id'], self.user_id)
         self.assertTrue(result['enabled'])
 
     def test_post(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'user_terminals/create': (200,
-                                      json.dumps({
-                                          'id':'id',
-                                          'name':'terminal_name',
-                                          'name_extra':'requester_terminal_id',
-                                          'user': {'name':'user_name', 'id':'id'}
-                                      }))})
-
-        result = api.post('/user_terminals/create',
-                          name='terminal_name',
-                          name_extra='requester_terminal_id',
-                          user_name='user_name')
-
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(result['id'], 'id')
-        self.assertEqual(result['user']['name'], 'user_name')
-        self.assertEqual(result['user']['id'], 'id')
-        self.assertEqual(result['name'], 'terminal_name')
-        self.assertEqual(result['name_extra'], 'requester_terminal_id')
+                json.dumps({
+                  'id': self.id,
+                  'name': self.terminal_name,
+                  'name_extra': self.requester_terminal_id,
+                  'user': self.user
+                })
+            )
+        })
+        result = self.api.post('/user_terminals/create',
+                               name='terminal_name',
+                               name_extra='requester_terminal_id',
+                               user_name='user_name')
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(result['id'], self.id)
+        self.assertEqual(result['user']['name'], self.user_name)
+        self.assertEqual(result['user']['id'], self.user_id)
+        self.assertEqual(result['name'], self.terminal_name)
+        self.assertEqual(result['name_extra'], self.requester_terminal_id)
 
     def test_disabled_user_raises_correct_error(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
-                json.dumps({'error_code': 704,
-                            'error_message': 'disabled user'}))})
+                json.dumps({
+                    'error_code': 704,
+                    'error_message': 'disabled user'
+                })
+            )
+        })
 
         def fn():
-            auth_request = api.authenticate('disabled user', 'terminal name')
+            auth_request = self.api.authenticate('disabled user', 'terminal name')
         self.assertRaises(toopher.UserDisabledError, fn)
 
     def test_unknown_user_raises_correct_error(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
-                json.dumps({'error_code': 705,
-                             'error_message': 'unknown user'}))})
+                json.dumps({
+                    'error_code': 705,
+                    'error_message': 'unknown user'
+                })
+            )
+        })
 
         def fn():
-            auth_request = api.authenticate('unknown user', 'terminal name')
+            auth_request = self.api.authenticate('unknown user', 'terminal name')
         self.assertRaises(toopher.UserUnknownError, fn)
 
     def test_unknown_terminal_raises_correct_error(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
-                json.dumps({'error_code': 706,
-                            'error_message': 'unknown terminal'}))})
+                json.dumps({
+                    'error_code': 706,
+                    'error_message': 'unknown terminal'
+                })
+            )
+        })
 
         def fn():
-            auth_request = api.authenticate('user', 'unknown terminal name')
+            auth_request = self.api.authenticate(self.user_name, 'unknown terminal name')
         self.assertRaises(toopher.TerminalUnknownError, fn)
 
     def test_deactivated_pairing_raises_correct_error(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
-                json.dumps({'error_code': 707,
-                            'error_message': 'Pairing has been deactivated'}))})
+                json.dumps({
+                    'error_code': 707,
+                    'error_message': 'Pairing has been deactivated'
+                })
+            )
+        })
 
         def fn():
-            auth_request = api.authenticate('user', 'terminal name')
+            auth_request = self.api.authenticate(self.user_name, self.terminal_name)
         self.assertRaises(toopher.PairingDeactivatedError, fn)
 
     def test_unauthorized_pairing_raises_correct_error(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
-                json.dumps({'error_code': 601,
-                            'error_message': 'Pairing has not been authorized'}))})
+                json.dumps({
+                    'error_code': 601,
+                    'error_message': 'Pairing has not been authorized'
+                })
+            )
+        })
 
         def fn():
-            auth_request = api.authenticate('user', 'terminal name')
+            auth_request = self.api.authenticate(self.user_name, self.terminal_name)
         self.assertRaises(toopher.PairingDeactivatedError, fn)
 
 
