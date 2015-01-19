@@ -96,6 +96,25 @@ class ToopherIframeTests(unittest.TestCase):
 class ToopherTests(unittest.TestCase):
     toopher.DEFAULT_BASE_URL = 'https://api.toopher.test/v1'
 
+    def setUp(self):
+        self.api = toopher.ToopherApi('key', 'secret')
+        self.id = str(uuid.uuid4())
+        self.name = 'name'
+        self.user = {
+            'id': str(uuid.uuid4()),
+            'name': 'user name'
+        }
+        self.user_id = self.user['id']
+        self.user_name = self.user['name']
+        self.reason = 'it is a test'
+        self.terminal = {
+            'id': str(uuid.uuid4()),
+            'name': 'terminal name'
+        }
+        self.terminal_id = self.terminal['id']
+        self.terminal_name = self.terminal['name']
+        self.action_name = 'action name'
+
     def test_constructor(self):
         def fn():
             api = toopher.ToopherApi()
@@ -118,68 +137,79 @@ class ToopherTests(unittest.TestCase):
                 self.assertEqual(version_number, toopher.VERSION)
 
     def test_create_user(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'users/create': (200,
-                '{"id":"1", "name":"name", "disable_toopher_auth": false }'
-                )
-            })
-        user = api.create_user('name')
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(user.id, '1')
-        self.assertEqual(user.name, 'name')
+                json.dumps({
+                    'id': self.id,
+                    'name': self.name,
+                    'disable_toopher_auth': False
+                })
+            )
+        })
+        user = self.api.create_user(self.name)
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(user.id, self.id)
+        self.assertEqual(user.name, self.name)
         self.assertFalse(user.disable_toopher_auth)
 
     def test_reset_user(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'users/reset': (200, '[]')
         })
-        result = api.reset_user('name')
+        result = self.api.reset_user('name')
         self.assertTrue(result)
 
     def test_get_user_by_id(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'users/1': (200,
-                '{"id":"1", "name":"name", "disable_toopher_auth": false }'
-                )
-            })
-        user = api.get_user_by_id('1')
-        self.assertEqual(api.client.last_called_method, 'GET')
-        self.assertEqual(user.id, '1')
-        self.assertEqual(user.name, 'name')
+        self.api.client = HttpClientMock({
+            'users/{0}'.format(self.id): (200,
+                json.dumps({
+                    'id': self.id,
+                    'name': self.name,
+                    'disable_toopher_auth': False
+                })
+            )
+        })
+        user = self.api.get_user_by_id(self.id)
+        self.assertEqual(self.api.client.last_called_method, 'GET')
+        self.assertEqual(user.id, self.id)
+        self.assertEqual(user.name, self.name)
         self.assertFalse(user.disable_toopher_auth)
 
     def test_create_pairing(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'pairings/create': (200,
-                '{"id":"1", "enabled":true, "pending":true, "user":{"id":"1","name":"some user"}}'
-                )
-            })
-        pairing = api.pair('some user', 'awkward turtle')
-
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['pairing_phrase'], 'awkward turtle')
+                json.dumps({
+                    'id': self.id,
+                    'enabled': True,
+                    'pending': True,
+                    'user': self.user
+                })
+            )
+        })
+        self.api.pair(self.user_name, 'awkward turtle')
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(self.api.client.last_called_data['pairing_phrase'], 'awkward turtle')
 
         def fn():
-            self.assertEqual(api.client.last_called_data['test_param'], ['42'])
+            self.assertEqual(self.api.client.last_called_data['test_param'], ['42'])
         self.assertRaises(KeyError, fn)
 
     def test_pairing(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'pairings/1': (200,
-                '{"id":"1", "enabled":true, "pending":true, "user":{"id":"1","name":"some user"}}'
-                )
-            })
-        pairing = api.get_pairing_by_id('1')
-        self.assertEqual(api.client.last_called_method, 'GET')
-
-        self.assertEqual(pairing.id, '1')
-        self.assertEqual(pairing.user_name, 'some user')
-        self.assertEqual(pairing.user_id, '1')
+        self.api.client = HttpClientMock({
+            'pairings/{0}'.format(self.id): (200,
+                json.dumps({
+                    'id': self.id,
+                    'enabled': True,
+                    'pending': True,
+                    'user': self.user
+                })
+            )
+        })
+        pairing = self.api.get_pairing_by_id(self.id)
+        self.assertEqual(self.api.client.last_called_method, 'GET')
+        self.assertEqual(pairing.id, self.id)
+        self.assertEqual(pairing.user_name, self.user_name)
+        self.assertEqual(pairing.user_id, self.user_id)
         self.assertTrue(pairing.enabled)
         self.assertTrue(pairing.pending)
 
@@ -188,168 +218,205 @@ class ToopherTests(unittest.TestCase):
         self.assertRaises(AttributeError, fn)
 
     def test_create_authentication_request(self):
-        api = toopher.ToopherApi('key', 'secret')
-        pairing_id = str(uuid.uuid4())
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/initiate': (200,
-                '{"id":"' + pairing_id + '", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}}'
-                )
-            })
-        auth_request = api.authenticate(pairing_id, 'test terminal')
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['pairing_id'], pairing_id)
-        self.assertEqual(api.client.last_called_data['terminal_name'], 'test terminal')
+                json.dumps({
+                    'id': self.id,
+                    'pending': False,
+                    'granted': True,
+                    'automated': False,
+                    'reason': self.reason,
+                    'terminal': self.terminal
+                })
+            )
+        })
+        self.api.authenticate(self.id, self.terminal_name)
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(self.api.client.last_called_data['pairing_id'], self.id)
+        self.assertEqual(self.api.client.last_called_data['terminal_name'], self.terminal_name)
 
         def fn():
-            self.assertEqual(api.client.last_called_data['test_param'], '42')
+            self.assertEqual(self.api.client.last_called_data['test_param'], '42')
         self.assertRaises(KeyError, fn)
 
-        api.authenticate(pairing_id, 'terminal_name', 'action_name')
-
-        last_called_data = api.client.last_called_data
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(last_called_data['pairing_id'], pairing_id)
-        self.assertEqual(last_called_data['terminal_name'], 'terminal_name')
-        self.assertEqual(last_called_data['action_name'], 'action_name')
+        self.api.authenticate(self.id, self.terminal_name, self.action_name)
+        last_called_data = self.api.client.last_called_data
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(last_called_data['pairing_id'], self.id)
+        self.assertEqual(last_called_data['terminal_name'], self.terminal_name)
+        self.assertEqual(last_called_data['action_name'], self.action_name)
 
     def test_authentication_request(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'authentication_requests/1': (200,
-                '{"id":"1", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}}'
-                )
-            })
-        auth_request = api.get_authentication_request_by_id('1')
-        self.assertEqual(api.client.last_called_method, 'GET')
-        self.assertEqual(auth_request.id, '1')
-        self.assertFalse(auth_request.pending, False)
+        self.api.client = HttpClientMock({
+            'authentication_requests/{0}'.format(self.id): (200,
+                json.dumps({
+                    'id': self.id,
+                    'pending': False,
+                    'granted': True,
+                    'automated': False,
+                    'reason': self.reason,
+                    'terminal': self.terminal
+                })
+            )
+        })
+        auth_request = self.api.get_authentication_request_by_id(self.id)
+        self.assertEqual(self.api.client.last_called_method, 'GET')
+        self.assertEqual(auth_request.id, self.id)
+        self.assertFalse(auth_request.pending)
         self.assertTrue(auth_request.granted)
         self.assertFalse(auth_request.automated)
-        self.assertEqual(auth_request.reason, 'its a test')
-        self.assertEqual(auth_request.terminal_id, '1')
-        self.assertEqual(auth_request.terminal_name, 'test terminal')
+        self.assertEqual(auth_request.reason, self.reason)
+        self.assertEqual(auth_request.terminal_id, self.terminal_id)
+        self.assertEqual(auth_request.terminal_name, self.terminal_name)
 
         def fn():
             foo = auth_request.random_key
         self.assertRaises(AttributeError, fn)
 
     def test_pass_arbitrary_parameters_on_pair(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'pairings/create': (200,
-                '{"id":"1", "enabled":true, "pending":true, "user":{"id":"1","name":"some user"}}'
-                )
-            })
-        pairing = api.pair('some user', 'awkward turtle', test_param='42')
-
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['pairing_phrase'], 'awkward turtle')
-        self.assertEqual(api.client.last_called_data['test_param'], '42')
+                json.dumps({
+                    'id': self.id,
+                    'enabled': True,
+                    'pending': True,
+                    'user': self.user
+                })
+            )
+        })
+        self.api.pair(self.user_name, 'awkward turtle', test_param='42')
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(self.api.client.last_called_data['pairing_phrase'], 'awkward turtle')
+        self.assertEqual(self.api.client.last_called_data['test_param'], '42')
 
     def test_pass_arbitrary_parameters_on_authenticate(self):
         api = toopher.ToopherApi('key', 'secret')
-        pairing_id = str(uuid.uuid4())
         api.client = HttpClientMock({
             'authentication_requests/initiate': (200,
-                '{"id":"' + pairing_id + '", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}}'
-                )
-            })
-        auth_request = api.authenticate(pairing_id, 'test terminal', test_param='42')
+                json.dumps({
+                    'id': self.id,
+                    'pending': False,
+                    'granted': True,
+                    'automated': False,
+                    'reason': self.reason,
+                    'terminal': self.terminal
+                })
+            )
+        })
+        api.authenticate(self.id, self.terminal_name, test_param='42')
         self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['pairing_id'], pairing_id)
-        self.assertEqual(api.client.last_called_data['terminal_name'], 'test terminal')
+        self.assertEqual(api.client.last_called_data['pairing_id'], self.id)
+        self.assertEqual(api.client.last_called_data['terminal_name'], self.terminal_name)
         self.assertEqual(api.client.last_called_data['test_param'], '42')
 
     def test_access_arbitrary_keys_in_pairing(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'pairings/1': (200,
-                '{"id":"1", "enabled":true, "pending":true, "user":{"id":"1","name":"some user"}, "random_key":"84"}'
-                )
-            })
-        pairing = api.get_pairing_by_id('1')
-        self.assertEqual(api.client.last_called_method, 'GET')
-
-        self.assertEqual(pairing.id, '1')
-        self.assertEqual(pairing.user_name, 'some user')
-        self.assertEqual(pairing.user_id, '1')
+        self.api.client = HttpClientMock({
+            'pairings/{0}'.format(self.id): (200,
+                json.dumps({
+                    'id': self.id,
+                    'enabled': True,
+                    'pending': True,
+                    'user': self.user,
+                    'random_key': '84'
+                })
+            )
+        })
+        pairing = self.api.get_pairing_by_id(self.id)
+        self.assertEqual(self.api.client.last_called_method, 'GET')
+        self.assertEqual(pairing.id, self.id)
+        self.assertEqual(pairing.user_name, self.user_name)
+        self.assertEqual(pairing.user_id, self.user_id)
         self.assertTrue(pairing.enabled)
-
         self.assertEqual(pairing.random_key, "84")
 
     def test_access_arbitrary_keys_in_authentication_request(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
-            'authentication_requests/1': (200,
-                '{"id":"1", "pending":false, "granted":true, "automated":false, "reason":"its a test", "terminal":{"id":"1", "name":"test terminal"}, "random_key":"84"}'
-                )
-            })
-        auth_request = api.get_authentication_request_by_id('1')
-        self.assertEqual(api.client.last_called_method, 'GET')
-        self.assertEqual(auth_request.id, '1')
-        self.assertFalse(auth_request.pending, False)
+        self.api.client = HttpClientMock({
+            'authentication_requests/{0}'.format(self.id): (200,
+                json.dumps({
+                    'id': self.id,
+                    'pending': False,
+                    'granted': True,
+                    'automated': False,
+                    'reason': self.reason,
+                    'terminal': self.terminal,
+                    'random_key': '84'
+                })
+            )
+        })
+        auth_request = self.api.get_authentication_request_by_id(self.id)
+        self.assertEqual(self.api.client.last_called_method, 'GET')
+        self.assertEqual(auth_request.id, self.id)
+        self.assertFalse(auth_request.pending)
         self.assertTrue(auth_request.granted)
         self.assertFalse(auth_request.automated)
-        self.assertEqual(auth_request.reason, 'its a test')
-        self.assertEqual(auth_request.terminal_id, '1')
-        self.assertEqual(auth_request.terminal_name, 'test terminal')
-
+        self.assertEqual(auth_request.reason, self.reason)
+        self.assertEqual(auth_request.terminal_id, self.terminal_id)
+        self.assertEqual(auth_request.terminal_name, self.terminal_name)
         self.assertEqual(auth_request.random_key, "84")
 
     def test_pair_qr(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'pairings/create/qr': (200,
-                json.dumps({'id': 'id',
-                            'enabled': True,
-                            'pending': True,
-                            'user': {'id': 'id', 'name': 'name'}}))})
-
-        api.pair('user_name')
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['user_name'], 'user_name')
+                json.dumps({
+                    'id': 'id',
+                    'enabled': True,
+                    'pending': True,
+                    'user': {
+                        'id': 'id',
+                        'name': 'name'
+                    }
+                })
+            )
+        })
+        self.api.pair(self.user_name)
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(self.api.client.last_called_data['user_name'], self.user_name)
 
     def test_pair_sms(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'pairings/create/sms': (200,
-                json.dumps({'id': 'id',
-                            'enabled': True,
-                            'pending': True,
-                            'user': {'id': 'id', 'name': 'name'}}))})
-
-        api.pair('user_name', '555-555-5555')
-        last_called_data = api.client.last_called_data
-        self.assertEqual(api.client.last_called_method, 'POST')
+                json.dumps({
+                    'id': self.id,
+                    'enabled': True,
+                    'pending': True,
+                    'user': self.user
+                })
+            )
+        })
+        self.api.pair(self.user_name, '555-555-5555')
+        last_called_data = self.api.client.last_called_data
+        self.assertEqual(self.api.client.last_called_method, 'POST')
         self.assertEqual(last_called_data['phone_number'], '555-555-5555')
-        self.assertEqual(last_called_data['user_name'], 'user_name')
+        self.assertEqual(last_called_data['user_name'], self.user_name)
 
-        api.pair('user_name', '555-555-5555', phone_country='1')
-        last_called_data = api.client.last_called_data
-        self.assertEqual(api.client.last_called_method, 'POST')
+        self.api.pair(self.user_name, '555-555-5555', phone_country='1')
+        last_called_data = self.api.client.last_called_data
+        self.assertEqual(self.api.client.last_called_method, 'POST')
         self.assertEqual(last_called_data['phone_number'], '555-555-5555')
-        self.assertEqual(last_called_data['user_name'], 'user_name')
+        self.assertEqual(last_called_data['user_name'], self.user_name)
         self.assertEqual(last_called_data['phone_country'], '1')
 
     def test_bad_response_raises_correct_error(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/initiate': (200,
                 'lol if you think this is json')})
 
         def fn():
-          api.authenticate('user_name', 'terminal_name')
+            self.api.authenticate(self.user_name, self.terminal_name)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_unrecognized_error_still_raises_error(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/initiate': (409,
-                json.dumps({'error_code': 42,
-                            'error_message': 'what'}))})
+                json.dumps({
+                    'error_code': 42,
+                    'error_message': 'what'
+                })
+            )
+        })
 
         def fn():
-            api.authenticate('user_name', 'terminal_name')
+            self.api.authenticate(self.user_name, self.terminal_name)
         self.assertRaises(toopher.ToopherApiError, fn)
 
 
