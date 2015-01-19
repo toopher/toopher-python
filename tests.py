@@ -39,18 +39,18 @@ class ToopherIframeTests(unittest.TestCase):
         self.iframe_api = toopher.ToopherIframe('abcdefg', 'hijklmnop')
         self.iframe_api.client.nonce = '12345678'
         self.old_time = time.time
-        time.time = lambda:1000
+        time.time = lambda: 1000
 
     def tearDown(self):
         time.time = self.old_time
 
     def test_validate_good_signature_is_successful(self):
         data = {
-                'foo':'bar',
-                'timestamp':'1000',
-                'session_token':ToopherIframeTests.request_token,
-                'toopher_sig':'6d2c7GlQssGmeYYGpcf+V/kirOI='
-                }
+            'foo': 'bar',
+            'timestamp': '1000',
+            'session_token': ToopherIframeTests.request_token,
+            'toopher_sig': '6d2c7GlQssGmeYYGpcf+V/kirOI='
+        }
         try:
             self.iframe_api.validate_postback(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
@@ -58,11 +58,11 @@ class ToopherIframeTests(unittest.TestCase):
 
     def test_arrays_get_flattened_for_validate(self):
         data = {
-                'foo': [ 'bar' ],
-                'timestamp': [ '1000' ],
-                'session_token': [ ToopherIframeTests.request_token ],
-                'toopher_sig':[ '6d2c7GlQssGmeYYGpcf+V/kirOI=' ]
-                }
+            'foo': ['bar'],
+            'timestamp': ['1000'],
+            'session_token': [ToopherIframeTests.request_token],
+            'toopher_sig': ['6d2c7GlQssGmeYYGpcf+V/kirOI=']
+        }
         try:
             self.iframe_api.validate_postback(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
@@ -70,11 +70,11 @@ class ToopherIframeTests(unittest.TestCase):
 
     def test_immutable_dictionaries_get_copied_for_validate(self):
         data = werkzeug.datastructures.ImmutableMultiDict([
-                ('foo', 'bar'),
-                ('timestamp', '1000'),
-                ('session_token', ToopherIframeTests.request_token),
-                ('toopher_sig', '6d2c7GlQssGmeYYGpcf+V/kirOI=')
-                ])
+            ('foo', 'bar'),
+            ('timestamp', '1000'),
+            ('session_token', ToopherIframeTests.request_token),
+            ('toopher_sig', '6d2c7GlQssGmeYYGpcf+V/kirOI=')
+        ])
         try:
             self.iframe_api.validate_postback(data, ToopherIframeTests.request_token)
         except toopher.SignatureValidationError:
