@@ -102,18 +102,18 @@ class ToopherTests(unittest.TestCase):
         self.name = 'name'
         self.user = {
             'id': str(uuid.uuid4()),
-            'name': 'user name'
+            'name': 'user_name'
         }
         self.user_id = self.user['id']
         self.user_name = self.user['name']
         self.reason = 'it is a test'
         self.terminal = {
             'id': str(uuid.uuid4()),
-            'name': 'terminal name'
+            'name': 'terminal_name'
         }
         self.terminal_id = self.terminal['id']
         self.terminal_name = self.terminal['name']
-        self.action_name = 'action name'
+        self.action_name = 'action_name'
 
     def test_constructor(self):
         def fn():
