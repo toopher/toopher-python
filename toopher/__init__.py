@@ -145,25 +145,24 @@ class ToopherApi(object):
         params.update(kwargs)
         if phrase_or_num:
             if any(c.isdigit() for c in phrase_or_num):
-                url = self.base_url + "/pairings/create/sms"
+                url = '/pairings/create/sms'
                 params.update(phone_number=phrase_or_num)
             else:
-                url = self.base_url + "/pairings/create"
+                url = '/pairings/create'
                 params.update(pairing_phrase=phrase_or_num)
         else:
-            url = self.base_url + "/pairings/create/qr"
+            url = '/pairings/create/qr'
 
-        result = self._request(url, "POST", params)
+        result = self.post(url, **params)
         return Pairing(result)
 
     def get_pairing_by_id(self, pairing_id):
-        url = self.base_url + "/pairings/" + pairing_id
-
-        result = self._request(url, "GET")
+        url = '/pairings/' + pairing_id
+        result = self.get(url)
         return Pairing(result)
 
     def authenticate(self, id_or_username, terminal, action_name=None, **kwargs):
-        url = self.base_url + "/authentication_requests/initiate"
+        url = '/authentication_requests/initiate'
         try:
             uuid.UUID(id_or_username)
             params = {'pairing_id': id_or_username,
@@ -175,61 +174,57 @@ class ToopherApi(object):
             params['action_name'] = action_name
         params.update(kwargs)
 
-        result = self._request(url, "POST", params)
+        result = self.post(url, **params)
         return AuthenticationRequest(result)
 
     def get_authentication_request_by_id(self, authentication_request_id):
-        url = self.base_url + "/authentication_requests/" + authentication_request_id
-
-        result = self._request(url, "GET")
+        url = '/authentication_requests/' + authentication_request_id
+        result = self.get(url)
         return AuthenticationRequest(result)
 
     def create_user(self, username, **kwargs):
-        url = self.base_url + '/users/create'
+        url = '/users/create'
         params = {'name': username}
         params.update(kwargs)
-        result = self._request(url, 'POST', params)
+        result = self.post(url, **params)
         return User(result)
 
     def reset_user(self, username):
-        url = self.base_url + '/users/reset'
+        url = '/users/reset'
         params = {'name': username}
-        self._request(url, 'POST', params)
+        self.post(url, **params)
         return True # would raise error in _request if failed
 
     def get_user_by_id(self, user_id):
-        url = self.base_url + '/users/' + user_id
-        result = self._request(url, 'GET')
+        url = '/users/' + user_id
+        result = self.get(url)
         return User(result)
 
     def create_user_terminal(self, username, terminal_name, requester_terminal_id, **kwargs):
-        url = self.base_url + '/user_terminals/create'
+        url = '/user_terminals/create'
         params = {'user_name': username,
                   'name': terminal_name,
                   'name_extra': requester_terminal_id}
         params.update(kwargs)
-        result = self._request(url, 'POST', params)
+        result = self.post(url, **params)
         return UserTerminal(result)
 
     def get_user_terminal_by_id(self, terminal_id):
-        url = self.base_url + '/user_terminals/' + terminal_id
-
-        result = self._request(url, "GET")
+        url = '/user_terminals/' + terminal_id
+        result = self.get(url)
         return UserTerminal(result)
 
-    def _set_toopher_disabled_for_user(self, user_name, disable):
-        url = self.base_url + '/users'
-        params = {'name': user_name}
-        users = self._request(url, 'GET', params)
+    def _set_toopher_disabled_for_user(self, username, disable):
+        url = '/users'
+        users = self.get(url, user_name=username)
 
         if len(users) > 1:
-            raise ToopherApiError('Multiple users with name = %s' % user_name)
+            raise ToopherApiError('Multiple users with name = %s' % username)
         elif not len(users):
-            raise ToopherApiError('No users with name = %s' % user_name)
+            raise ToopherApiError('No users with name = %s' % username)
 
-        url = self.base_url + '/users/' + users[0]['id']
-        params = {'disable_toopher_auth': disable}
-        self._request(url, 'POST', params)
+        url = '/users/' + users[0]['id']
+        self.post(url, disable_toopher_auth=disable)
 
     def enable_user(self, username):
         self._set_toopher_disabled_for_user(username, False)
@@ -243,15 +238,15 @@ class ToopherApi(object):
         if not 'security_answer' in kwargs:
             kwargs['security_answer'] = None
 
-        url = self.base_url + '/pairings/' + pairing_id + '/generate_reset_link'
-        result = self._request(url, 'POST', kwargs)
+        url = '/pairings/' + pairing_id + '/generate_reset_link'
+        result = self.post(url, **kwargs)
         return result['url']
 
     def email_pairing_reset_link_to_user(self, pairing_id, email, **kwargs):
         params = {'reset_email': email}
         params.update(kwargs)
-        url = self.base_url + '/pairings/' + pairing_id + '/send_reset_link'
-        self._request(url, 'POST', params)
+        url = '/pairings/' + pairing_id + '/send_reset_link'
+        self.post(url, **params)
         return True #would raise error in _request if failed
 
     def get(self, endpoint, **kwargs):
@@ -326,8 +321,8 @@ class Pairing(object):
             return self._raw_data[name]
 
     def refresh_from_server(self, api):
-        url = api.base_url + '/pairings/' + self.id
-        result = api._request(url, 'GET')
+        url = '/pairings/' + self.id
+        result = api.get(url)
         self.enabled = result['enabled']
         self.pending = result['pending']
         user = result['user']
@@ -366,10 +361,11 @@ class AuthenticationRequest(object):
             return self._raw_data[name]
 
     def authenticate_with_otp(self, otp, api, **kwargs):
-        url = api.base_url + "/authentication_requests/" + self.id + '/otp_auth'
+        url = '/authentication_requests/' + self.id + '/otp_auth'
         params = {'otp' : otp}
         params.update(kwargs)
-        result = api._request(url, "POST", params)
+        result = api.post(url, **params)
+
         self.pending = result['pending']
         self.granted = result['granted']
         self.automated = result['automated']
@@ -379,8 +375,9 @@ class AuthenticationRequest(object):
         self._raw_data = result
 
     def refresh_from_server(self, api):
-        url = api.base_url + '/authentication_requests/' + self.id
-        result = api._request(url, 'GET')
+        url = '/authentication_requests/' + self.id
+        result = api.get(url)
+
         self.pending = result['pending']
         self.granted = result['granted']
         self.automated = result['automated']
@@ -411,8 +408,9 @@ class UserTerminal(object):
             return self._raw_data[name]
 
     def refresh_from_server(self, api):
-        url = api.base_url + '/user_terminals/' + self.id
-        result = api._request(url, "GET")
+        url = '/user_terminals/' + self.id
+        result = api.get(url)
+
         self.name = result["name"]
         self.name_extra = result["name_extra"]
         user = result["user"]
@@ -438,8 +436,9 @@ class User(object):
             return self._raw_data[name]
 
     def refresh_from_server(self, api):
-        url = api.base_url + '/users/' + self.id
-        result = api._request(url, 'GET')
+        url = '/users/' + self.id
+        result = api.get(url)
+
         self.name = result['name']
         self.disable_toopher_auth = result['disable_toopher_auth']
         self._raw_data = result
