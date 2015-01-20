@@ -299,14 +299,10 @@ class ToopherApi(object):
 class Pairing(object):
     def __init__(self, json_response):
         try:
-            self.id = json_response['id']
-            self.enabled = json_response['enabled']
-            self.pending = json_response['pending']
             self.user = User(json_response['user'])
         except Exception as e:
             raise ToopherApiError("Could not parse pairing status from response" + e.message)
-
-        self._raw_data = json_response
+        self.update(json_response)
 
     def __nonzero__(self):
         return self.enabled
@@ -320,14 +316,22 @@ class Pairing(object):
     def refresh_from_server(self, api):
         url = '/pairings/' + self.id
         result = api.get(url)
-        self.enabled = result['enabled']
-        self.pending = result['pending']
-        self.user.update(result['user'])
-        self._raw_data = result
+        self.update(result)
 
     def get_qr_code_image(self, api):
         url = api.base_url + '/qr/pairings/' + self.id
         return api._request_raw(url, 'GET')
+
+    def update(self, json_response):
+        try:
+            self.id = json_response['id']
+            self.enabled = json_response['enabled']
+            self.pending = json_response['pending']
+            self.user.update(json_response['user'])
+        except Exception as e:
+            raise ToopherApiError("Could not parse pairing status from response" + e.message)
+
+        self._raw_data = json_response
 
 
 class AuthenticationRequest(object):
