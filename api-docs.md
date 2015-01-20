@@ -2,8 +2,8 @@ Toopher API
 ===
 
 1. ToopherIframe
-    * [get\_user\_management\_url](#get\_user\_management\_url)
-    * [get\_auth\_url](#get\_auth\_url)
+    * [get\_auth\_iframe\_url](#get\_auth\_iframe\_url)
+    * [get\_user\_management\_iframe\_url](#get\_user\_management\_iframe\_url)
     * [validate\_postback](#validate\_postback)
 
 2. ToopherApi
