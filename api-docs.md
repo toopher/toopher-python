@@ -46,12 +46,11 @@ Toopher API
 Toopher's <iframe>-based authentication flow is the simplest way for web developers to integrate Toopher Two-Factor Authentication into an application. The iframe-based authentication flow works by inserting an <iframe> element into the HTML displayed to the user after a successful username/password validation (but before they are actually logged-in to the service).
 
 #### Attributes
-
-
+| Name | Format |
 | -----: | :----- |
-| secret | string ||
-| client | OAuth1 Client object ||
-| base_uri | string ||
+| secret | string |
+| client | OAuth1 Client object |
+| base_uri | string |
 
 ### get\_auth\_iframe\_url
 
@@ -67,6 +66,7 @@ Retrieves an OAuth-signed combined pairing and authentication IFrame URL.
 | requester_metadata | optional | string | default is None|
 | **kwargs | optional | dict | |
 
+#### Example
 ```python
 # Create an instance of ToopherIframe
 api.get_auth_iframe_url('username@yourservice.com', 'reset_email@yourservice.com', 'request_token')
@@ -75,14 +75,14 @@ api.get_auth_iframe_url('username@yourservice.com', 'reset_email@yourservice.com
 ### get\_user\_management\_iframe\_url
 
 Retrieves OAuth-signed pairing IFrame URL.
-
 #### Arguments
-
+| Name | | Format |
 | -----: | :----- | :----- |
 | username | required | string |
 | reset_email | required | string |
 | **kwargs | optional | dict |
 
+#### Example
 ```python
 # Create an instance of ToopherIframe
 api.get_user_management_iframe_url('username@yourservice.com', 'reset_email@yourservice.com')
@@ -91,16 +91,15 @@ api.get_user_management_iframe_url('username@yourservice.com', 'reset_email@your
 ### validate\_postback(data, request_token=None, **kwargs)
 
 Validates authentication request from IFrame.
-
 #### Arguments
-
+| Name | | Format |
 | -----: | :----- | :----- | :---- |
 | username | required | string | |
 | data | required | dict | |
 | request_token | optional | string | default is None |
 | **kwargs | optional | dict | |
 
-
+#### Example
 ```python
 data = {
     'timestamp': 'timestamp',
