@@ -47,17 +47,18 @@ Toopher's <iframe>-based authentication flow is the simplest way for web develop
 
 #### Attributes
 
+
 | -----: | :----- |
-| secret | string |
-| client | OAuth1 Client object |
-| base_uri | string |
+| secret | string ||
+| client | OAuth1 Client object ||
+| base_uri | string ||
 
 ### get\_auth\_iframe\_url
 
 Retrieves an OAuth-signed combined pairing and authentication IFrame URL.
 
 #### Arguments
-
+| Name | | Format |
 | -----: | :----- | :----- | :--- |
 | username | required | string | |
 | reset_email | required | string | |
