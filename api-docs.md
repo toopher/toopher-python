@@ -259,7 +259,7 @@ Update authentication request from server.
 ## authenticate\_with\_otp
 
 ```python
-authentication_request.authenticate_with_otp(otp, api, **kwargs)
+authentication_request.authenticate_with_otp(api, otp, **kwargs)
 ```
 
 Authenticate authentication request with one-time password (OTP).

@@ -121,7 +121,7 @@ def authenticate_with_toopher(api, pairing):
             
             try:
                 if otp:
-                    auth_request = auth_request.authenticate_with_otp(otp, api)
+                    auth_request = auth_request.authenticate_with_otp(api, otp)
                 else:
                     auth_request.refresh_from_server(api)
             except ToopherApiError, e:

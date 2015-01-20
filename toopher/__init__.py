@@ -368,7 +368,7 @@ class AuthenticationRequest(object):
         else:
             return self._raw_data[name]
 
-    def authenticate_with_otp(self, otp, api, **kwargs):
+    def authenticate_with_otp(self, api, otp, **kwargs):
         url = '/authentication_requests/' + self.id + '/otp_auth'
         params = {'otp' : otp}
         params.update(kwargs)
