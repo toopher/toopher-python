@@ -2,8 +2,8 @@ Toopher API
 ===
 
 1. ToopherIframe
-    * [get\_user\_management\_url](#get\_user\_management\_url)
-    * [get\_auth\_url](#get\_auth\_url)
+    * [get\_auth\_iframe\_url](#get\_auth\_iframe\_url)
+    * [get\_user\_management\_iframe\_url](#get\_user\_management\_iframe\_url)
     * [validate\_postback](#validate\_postback)
 
 2. ToopherApi
@@ -43,29 +43,72 @@ Toopher API
 
 # ToopherIframe
 
-## get\_user\_management\_url
+Toopher's <iframe>-based authentication flow is the simplest way for web developers to integrate Toopher Two-Factor Authentication into an application. The iframe-based authentication flow works by inserting an <iframe> element into the HTML displayed to the user after a successful username/password validation (but before they are actually logged-in to the service).
 
+#### Attributes
+| Name | Format |
+| -----: | :----- |
+| secret | string |
+| client | OAuth1 Client object |
+| base_uri | string |
+
+### get\_auth\_iframe\_url
+
+Retrieves an OAuth-signed combined pairing and authentication IFrame URL.
+
+#### Arguments
+| Name | | Format |
+| -----: | :----- | :----- | :--- |
+| username | required | string | |
+| reset_email | required | string | |
+| request_token | required | string | |
+| action_name | optional | string | default is 'Log In'|
+| requester_metadata | optional | string | default is None|
+| **kwargs | optional | dict | |
+
+#### Example
 ```python
-api.get_user_management_iframe_url(username, reset_email, **kwargs)
+# Create an instance of ToopherIframe
+api.get_auth_iframe_url('username@yourservice.com', 'reset_email@yourservice.com', 'request_token')
 ```
 
-Retrieve OAuth-signed pairing IFrame URL.
+### get\_user\_management\_iframe\_url
 
-## get\_auth\_url
+Retrieves OAuth-signed pairing IFrame URL.
+#### Arguments
+| Name | | Format |
+| -----: | :----- | :----- |
+| username | required | string |
+| reset_email | required | string |
+| **kwargs | optional | dict |
 
+#### Example
 ```python
-api.get_auth_iframe_url(username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs)
+# Create an instance of ToopherIframe
+api.get_user_management_iframe_url('username@yourservice.com', 'reset_email@yourservice.com')
 ```
 
-Retrieve OAuth-signed combined pairing/authentication IFrame URL.
+### validate\_postback(data, request_token=None, **kwargs)
 
-## validate\_postback
+Validates authentication request from IFrame.
+#### Arguments
+| Name | | Format |
+| -----: | :----- | :----- | :---- |
+| username | required | string | |
+| data | required | dict | |
+| request_token | optional | string | default is None |
+| **kwargs | optional | dict | |
 
+#### Example
 ```python
-api.validate_postback((data, request_token=None, **kwargs)
+data = {
+    'timestamp': 'timestamp',
+    'session_token': 'session_token',
+    'toopher_sig': 'your_toopher_sig'
+}
+# Create an instance of ToopherIframe
+api.validate_postback(data, 'request_token')
 ```
-
-Validate authentication request from IFrame.
 
 # ToopherApi
 
