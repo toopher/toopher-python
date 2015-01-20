@@ -18,14 +18,14 @@ Toopher API
     * [get\_user\_terminal\_by\_id](#get\_user\_terminal\_by\_id)
     * [enable\_user](#enable\_user)
     * [disable\_user](#disable\_user)
-    * [get\_pairing\_reset\_link](#get\_pairing\_reset\_link)
-    * [email\_pairing\_reset\_link\_to\_user](#email\_pairing\_reset\_link\_to\_user)
     * [get](#get)
     * [post](#post)
 
 3. Pairing
     * [refresh\_from\_server](#refresh\_from\_server)
     * [get\_qr\_code\_image](#get\_qr\_code\_image)
+    * [get\_reset\_link](#get\_reset\_link)
+    * [email\_reset\_link\_to\_user](#email\_reset\_link\_to\_user)
 
 4. AuthenticationRequest
     * [refresh\_from\_server](#refresh\_from\_server)
@@ -200,22 +200,6 @@ api.disable_user(username)
 
 Disable Toopher for user by username.
 
-## get\_pairing\_reset\_link
-
-```python
-api.get_pairing_reset_link(pairing_id, **kwargs)
-```
-
-Retrieve pairing reset link for user to reset their pairing.
-
-## email\_pairing\_reset\_link\_to\_user
-
-```python
-api.email_pairing_reset_link_to_user(pairing_id, email, **kwargs)
-```
-
-Email pairing reset link to user.
-
 ## get
 
 ```python
@@ -245,6 +229,22 @@ pairing.get_qr_code_image(api)
 ```
 
 Retrieve QR code image for pairing.
+
+## get\_pairing\_reset\_link
+
+```python
+pairing.get_reset_link(api, **kwargs)
+```
+
+Retrieve pairing reset link for user to reset their pairing.
+
+## email\_pairing\_reset\_link\_to\_user
+
+```python
+pairing.email_reset_link_to_user(api, email, **kwargs)
+```
+
+Email pairing reset link to user.
 
 # AuthenticationRequest
 
