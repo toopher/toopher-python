@@ -846,6 +846,16 @@ class PairingTests(unittest.TestCase):
 
 
 class UserTerminalTests(unittest.TestCase):
+    def setUp(self):
+        self.id = str(uuid.uuid4())
+        self.name = 'name'
+        self.name_extra = 'name_extra'
+        self.user = {
+            'id': str(uuid.uuid4()),
+            'name': 'user_name'
+        }
+        self.user_id = self.user['id']
+
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
         def fn():
@@ -853,27 +863,34 @@ class UserTerminalTests(unittest.TestCase):
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_refresh_from_server(self):
-        response = {'id': 'id',
-                    'name': 'name',
-                    'name_extra': 'name_extra',
-                    'user': {'id': 'id', 'name': 'name'}}
+        response = {
+            'id': self.id,
+            'name': self.name,
+            'name_extra': self.name_extra,
+            'user': self.user
+        }
         user_terminal = toopher.UserTerminal(response)
         api = toopher.ToopherApi('key', 'secret')
         api.client = HttpClientMock({
             'user_terminals/{0}'.format(user_terminal.id): (200,
-                json.dumps({'id': 'id',
+                json.dumps({
+                    'id': self.id,
                     'name': 'name changed',
                     'name_extra': 'name_extra changed',
-                    'user': {'id': 'id', 'name': 'name changed'}}))})
+                    'user': {
+                        'id': self.user_id,
+                        'name': 'user_name changed'
+                    }
+                })
+            )
+        })
         user_terminal.refresh_from_server(api)
         self.assertEqual(api.client.last_called_method, 'GET')
-
-
-        self.assertEqual(user_terminal.id, "id")
+        self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, "name changed")
         self.assertEqual(user_terminal.name_extra, "name_extra changed")
-        self.assertEqual(user_terminal.user_name, "name changed")
-        self.assertEqual(user_terminal.user_id, "id")
+        self.assertEqual(user_terminal.user_name, "user_name changed")
+        self.assertEqual(user_terminal.user_id, self.user_id)
 
 
 class UserTests(unittest.TestCase):
