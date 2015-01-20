@@ -102,7 +102,8 @@ class ToopherTests(unittest.TestCase):
         self.name = 'name'
         self.user = {
             'id': str(uuid.uuid4()),
-            'name': 'user_name'
+            'name': 'user_name',
+            'disable_toopher_auth': False
         }
         self.user_id = self.user['id']
         self.user_name = self.user['name']
@@ -208,8 +209,9 @@ class ToopherTests(unittest.TestCase):
         pairing = self.api.get_pairing_by_id(self.id)
         self.assertEqual(self.api.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
-        self.assertEqual(pairing.user_name, self.user_name)
-        self.assertEqual(pairing.user_id, self.user_id)
+        self.assertEqual(pairing.user.name, self.user_name)
+        self.assertEqual(pairing.user.id, self.user_id)
+        self.assertFalse(pairing.user.disable_toopher_auth)
         self.assertTrue(pairing.enabled)
         self.assertTrue(pairing.pending)
 
@@ -324,8 +326,9 @@ class ToopherTests(unittest.TestCase):
         pairing = self.api.get_pairing_by_id(self.id)
         self.assertEqual(self.api.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
-        self.assertEqual(pairing.user_name, self.user_name)
-        self.assertEqual(pairing.user_id, self.user_id)
+        self.assertEqual(pairing.user.name, self.user_name)
+        self.assertEqual(pairing.user.id, self.user_id)
+        self.assertFalse(pairing.user.disable_toopher_auth)
         self.assertTrue(pairing.enabled)
         self.assertEqual(pairing.random_key, "84")
 
@@ -361,10 +364,7 @@ class ToopherTests(unittest.TestCase):
                     'id': 'id',
                     'enabled': True,
                     'pending': True,
-                    'user': {
-                        'id': 'id',
-                        'name': 'name'
-                    }
+                    'user': self.user
                 })
             )
         })
@@ -428,7 +428,8 @@ class ZeroStorageTests(unittest.TestCase):
         self.requester_terminal_id = 'requester_terminal_id'
         self.user = {
             'id': str(uuid.uuid4()),
-            'name': 'user_name'
+            'name': 'user_name',
+            'disable_toopher_auth': False
         }
         self.user_id = self.user['id']
         self.user_name = self.user['name']
@@ -771,7 +772,8 @@ class PairingTests(unittest.TestCase):
         self.id = str(uuid.uuid4())
         self.user = {
             'id': str(uuid.uuid4()),
-            'name': 'user_name'
+            'name': 'user_name',
+            'disable_toopher_auth': False
         }
         self.user_id = self.user['id']
         self.user_name = self.user['name']
@@ -809,7 +811,8 @@ class PairingTests(unittest.TestCase):
                     'pending': False,
                     'user': {
                         'id': self.user_id,
-                        'name': 'user_name changed'
+                        'name': 'user_name changed',
+                        'disable_toopher_auth': True
                     }
                 })
             )
@@ -817,8 +820,9 @@ class PairingTests(unittest.TestCase):
         pairing.refresh_from_server(self.api)
         self.assertEqual(self.api.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
-        self.assertEqual(pairing.user_id, self.user_id)
-        self.assertEqual(pairing.user_name, 'user_name changed')
+        self.assertEqual(pairing.user.id, self.user_id)
+        self.assertEqual(pairing.user.name, 'user_name changed')
+        self.assertTrue(pairing.user.disable_toopher_auth)
         self.assertFalse(pairing.enabled)
         self.assertFalse(pairing.pending)
 
@@ -826,7 +830,7 @@ class PairingTests(unittest.TestCase):
         response = {'id': 'id',
                     'enabled': True,
                     'pending': True,
-                    'user': {'id': 'id', 'name': 'name'}}
+                    'user': self.user }
         pairing = toopher.Pairing(response)
 
         with open('qr_image.png', 'rb') as qr_image:
@@ -855,7 +859,8 @@ class UserTerminalTests(unittest.TestCase):
         self.name_extra = 'name_extra'
         self.user = {
             'id': str(uuid.uuid4()),
-            'name': 'user_name'
+            'name': 'user_name',
+            'disable_toopher_auth': False
         }
         self.user_id = self.user['id']
 

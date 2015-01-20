@@ -302,10 +302,7 @@ class Pairing(object):
             self.id = json_response['id']
             self.enabled = json_response['enabled']
             self.pending = json_response['pending']
-
-            user = json_response['user']
-            self.user_id = user['id']
-            self.user_name = user['name']
+            self.user = User(json_response['user'])
         except Exception as e:
             raise ToopherApiError("Could not parse pairing status from response" + e.message)
 
@@ -326,7 +323,9 @@ class Pairing(object):
         self.enabled = result['enabled']
         self.pending = result['pending']
         user = result['user']
-        self.user_name = user['name']
+        self.user.name = user['name']
+        self.user.disable_toopher_auth = user['disable_toopher_auth']
+        self.user._raw_data = user
         self._raw_data = result
 
     def get_qr_code_image(self, api):
