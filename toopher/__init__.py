@@ -336,19 +336,10 @@ class Pairing(object):
 class AuthenticationRequest(object):
     def __init__(self, json_response):
         try:
-            self.id = json_response['id']
-            self.pending = json_response['pending']
-            self.granted = json_response['granted']
-            self.automated = json_response['automated']
-            self.reason = json_response['reason']
-
-            terminal = json_response['terminal']
-            self.terminal_id = terminal['id']
-            self.terminal_name = terminal['name']
+            self.terminal = UserTerminal(json_response['terminal'])
         except Exception:
-            raise ToopherApiError("Could not parse authentication status from response")
-
-        self._raw_data = json_response
+            raise ToopherApiError("Could not parse authentication from response")
+        self.update(json_response)
 
     def __nonzero__(self):
         return self.granted
@@ -364,39 +355,23 @@ class AuthenticationRequest(object):
         params = {'otp' : otp}
         params.update(kwargs)
         result = api.post(url, **params)
-
-        self.pending = result['pending']
-        self.granted = result['granted']
-        self.automated = result['automated']
-        self.reason = result['reason']
-        terminal = result['terminal']
-        self.terminal_name = terminal['name']
-        self._raw_data = result
+        self.update(result)
 
     def refresh_from_server(self, api):
         url = '/authentication_requests/' + self.id
         result = api.get(url)
+        self.update(result)
 
-        self.pending = result['pending']
-        self.granted = result['granted']
-        self.automated = result['automated']
-        self.reason = result['reason']
-        terminal = result['terminal']
-        self.terminal_name = terminal['name']
-        self._raw_data = result
-
-
-class UserTerminal(object):
-    def __init__(self, json_response):
+    def update(self, json_response):
         try:
             self.id = json_response['id']
-            self.name = json_response['name']
-            self.name_extra = json_response['name_extra']
-            user = json_response['user']
-            self.user_id = user['id']
-            self.user_name = user['name']
+            self.pending = json_response['pending']
+            self.granted = json_response['granted']
+            self.automated = json_response['automated']
+            self.reason = json_response['reason']
+            self.terminal.update(json_response['terminal'])
         except Exception:
-            raise ToopherApiError("Could not parse user terminal from response")
+            raise ToopherApiError("Could not parse authentication status from response")
 
         self._raw_data = json_response
 
