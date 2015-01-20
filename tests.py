@@ -672,6 +672,16 @@ class ddict(dict):
 
 
 class AuthenticationRequestTests(unittest.TestCase):
+    def setUp(self):
+        self.api = toopher.ToopherApi('key', 'secret')
+        self.id = str(uuid.uuid4())
+        self.reason = 'it is a test',
+        self.terminal = {
+            'id': str(uuid.uuid4()),
+            'name': 'terminal_name'
+        }
+        self.terminal_id = self.terminal['id']
+
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
         def fn():
@@ -689,55 +699,67 @@ class AuthenticationRequestTests(unittest.TestCase):
         self.assertFalse(denied)
 
     def test_authenticate_with_otp(self):
-        response = {'id':'id',
-                    'pending':False,
-                    'granted':True,
-                    'automated': False,
-                    'reason': 'it is a test',
-                    'terminal': {'name':'name', 'id':'id'}}
+        response = {
+            'id': self.id,
+            'pending':False,
+            'granted':True,
+            'automated': False,
+            'reason': self.reason,
+            'terminal': self.terminal
+        }
         auth_request = toopher.AuthenticationRequest(response)
 
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/{0}/otp_auth'.format(auth_request.id): (200,
-                json.dumps({'id': auth_request.id,
-                            'pending': False,
-                            'granted': False,
-                            'automated': False,
-                            'reason': 'it is a test',
-                            'terminal': {'id': 'id', 'name': 'name'}}))})
-        auth_request.authenticate_with_otp('otp', api)
-        self.assertEqual(api.client.last_called_method, 'POST')
-        self.assertEqual(api.client.last_called_data['otp'], 'otp')
+                json.dumps({
+                    'id': self.id,
+                    'pending': False,
+                    'granted': False,
+                    'automated': False,
+                    'reason': self.reason,
+                    'terminal': self.terminal
+                })
+            )
+        })
+        auth_request.authenticate_with_otp('otp', self.api)
+        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(self.api.client.last_called_data['otp'], 'otp')
 
     def test_refresh_from_server(self):
-        response = {'id':'id',
-                    'pending':False,
-                    'granted':True,
-                    'automated': False,
-                    'reason': 'it is a test',
-                    'terminal': {'name':'name', 'id':'id'}}
+        response = {
+            'id': self.id,
+            'pending': False,
+            'granted': True,
+            'automated': False,
+            'reason': self.reason,
+            'terminal': self.terminal
+        }
         auth_request = toopher.AuthenticationRequest(response)
 
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'authentication_requests/{0}'.format(auth_request.id): (200,
-                json.dumps({'id': auth_request.id,
-                            'pending': False,
-                            'granted': True,
-                            'automated': True,
-                            'reason': 'it is a test CHANGED',
-                            'terminal': {'id': 'id', 'name': 'name changed'}}))})
-        auth_request.refresh_from_server(api)
-        self.assertEqual(api.client.last_called_method, 'GET')
-
-        self.assertEqual(auth_request.id, 'id')
-        self.assertFalse(auth_request.pending, False)
+                json.dumps({
+                    'id': self.id,
+                    'pending': False,
+                    'granted': True,
+                    'automated': True,
+                    'reason': 'it is a test CHANGED',
+                    'terminal': {
+                        'id': self.terminal_id,
+                        'name': 'terminal_name changed'
+                    }
+                })
+            )
+        })
+        auth_request.refresh_from_server(self.api)
+        self.assertEqual(self.api.client.last_called_method, 'GET')
+        self.assertEqual(auth_request.id, self.id)
+        self.assertFalse(auth_request.pending)
         self.assertTrue(auth_request.granted)
         self.assertTrue(auth_request.automated)
         self.assertEqual(auth_request.reason, 'it is a test CHANGED')
-        self.assertEqual(auth_request.terminal_id, 'id')
-        self.assertEqual(auth_request.terminal_name, 'name changed')
+        self.assertEqual(auth_request.terminal_id, self.terminal_id)
+        self.assertEqual(auth_request.terminal_name, 'terminal_name changed')
         
 
 class PairingTests(unittest.TestCase):
