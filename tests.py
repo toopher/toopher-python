@@ -701,8 +701,8 @@ class AuthenticationRequestTests(unittest.TestCase):
     def test_authenticate_with_otp(self):
         response = {
             'id': self.id,
-            'pending':False,
-            'granted':True,
+            'pending':True,
+            'granted':False,
             'automated': False,
             'reason': self.reason,
             'terminal': self.terminal
@@ -714,8 +714,8 @@ class AuthenticationRequestTests(unittest.TestCase):
                 json.dumps({
                     'id': self.id,
                     'pending': False,
-                    'granted': False,
-                    'automated': False,
+                    'granted': True,
+                    'automated': True,
                     'reason': self.reason,
                     'terminal': self.terminal
                 })
@@ -724,6 +724,9 @@ class AuthenticationRequestTests(unittest.TestCase):
         auth_request.authenticate_with_otp('otp', self.api)
         self.assertEqual(self.api.client.last_called_method, 'POST')
         self.assertEqual(self.api.client.last_called_data['otp'], 'otp')
+        self.assertFalse(auth_request.pending)
+        self.assertTrue(auth_request.granted)
+        self.assertTrue(auth_request.automated)
 
     def test_refresh_from_server(self):
         response = {

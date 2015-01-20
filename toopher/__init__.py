@@ -370,7 +370,13 @@ class AuthenticationRequest(object):
         params = {'otp' : otp}
         params.update(kwargs)
         result = api._request(url, "POST", params)
-        return AuthenticationRequest(result)
+        self.pending = result['pending']
+        self.granted = result['granted']
+        self.automated = result['automated']
+        self.reason = result['reason']
+        terminal = result['terminal']
+        self.terminal_name = terminal['name']
+        self._raw_data = result
 
     def refresh_from_server(self, api):
         url = api.base_url + '/authentication_requests/' + self.id
