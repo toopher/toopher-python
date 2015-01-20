@@ -541,26 +541,6 @@ class ZeroStorageTests(unittest.TestCase):
             self.api.enable_user('no users')
         self.assertRaises(toopher.ToopherApiError, fn)
 
-    def test_get_pairing_reset_link(self):
-        self.api.client = HttpClientMock({
-            'pairings/{0}/generate_reset_link'.format(self.id): (200,
-                json.dumps({
-                    'url': 'http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id)
-                })
-            )
-        })
-        reset_link = self.api.get_pairing_reset_link(self.id)
-        self.assertEqual('http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id), reset_link)
-
-    def test_email_pairing_reset_link_to_user(self):
-        self.api.client = HttpClientMock({
-            'pairings/{0}/send_reset_link'.format(self.id): (201,
-                                           '[]'
-            )
-        })
-        result = self.api.email_pairing_reset_link_to_user(self.id, 'email')
-        self.assertTrue(result)
-
     def test_get(self):
         self.api.client = HttpClientMock({
             'pairings/{0}'.format(self.id): (200,
@@ -879,6 +859,39 @@ class PairingTests(unittest.TestCase):
             except:
                 self.assertTrue(False)
             os.remove('new_image.png')
+
+    def test_get_reset_link(self):
+        response = {'id':self.id,
+                    'enabled': False,
+                    'pending': True,
+                    'user': self.user }
+        pairing = toopher.Pairing(response)
+
+        self.api.client = HttpClientMock({
+            'pairings/{0}/generate_reset_link'.format(self.id): (200,
+                json.dumps({
+                    'url': 'http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id)
+                })
+            )
+        })
+        reset_link = pairing.get_reset_link(self.api)
+        self.assertEqual('http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id), reset_link)
+
+    def test_email_reset_link(self):
+        response = {'id':self.id,
+                    'enabled': False,
+                    'pending': True,
+                    'user': self.user }
+        pairing = toopher.Pairing(response)
+        self.api.client = HttpClientMock({
+            'pairings/{0}/send_reset_link'.format(self.id): (201,
+                                           '[]'
+            )
+        })
+        try:
+            pairing.email_reset_link(self.api, 'email')
+        except:
+            self.assertTrue(False)
 
 
 class UserTerminalTests(unittest.TestCase):

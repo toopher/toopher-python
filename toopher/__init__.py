@@ -322,6 +322,22 @@ class Pairing(object):
         url = api.base_url + '/qr/pairings/' + self.id
         return api._request_raw(url, 'GET')
 
+    def get_reset_link(self, api, **kwargs):
+        if not 'security_question' in kwargs:
+            kwargs['security_question'] = None
+        if not 'security_answer' in kwargs:
+            kwargs['security_answer'] = None
+
+        url = '/pairings/' + self.id + '/generate_reset_link'
+        result = api.post(url, **kwargs)
+        return result['url']
+
+    def email_reset_link(self, api, email, **kwargs):
+        params = {'reset_email': email}
+        params.update(kwargs)
+        url = '/pairings/' + self.id + '/send_reset_link'
+        api.post(url, **params)
+
     def update(self, json_response):
         try:
             self.id = json_response['id']
