@@ -439,7 +439,7 @@ class User(object):
         self.update(result)
 
     def reset(self, api):
-        return api.reset_user(self.name)
+        api.reset_user(self.name)
 
     def update(self, json_response):
         try:

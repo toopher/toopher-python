@@ -1017,8 +1017,10 @@ class UserTests(unittest.TestCase):
                             '[]'
             )
         })
-        result = user.reset(self.api)
-        self.assertTrue(result)
+        try:
+            user.reset(self.api)
+        except:
+            self.assertTrue(False) # reset failed
 
 def main():
     unittest.main()
