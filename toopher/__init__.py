@@ -332,6 +332,7 @@ class Pairing(object):
         self.pending = result['pending']
         user = result['user']
         self.user_name = user['name']
+        self._raw_data = result
 
     def get_qr_code_image(self, api):
         url = api.base_url + '/qr/pairings/' + self.id
@@ -369,7 +370,13 @@ class AuthenticationRequest(object):
         params = {'otp' : otp}
         params.update(kwargs)
         result = api._request(url, "POST", params)
-        return AuthenticationRequest(result)
+        self.pending = result['pending']
+        self.granted = result['granted']
+        self.automated = result['automated']
+        self.reason = result['reason']
+        terminal = result['terminal']
+        self.terminal_name = terminal['name']
+        self._raw_data = result
 
     def refresh_from_server(self, api):
         url = api.base_url + '/authentication_requests/' + self.id
@@ -380,6 +387,7 @@ class AuthenticationRequest(object):
         self.reason = result['reason']
         terminal = result['terminal']
         self.terminal_name = terminal['name']
+        self._raw_data = result
 
 
 class UserTerminal(object):
@@ -409,6 +417,7 @@ class UserTerminal(object):
         self.name_extra = result["name_extra"]
         user = result["user"]
         self.user_name = user["name"]
+        self._raw_data = result
 
 
 class User(object):
@@ -433,14 +442,17 @@ class User(object):
         result = api._request(url, 'GET')
         self.name = result['name']
         self.disable_toopher_auth = result['disable_toopher_auth']
+        self._raw_data = result
 
     def enable(self, api):
         api._set_toopher_disabled_for_user(self.name, False)
         self.disable_toopher_auth = False
+        self._raw_data['disable_toopher_auth'] = False
 
     def disable(self, api):
         api._set_toopher_disabled_for_user(self.name, True)
         self.disable_toopher_auth = True
+        self._raw_data['disable_toopher_auth'] = True
 
     def reset(self, api):
         return api.reset_user(self.name)
