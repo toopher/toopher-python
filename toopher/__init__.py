@@ -381,6 +381,10 @@ class AuthenticationRequest(object):
 
 class UserTerminal(object):
     def __init__(self, json_response):
+        try:
+            self.user = User(json_response['user'])
+        except Exception:
+            raise ToopherApiError("Could not parse user terminal from response")
         self.update(json_response)
 
     def __getattr__(self, name):
@@ -392,21 +396,14 @@ class UserTerminal(object):
     def refresh_from_server(self, api):
         url = '/user_terminals/' + self.id
         result = api.get(url)
-
-        self.name = result["name"]
-        self.name_extra = result["name_extra"]
-        user = result["user"]
-        self.user_name = user["name"]
-        self._raw_data = result
+        self.update(result)
 
     def update(self, json_response):
         try:
             self.id = json_response['id']
             self.name = json_response['name']
             self.name_extra = json_response['name_extra']
-            user = json_response['user']
-            self.user_id = user['id']
-            self.user_name = user['name']
+            self.user = User(json_response['user'])
         except Exception:
             raise ToopherApiError("Could not parse user terminal from response")
 

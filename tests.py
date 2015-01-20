@@ -456,8 +456,8 @@ class ZeroStorageTests(unittest.TestCase):
         user_terminal = self.api.create_user_terminal(self.user_name, self.terminal_name, self.requester_terminal_id)
         self.assertEqual(self.api.client.last_called_method, 'POST')
         self.assertEqual(user_terminal.id, self.id)
-        self.assertEqual(user_terminal.user_name, self.user_name)
-        self.assertEqual(user_terminal.user_id, self.user_id)
+        self.assertEqual(user_terminal.user.name, self.user_name)
+        self.assertEqual(user_terminal.user.id, self.user_id)
         self.assertEqual(user_terminal.name, self.terminal_name)
         self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
 
@@ -477,8 +477,8 @@ class ZeroStorageTests(unittest.TestCase):
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, self.terminal_name)
         self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
-        self.assertEqual(user_terminal.user_name, self.user_name)
-        self.assertEqual(user_terminal.user_id, self.user_id)
+        self.assertEqual(user_terminal.user.name, self.user_name)
+        self.assertEqual(user_terminal.user.id, self.user_id)
 
     def test_enable_toopher_user(self):
         self.api.client = HttpClientMock({
@@ -916,7 +916,8 @@ class UserTerminalTests(unittest.TestCase):
                     'name_extra': 'name_extra changed',
                     'user': {
                         'id': self.user_id,
-                        'name': 'user_name changed'
+                        'name': 'user_name changed',
+                        'disable_toopher_auth': True
                     }
                 })
             )
@@ -926,8 +927,9 @@ class UserTerminalTests(unittest.TestCase):
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, "name changed")
         self.assertEqual(user_terminal.name_extra, "name_extra changed")
-        self.assertEqual(user_terminal.user_name, "user_name changed")
-        self.assertEqual(user_terminal.user_id, self.user_id)
+        self.assertEqual(user_terminal.user.name, "user_name changed")
+        self.assertEqual(user_terminal.user.id, self.user_id)
+        self.assertTrue(user_terminal.user.disable_toopher_auth)
 
 
 class UserTests(unittest.TestCase):
