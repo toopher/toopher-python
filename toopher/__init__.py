@@ -338,6 +338,7 @@ class AuthenticationRequest(object):
     def __init__(self, json_response):
         try:
             self.terminal = UserTerminal(json_response['terminal'])
+            self.user = User(json_response['user'])
         except Exception:
             raise ToopherApiError("Could not parse authentication from response")
         self.update(json_response)
@@ -371,6 +372,7 @@ class AuthenticationRequest(object):
             self.automated = json_response['automated']
             self.reason = json_response['reason']
             self.terminal.update(json_response['terminal'])
+            self.user.update(json_response['user'])
         except Exception:
             raise ToopherApiError("Could not parse authentication status from response")
 
