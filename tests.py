@@ -763,6 +763,16 @@ class AuthenticationRequestTests(unittest.TestCase):
         
 
 class PairingTests(unittest.TestCase):
+    def setUp(self):
+        self.api = toopher.ToopherApi('key', 'secret')
+        self.id = str(uuid.uuid4())
+        self.user = {
+            'id': str(uuid.uuid4()),
+            'name': 'user_name'
+        }
+        self.user_id = self.user['id']
+        self.user_name = self.user['name']
+
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
         def fn():
@@ -780,25 +790,32 @@ class PairingTests(unittest.TestCase):
         self.assertFalse(denied)
 
     def test_refresh_from_server(self):
-        response = {'id': 'id',
-                    'enabled': True,
-                    'pending': True,
-                    'user': {'id': 'id', 'name': 'name'}}
+        response = {
+            'id': self.id,
+            'enabled': True,
+            'pending': True,
+            'user': self.user
+        }
         pairing = toopher.Pairing(response)
 
-        api = toopher.ToopherApi('key', 'secret')
-        api.client = HttpClientMock({
+        self.api.client = HttpClientMock({
             'pairings/{0}'.format(pairing.id): (200,
-                json.dumps({'id': pairing.id,
+                json.dumps({
+                    'id': self.id,
                     'enabled': False,
                     'pending': False,
-                    'user': {'id': 'id', 'name': 'name changed'}}))})
-        pairing.refresh_from_server(api)
-        self.assertEqual(api.client.last_called_method, 'GET')
-
-        self.assertEqual(pairing.id, 'id')
-        self.assertEqual(pairing.user_name, 'name changed')
-        self.assertEqual(pairing.user_id, 'id')
+                    'user': {
+                        'id': self.user_id,
+                        'name': 'user_name changed'
+                    }
+                })
+            )
+        })
+        pairing.refresh_from_server(self.api)
+        self.assertEqual(self.api.client.last_called_method, 'GET')
+        self.assertEqual(pairing.id, self.id)
+        self.assertEqual(pairing.user_id, self.user_id)
+        self.assertEqual(pairing.user_name, 'user_name changed')
         self.assertFalse(pairing.enabled)
         self.assertFalse(pairing.pending)
 
@@ -809,13 +826,14 @@ class PairingTests(unittest.TestCase):
                     'user': {'id': 'id', 'name': 'name'}}
         pairing = toopher.Pairing(response)
 
-        api = toopher.ToopherApi('key', 'secret')
         with open('qr_image.png', 'rb') as qr_image:
-            api.client = HttpClientMock({
-                'qr/pairings/{}'.format(pairing.id): (200, qr_image.read())})
-
-            qr_image_data = pairing.get_qr_code_image(api)
-            self.assertEqual(api.client.last_called_method, 'GET')
+            self.api.client = HttpClientMock({
+                'qr/pairings/{0}'.format(pairing.id): (200,
+                                                       qr_image.read()
+                )
+            })
+            qr_image_data = pairing.get_qr_code_image(self.api)
+            self.assertEqual(self.api.client.last_called_method, 'GET')
             with open('new_image.png', 'wb') as new_image:
                 new_image.write(qr_image_data)
 
