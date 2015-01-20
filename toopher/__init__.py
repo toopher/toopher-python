@@ -444,12 +444,16 @@ class User(object):
         self._raw_data = result
 
     def enable(self, api):
-        api._set_toopher_disabled_for_user(self.name, False)
+        url = '/users/' + self.id
+        api.post(url, disable_toopher_auth=False)
+        # At this point, if there was an error it would have been raised
         self.disable_toopher_auth = False
         self._raw_data['disable_toopher_auth'] = False
 
     def disable(self, api):
-        api._set_toopher_disabled_for_user(self.name, True)
+        url = '/users/' + self.id
+        api.post(url, disable_toopher_auth=True)
+        # At this point, if there was an error it would have been raised
         self.disable_toopher_auth = True
         self._raw_data['disable_toopher_auth'] = True
 
