@@ -322,10 +322,7 @@ class Pairing(object):
         result = api.get(url)
         self.enabled = result['enabled']
         self.pending = result['pending']
-        user = result['user']
-        self.user.name = user['name']
-        self.user.disable_toopher_auth = user['disable_toopher_auth']
-        self.user._raw_data = user
+        self.user.update(result['user'])
         self._raw_data = result
 
     def get_qr_code_image(self, api):
@@ -412,14 +409,7 @@ class UserTerminal(object):
 
 class User(object):
     def __init__(self, json_response):
-        try:
-            self.id = json_response['id']
-            self.name = json_response['name']
-            self.disable_toopher_auth = json_response['disable_toopher_auth']
-        except Exception:
-            raise ToopherApiError("Could not parse user from response")
-
-        self._raw_data = json_response
+        self.update(json_response)
 
     def __getattr__(self, name):
         if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
@@ -430,27 +420,30 @@ class User(object):
     def refresh_from_server(self, api):
         url = '/users/' + self.id
         result = api.get(url)
-
-        self.name = result['name']
-        self.disable_toopher_auth = result['disable_toopher_auth']
-        self._raw_data = result
+        self.update(result)
 
     def enable(self, api):
         url = '/users/' + self.id
-        api.post(url, disable_toopher_auth=False)
-        # At this point, if there was an error it would have been raised
-        self.disable_toopher_auth = False
-        self._raw_data['disable_toopher_auth'] = False
+        result = api.post(url, disable_toopher_auth=False)
+        self.update(result)
 
     def disable(self, api):
         url = '/users/' + self.id
-        api.post(url, disable_toopher_auth=True)
-        # At this point, if there was an error it would have been raised
-        self.disable_toopher_auth = True
-        self._raw_data['disable_toopher_auth'] = True
+        result = api.post(url, disable_toopher_auth=True)
+        self.update(result)
 
     def reset(self, api):
         return api.reset_user(self.name)
+
+    def update(self, json_response):
+        try:
+            self.id = json_response['id']
+            self.name = json_response['name']
+            self.disable_toopher_auth = json_response['disable_toopher_auth']
+        except Exception:
+            raise ToopherApiError("Could not parse user from response")
+
+        self._raw_data = json_response
 
 
 class ToopherApiError(Exception): pass

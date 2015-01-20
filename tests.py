@@ -954,15 +954,11 @@ class UserTests(unittest.TestCase):
         }
         user = toopher.User(response)
         self.api.client = HttpClientMock({
-            'users': (200,
-                json.dumps([{
-                    'id': self.id,
-                    'name': self.name
-                }])
-            ),
             'users/{0}'.format(user.id): (200,
                 json.dumps({
-                    'name': self.name
+                    'id': self.id,
+                    'name': self.name,
+                    'disable_toopher_auth': False
                 })
             )
         })
@@ -979,15 +975,11 @@ class UserTests(unittest.TestCase):
         }
         user = toopher.User(response)
         self.api.client = HttpClientMock({
-            'users': (200,
-                json.dumps([{
-                    'id': self.id,
-                    'name': self.name
-                }])
-            ),
             'users/{0}'.format(self.id): (200,
                 json.dumps({
-                    'name': self.name
+                    'id': self.id,
+                    'name': self.name,
+                    'disable_toopher_auth': True
                 })
             )
         })
