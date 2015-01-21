@@ -198,7 +198,7 @@ class ToopherTests(unittest.TestCase):
         self.assertRaises(KeyError, fn)
 
     def test_pairing(self):
-        self.api.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'pairings/{0}'.format(self.id): (200,
                 json.dumps({
                     'id': self.id,
@@ -208,8 +208,8 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        pairing = self.api.get_pairing_by_id(self.id)
-        self.assertEqual(self.api.client.last_called_method, 'GET')
+        pairing = self.api.advanced.pairing_finder.get_by_id(self.id)
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
         self.assertEqual(pairing.user.name, self.user_name)
         self.assertEqual(pairing.user.id, self.user_id)
@@ -317,7 +317,7 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(api.client.last_called_data['test_param'], '42')
 
     def test_access_arbitrary_keys_in_pairing(self):
-        self.api.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'pairings/{0}'.format(self.id): (200,
                 json.dumps({
                     'id': self.id,
@@ -328,8 +328,8 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        pairing = self.api.get_pairing_by_id(self.id)
-        self.assertEqual(self.api.client.last_called_method, 'GET')
+        pairing = self.api.advanced.pairing_finder.get_by_id(self.id)
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
         self.assertEqual(pairing.user.name, self.user_name)
         self.assertEqual(pairing.user.id, self.user_id)

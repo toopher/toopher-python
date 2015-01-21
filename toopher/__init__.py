@@ -157,11 +157,6 @@ class ToopherApi(object):
         result = self.post(url, **params)
         return Pairing(result)
 
-    def get_pairing_by_id(self, pairing_id):
-        url = '/pairings/' + pairing_id
-        result = self.get(url)
-        return Pairing(result)
-
     def authenticate(self, id_or_username, terminal, action_name=None, **kwargs):
         url = '/authentication_requests/initiate'
         try:
@@ -283,6 +278,7 @@ class ToopherApi(object):
 class AdvancedApiUsageFactory(object):
     def __init__(self, client, base_url):
         self.raw = ApiRawRequester(client, base_url)
+        self.pairing_finder = PairingFinder(self.raw)
 
 
 class ApiRawRequester(object):
@@ -324,6 +320,16 @@ class ApiRawRequester(object):
             raise PairingDeactivatedError(error_message)
 
         raise ToopherApiError(error_message)
+
+
+class PairingFinder(object):
+    def __init__(self, raw):
+        self.raw = raw
+
+    def get_by_id(self, pairing_id):
+        url = '/pairings/' + pairing_id
+        result = self.raw.get(url)
+        return Pairing(result)
 
 
 class Pairing(object):

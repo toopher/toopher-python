@@ -120,14 +120,6 @@ api.pair(username, phrase_or_num=None, **kwargs)
 
 Pairing using pairing phrase, phone number or QR code.
 
-## get\_pairing\_by\_id
-
-```python
-api.get_pairing_by_id(pairing_id)
-```
-
-Retrieve pairing by pairing ID.
-
 ## authenticate
 
 ```python
@@ -213,6 +205,16 @@ api.advanced.raw.get(endpoint, **kwargs)
 ```python
 api.advanced.raw.post(endpoint, **kwargs)
 ```
+
+# PairingFinder
+
+## get\_by\_id
+
+```python
+api.advanced.pairing_finder.get_by_id(pairing_id)
+```
+
+Retrieve pairing by pairing ID.
 
 # Pairing
 
