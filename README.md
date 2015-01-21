@@ -75,7 +75,7 @@ except TerminalUnknownError:
     # This user has not assigned a "Friendly Name" to this terminal identifier.
     # Prompt them to enter a terminal name, then submit that "friendly name" to
     # the Toopher API:
-    #   api.create_user_terminal("username", "terminal_name", "requester_terminal_id")
+    #   api.advanced.user_terminals.create("username", "terminal_name", "requester_terminal_id")
     # Afterwards, re-try authentication
 except PairingDeactivatedError:
     # this user does not have an active pairing,

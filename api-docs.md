@@ -9,8 +9,6 @@ Toopher API
 2. ToopherApi
     * [pair](#pair)
     * [authenticate](#authenticate)
-    * [create\_user](#create\_user)
-    * [create\_user\_terminal](#create\_user\_terminal)
 
 3. ApiRawRequester
     * [get](#get)
@@ -33,12 +31,14 @@ Toopher API
     * [authenticate\_with\_otp](#authenticate\_with\_otp)
 
 8. UserTerminals
+    * [create](#create)
     * [get\_by\_id](#get\_by\_id)
 
 9. UserTerminal
     * [refresh\_from\_server](#refresh\_from\_server)
 
 10. Users
+    * [create](#create)
     * [get\_by\_id](#get\_by\_id)
     * [get\_by\_name](#get\_by\_name)
 
@@ -141,22 +141,6 @@ api.authenticate(id_or_username, terminal, action_name=None, **kwargs)
 
 Authenticate pairing with username or pairing ID.
 
-## create\_user
-
-```python
-api.create_user(username, **kwargs)
-```
-
-Create user with username.
-
-## create\_user\_terminal
-
-```python
-api.create_user_terminal(username, terminal_name, requester_terminal_id, **kwargs)
-```
-
-Create terminal for user with username.
-
 # ApiRawRequester
 
 ## get
@@ -245,6 +229,14 @@ Authenticate authentication request with one-time password (OTP).
 
 # UserTerminals
 
+## create
+
+```python
+api.advanced.user_terminals.create(username, terminal_name, requester_terminal_id, **kwargs)
+```
+
+Create terminal for user with username.
+
 ## get\_by\_id
 
 ```python
@@ -264,6 +256,14 @@ user_terminal.refresh_from_server(api)
 Update user terminal from server.
 
 # Users
+
+## create
+
+```python
+api.advanced.users.create(username, **kwargs)
+```
+
+Create user with username.
 
 ## get\_by\_id
 

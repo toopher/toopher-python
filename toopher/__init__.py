@@ -168,22 +168,6 @@ class ToopherApi(object):
         result = self.advanced.raw.post(url, **params)
         return AuthenticationRequest(result)
 
-    def create_user(self, username, **kwargs):
-        url = '/users/create'
-        params = {'name': username}
-        params.update(kwargs)
-        result = self.advanced.raw.post(url, **params)
-        return User(result)
-
-    def create_user_terminal(self, username, terminal_name, requester_terminal_id, **kwargs):
-        url = '/user_terminals/create'
-        params = {'user_name': username,
-                  'name': terminal_name,
-                  'name_extra': requester_terminal_id}
-        params.update(kwargs)
-        result = self.advanced.raw.post(url, **params)
-        return UserTerminal(result)
-
 
 class AdvancedApiUsageFactory(object):
     def __init__(self, key, secret, api_url):
@@ -376,6 +360,15 @@ class UserTerminals(object):
     def __init__(self, raw):
         self.raw = raw
 
+    def create(self, username, terminal_name, requester_terminal_id, **kwargs):
+        url = '/user_terminals/create'
+        params = {'user_name': username,
+                  'name': terminal_name,
+                  'name_extra': requester_terminal_id}
+        params.update(kwargs)
+        result = self.raw.post(url, **params)
+        return UserTerminal(result)
+
     def get_by_id(self, terminal_id):
         url = '/user_terminals/' + terminal_id
         result = self.raw.get(url)
@@ -416,6 +409,13 @@ class UserTerminal(object):
 class Users(object):
     def __init__(self, raw):
         self.raw = raw
+
+    def create(self, username, **kwargs):
+        url = '/users/create'
+        params = {'name': username}
+        params.update(kwargs)
+        result = self.raw.post(url, **params)
+        return User(result)
 
     def get_by_id(self, user_id):
         url = '/users/' + user_id
