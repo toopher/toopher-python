@@ -16,7 +16,7 @@ Toopher API
     * [get](#get)
     * [post](#post)
 
-4. PairingFinder
+4. Pairings
     * [get\_by\_id](#get\_by\_id)
 
 5. Pairing
@@ -25,20 +25,20 @@ Toopher API
     * [get\_reset\_link](#get\_reset\_link)
     * [email\_reset\_link\_to\_user](#email\_reset\_link\_to\_user)
 
-6. AuthenticationRequestFinder
+6. AuthenticationRequests
     * [get\_by\_id](#get\_by\_id)
 
 7. AuthenticationRequest
     * [refresh\_from\_server](#refresh\_from\_server)
     * [authenticate\_with\_otp](#authenticate\_with\_otp)
 
-8. UserTerminalFinder
+8. UserTerminals
     * [get\_by\_id](#get\_by\_id)
 
 9. UserTerminal
     * [refresh\_from\_server](#refresh\_from\_server)
 
-10. UserFinder
+10. Users
     * [get\_by\_id](#get\_by\_id)
     * [get\_by\_name](#get\_by\_name)
 
@@ -171,12 +171,12 @@ api.advanced.raw.get(endpoint, **kwargs)
 api.advanced.raw.post(endpoint, **kwargs)
 ```
 
-# PairingFinder
+# Pairings
 
 ## get\_by\_id
 
 ```python
-api.advanced.pairing_finder.get_by_id(pairing_id)
+api.advanced.pairings.get_by_id(pairing_id)
 ```
 
 Retrieve pairing by pairing ID.
@@ -215,12 +215,12 @@ pairing.email_reset_link_to_user(api, email, **kwargs)
 
 Email pairing reset link to user.
 
-# AuthenticationRequestFinder
+# AuthenticationRequests
 
 ## get\_by\_id
 
 ```python
-api.advanced.authentication_request_finder.get_by_id(authentication_request_id)
+api.advanced.authentication_requests.get_by_id(authentication_request_id)
 ```
 
 Retrieve authentication request by authentication request ID.
@@ -243,12 +243,12 @@ authentication_request.authenticate_with_otp(api, otp, **kwargs)
 
 Authenticate authentication request with one-time password (OTP).
 
-# UserTerminalFinder
+# UserTerminals
 
 ## get\_by\_id
 
 ```python
-api.advanced.user_terminal_finder.get_by_id(terminal_id)
+api.advanced.user_terminals.get_by_id(terminal_id)
 ```
 
 Retrieve terminal by terminal ID.
@@ -263,12 +263,12 @@ user_terminal.refresh_from_server(api)
 
 Update user terminal from server.
 
-# UserFinder
+# Users
 
 ## get\_by\_id
 
 ```python
-api.advanced.user_finder.get_by_id(user_id)
+api.advanced.users.get_by_id(user_id)
 ```
 
 Retrieve user by user ID.
@@ -276,7 +276,7 @@ Retrieve user by user ID.
 ## get\_by\_name
 
 ```python
-api.advanced.user_finder.get_by_name(username)
+api.advanced.users.get_by_name(username)
 ```
 
 Retrieve user by user name.

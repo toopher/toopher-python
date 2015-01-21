@@ -188,10 +188,10 @@ class ToopherApi(object):
 class AdvancedApiUsageFactory(object):
     def __init__(self, key, secret, api_url):
         self.raw = ApiRawRequester(key, secret, api_url)
-        self.pairing_finder = PairingFinder(self.raw)
-        self.authentication_request_finder = AuthenticationRequestFinder(self.raw)
-        self.user_finder = UserFinder(self.raw)
-        self.user_terminal_finder = UserTerminalFinder(self.raw)
+        self.pairings = Pairings(self.raw)
+        self.authentication_requests = AuthenticationRequests(self.raw)
+        self.users = Users(self.raw)
+        self.user_terminals = UserTerminals(self.raw)
 
 
 class ApiRawRequester(object):
@@ -253,7 +253,7 @@ class ApiRawRequester(object):
         raise ToopherApiError(error_message)
 
 
-class PairingFinder(object):
+class Pairings(object):
     def __init__(self, raw):
         self.raw = raw
 
@@ -317,7 +317,7 @@ class Pairing(object):
         self._raw_data = json_response
 
 
-class AuthenticationRequestFinder(object):
+class AuthenticationRequests(object):
     def __init__(self, raw):
         self.raw = raw
 
@@ -372,7 +372,7 @@ class AuthenticationRequest(object):
         self._raw_data = json_response
 
 
-class UserTerminalFinder(object):
+class UserTerminals(object):
     def __init__(self, raw):
         self.raw = raw
 
@@ -413,7 +413,7 @@ class UserTerminal(object):
         self._raw_data = json_response
 
 
-class UserFinder(object):
+class Users(object):
     def __init__(self, raw):
         self.raw = raw
 

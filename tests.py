@@ -165,7 +165,7 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        user = self.api.advanced.user_finder.get_by_id(self.id)
+        user = self.api.advanced.users.get_by_id(self.id)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(user.id, self.id)
         self.assertEqual(user.name, self.name)
@@ -187,7 +187,7 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        user = self.api.advanced.user_finder.get_by_name(self.user_name)
+        user = self.api.advanced.users.get_by_name(self.user_name)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(user.id, self.user_id)
         self.assertEqual(user.name, self.user_name)
@@ -207,7 +207,7 @@ class ToopherTests(unittest.TestCase):
         })
 
         def fn():
-            self.api.advanced.user_finder.get_by_name(self.user_name)
+            self.api.advanced.users.get_by_name(self.user_name)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_get_user_by_name_does_not_exist_raises_error(self):
@@ -216,7 +216,7 @@ class ToopherTests(unittest.TestCase):
         })
 
         def fn():
-            self.api.advanced.user_finder.get_by_name(self.user_name)
+            self.api.advanced.users.get_by_name(self.user_name)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_create_pairing(self):
@@ -249,7 +249,7 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        pairing = self.api.advanced.pairing_finder.get_by_id(self.id)
+        pairing = self.api.advanced.pairings.get_by_id(self.id)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
         self.assertEqual(pairing.user.name, self.user_name)
@@ -306,7 +306,7 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        auth_request = self.api.advanced.authentication_request_finder.get_by_id(self.id)
+        auth_request = self.api.advanced.authentication_requests.get_by_id(self.id)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(auth_request.id, self.id)
         self.assertFalse(auth_request.pending)
@@ -369,7 +369,7 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        pairing = self.api.advanced.pairing_finder.get_by_id(self.id)
+        pairing = self.api.advanced.pairings.get_by_id(self.id)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
         self.assertEqual(pairing.user.name, self.user_name)
@@ -393,7 +393,7 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        auth_request = self.api.advanced.authentication_request_finder.get_by_id(self.id)
+        auth_request = self.api.advanced.authentication_requests.get_by_id(self.id)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(auth_request.id, self.id)
         self.assertFalse(auth_request.pending)
@@ -513,7 +513,7 @@ class ZeroStorageTests(unittest.TestCase):
                 })
             )
         })
-        user_terminal = self.api.advanced.user_terminal_finder.get_by_id(self.id)
+        user_terminal = self.api.advanced.user_terminals.get_by_id(self.id)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, "GET")
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, self.terminal_name)
