@@ -8,8 +8,8 @@ Toopher API
 
 2. ToopherApi
     * [pair](#pair)
-    * [get\_pairing\_by\_id](#get\_pairing\_by\_id)
     * [authenticate](#authenticate)
+    * [get\_pairing\_by\_id](#get\_pairing\_by\_id)
     * [get\_authentication\_request\_by\_id](#get\_authentication\_request\_by\_id)
     * [create\_user](#create\_user)
     * [reset\_user](#reset\_user)
@@ -43,14 +43,19 @@ Toopher API
 
 # ToopherIframe
 
-Toopher's <iframe>-based authentication flow is the simplest way for web developers to integrate Toopher Two-Factor Authentication into an application. The iframe-based authentication flow works by inserting an <iframe> element into the HTML displayed to the user after a successful username/password validation (but before they are actually logged-in to the service).
+Toopher's IFrame-based authentication flow is the simplest way for web developers to integrate Toopher Two-Factor Authentication into an application. The IFrame-based authentication flow works by inserting an `<iframe>` element into the HTML displayed to the user after a successful username/password validation (but before they are actually logged-in to the service).
 
-#### Attributes
-| Name | Format |
-| -----: | :----- |
-| secret | string |
-| client | OAuth1 Client object |
-| base_uri | string |
+#### Arguments
+| Name | | Format | Default |
+| -----: | :----- | :----- | :---- |
+| key | required | string ||
+| secret | required | string ||
+| api_uri | optional | string | default is 'https://api.toopher.com/v1'|
+
+#### Example
+```python
+api = toopher.ToopherIframe('<your_consumer_key>', '<your_consumer_secret>')
+```
 
 ### get\_auth\_iframe\_url
 
