@@ -510,7 +510,7 @@ class ZeroStorageTests(unittest.TestCase):
         self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
 
     def test_get_user_terminal_by_id(self):
-        self.api.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'user_terminals/{0}'.format(self.id): (200,
                 json.dumps({
                     'id': self.id,
@@ -520,8 +520,8 @@ class ZeroStorageTests(unittest.TestCase):
                 })
             )
         })
-        user_terminal = self.api.get_user_terminal_by_id(self.id)
-        self.assertEqual(self.api.client.last_called_method, "GET")
+        user_terminal = self.api.advanced.user_terminal_finder.get_by_id(self.id)
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, "GET")
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, self.terminal_name)
         self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)

@@ -195,11 +195,6 @@ class ToopherApi(object):
         result = self.post(url, **params)
         return UserTerminal(result)
 
-    def get_user_terminal_by_id(self, terminal_id):
-        url = '/user_terminals/' + terminal_id
-        result = self.get(url)
-        return UserTerminal(result)
-
     def _set_toopher_disabled_for_user(self, username, disable):
         url = '/users'
         users = self.get(url, user_name=username)
@@ -271,6 +266,7 @@ class AdvancedApiUsageFactory(object):
         self.pairing_finder = PairingFinder(self.raw)
         self.authentication_request_finder = AuthenticationRequestFinder(self.raw)
         self.user_finder = UserFinder(self.raw)
+        self.user_terminal_finder = UserTerminalFinder(self.raw)
 
 
 class ApiRawRequester(object):
@@ -431,6 +427,16 @@ class AuthenticationRequest(object):
             raise ToopherApiError("Could not parse authentication status from response")
 
         self._raw_data = json_response
+
+
+class UserTerminalFinder(object):
+    def __init__(self, raw):
+        self.raw = raw
+
+    def get_by_id(self, terminal_id):
+        url = '/user_terminals/' + terminal_id
+        result = self.raw.get(url)
+        return UserTerminal(result)
 
 
 class UserTerminal(object):

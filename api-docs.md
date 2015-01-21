@@ -152,14 +152,6 @@ api.create_user_terminal(username, terminal_name, requester_terminal_id, **kwarg
 
 Create terminal for user with username.
 
-## get\_user\_terminal\_by\_id
-
-```python
-api.get_user_terminal_by_id(terminal_id)
-```
-
-Retrieve terminal by terminal ID.
-
 ## enable\_user
 
 ```python
@@ -261,6 +253,16 @@ authentication_request.authenticate_with_otp(api, otp, **kwargs)
 ```
 
 Authenticate authentication request with one-time password (OTP).
+
+# UserTerminalFinder
+
+## get\_by\_id
+
+```python
+api.advanced.user_terminal_finder.get_by_id(terminal_id)
+```
+
+Retrieve terminal by terminal ID.
 
 # UserTerminal
 
