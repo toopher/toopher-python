@@ -282,6 +282,14 @@ api.advanced.user_finder.get_by_id(user_id)
 
 Retrieve user by user ID.
 
+## get\_by\_name
+
+```python
+api.advanced.user_finder.get_by_name(username)
+```
+
+Retrieve user by user name.
+
 # User
 
 ## refresh\_from\_server

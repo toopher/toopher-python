@@ -178,6 +178,54 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(user.name, self.name)
         self.assertFalse(user.disable_toopher_auth)
 
+    def test_get_user_by_name(self):
+        self.api.advanced.raw.client = HttpClientMock({
+            'users': (200,
+                json.dumps([{
+                    'id': self.user_id,
+                    'name': self.user_name
+                }])
+            ),
+            'users/{0}'.format(self.user_id): (200,
+                json.dumps({
+                    'id': self.user_id,
+                    'name': self.user_name,
+                    'disable_toopher_auth': False
+                })
+            )
+        })
+        user = self.api.advanced.user_finder.get_by_name(self.user_name)
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
+        self.assertEqual(user.id, self.user_id)
+        self.assertEqual(user.name, self.user_name)
+        self.assertFalse(user.disable_toopher_auth)
+
+    def test_get_multiple_users_by_name_raises_error(self):
+        self.api.advanced.raw.client = HttpClientMock({
+            'users': (200,
+                json.dumps([{
+                    'id': self.user_id,
+                    'name': self.user_name
+                }, {
+                    'id': '2',
+                    'name': self.user_name
+                }])
+            )
+        })
+
+        def fn():
+            self.api.advanced.user_finder.get_by_name(self.user_name)
+        self.assertRaises(toopher.ToopherApiError, fn)
+
+    def test_get_user_by_name_does_not_exist_raises_error(self):
+        self.api.advanced.raw.client = HttpClientMock({
+            'users': (200, '[]')
+        })
+
+        def fn():
+            self.api.advanced.user_finder.get_by_name(self.user_name)
+        self.assertRaises(toopher.ToopherApiError, fn)
+
     def test_create_pairing(self):
         self.api.client = HttpClientMock({
             'pairings/create': (200,

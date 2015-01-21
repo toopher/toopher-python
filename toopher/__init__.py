@@ -473,6 +473,17 @@ class UserFinder(object):
         result = self.raw.get(url)
         return User(result)
 
+    def get_by_name(self, username):
+        url = '/users'
+        users = self.raw.get(url, user_name=username)
+
+        if len(users) > 1:
+            raise ToopherApiError('Multiple users with name = %s' % username)
+        elif not len(users):
+            raise ToopherApiError('No users with name = %s' % username)
+
+        return self.get_by_id(users[0]['id'])
+
 
 class User(object):
     def __init__(self, json_response):
