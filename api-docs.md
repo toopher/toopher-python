@@ -82,7 +82,7 @@ Retrieves an OAuth-signed combined pairing and authentication IFrame URL.
 ##### Example
 ```python
 # Create an instance of ToopherIframe
-api.get_auth_iframe_url('username@yourservice.com', 'reset_email@yourservice.com', 'request_token')
+api.get_authentication_url('username@yourservice.com', 'reset_email@yourservice.com', 'request_token')
 ```
 
 ### get\_user\_management\_iframe\_url

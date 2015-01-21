@@ -55,7 +55,7 @@ class ToopherIframe(object):
         return self._get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
 
     # Params still TBD
-    def get_auth_iframe_url(self, username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs):
+    def get_authentication_url(self, username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs):
         if not 'allow_inline_pairing' in kwargs:
             kwargs['allow_inline_pairing'] = True
         if not 'automation_allowed' in kwargs:
