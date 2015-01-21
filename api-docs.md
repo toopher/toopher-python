@@ -128,14 +128,6 @@ api.authenticate(id_or_username, terminal, action_name=None, **kwargs)
 
 Authenticate pairing with username or pairing ID.
 
-## get\_authentication\_request\_by\_id
-
-```python
-api.get_authentication_request_by_id(authentication_request_id)
-```
-
-Retrieve authentication request by authentication request ID.
-
 ## create\_user
 
 ```python
@@ -249,6 +241,16 @@ pairing.email_reset_link_to_user(api, email, **kwargs)
 ```
 
 Email pairing reset link to user.
+
+# AuthenticationRequestFinder
+
+## get\_by\_id
+
+```python
+api.advanced.authentication_request_finder.get_by_id(authentication_request_id)
+```
+
+Retrieve authentication request by authentication request ID.
 
 # AuthenticationRequest
 

@@ -173,11 +173,6 @@ class ToopherApi(object):
         result = self.post(url, **params)
         return AuthenticationRequest(result)
 
-    def get_authentication_request_by_id(self, authentication_request_id):
-        url = '/authentication_requests/' + authentication_request_id
-        result = self.get(url)
-        return AuthenticationRequest(result)
-
     def create_user(self, username, **kwargs):
         url = '/users/create'
         params = {'name': username}
@@ -279,6 +274,7 @@ class AdvancedApiUsageFactory(object):
     def __init__(self, client, base_url):
         self.raw = ApiRawRequester(client, base_url)
         self.pairing_finder = PairingFinder(self.raw)
+        self.authentication_request_finder = AuthenticationRequestFinder(self.raw)
 
 
 class ApiRawRequester(object):
@@ -384,6 +380,16 @@ class Pairing(object):
             raise ToopherApiError("Could not parse pairing status from response" + e.message)
 
         self._raw_data = json_response
+
+
+class AuthenticationRequestFinder(object):
+    def __init__(self, raw):
+        self.raw = raw
+
+    def get_by_id(self, authentication_request_id):
+        url = '/authentication_requests/' + authentication_request_id
+        result = self.raw.get(url)
+        return AuthenticationRequest(result)
 
 
 class AuthenticationRequest(object):

@@ -252,7 +252,7 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(last_called_data['action_name'], self.action_name)
 
     def test_authentication_request(self):
-        self.api.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'authentication_requests/{0}'.format(self.id): (200,
                 json.dumps({
                     'id': self.id,
@@ -265,8 +265,8 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        auth_request = self.api.get_authentication_request_by_id(self.id)
-        self.assertEqual(self.api.client.last_called_method, 'GET')
+        auth_request = self.api.advanced.authentication_request_finder.get_by_id(self.id)
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(auth_request.id, self.id)
         self.assertFalse(auth_request.pending)
         self.assertTrue(auth_request.granted)
@@ -338,7 +338,7 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(pairing.random_key, "84")
 
     def test_access_arbitrary_keys_in_authentication_request(self):
-        self.api.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'authentication_requests/{0}'.format(self.id): (200,
                 json.dumps({
                     'id': self.id,
@@ -352,8 +352,8 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        auth_request = self.api.get_authentication_request_by_id(self.id)
-        self.assertEqual(self.api.client.last_called_method, 'GET')
+        auth_request = self.api.advanced.authentication_request_finder.get_by_id(self.id)
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(auth_request.id, self.id)
         self.assertFalse(auth_request.pending)
         self.assertTrue(auth_request.granted)
