@@ -46,7 +46,6 @@ def pair_device_with_toopher(api):
         
         try:
             pairing = api.pair(user_name, pairing_phrase)
-            pairing_id = pairing.id
             break
         except ToopherApiError, e:
             print 'The pairing phrase was not accepted (reason: %s)' % e

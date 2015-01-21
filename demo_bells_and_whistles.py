@@ -50,7 +50,6 @@ def pair_device_with_toopher(api):
         user_name = raw_input('Enter a username for this pairing [%s]: ' % DEFAULT_USERNAME)
         if not user_name:
             user_name = DEFAULT_USERNAME
-            
 
         try:
             if args.qr_pairing:
@@ -106,7 +105,6 @@ def authenticate_with_toopher(api, pairing):
         
         try:
             auth_request = api.authenticate(pairing.id, terminal_name, terminal_name_extra=terminal_extra, use_sms_inband_reply=args.sms_inband_reply)
-            auth_request_id = auth_request.id
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
             continue
@@ -121,7 +119,7 @@ def authenticate_with_toopher(api, pairing):
             
             try:
                 if otp:
-                    auth_request = auth_request.authenticate_with_otp(otp, api)
+                    auth_request.authenticate_with_otp(api, otp)
                 else:
                     auth_request.refresh_from_server(api)
             except ToopherApiError, e:

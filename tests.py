@@ -102,14 +102,17 @@ class ToopherTests(unittest.TestCase):
         self.name = 'name'
         self.user = {
             'id': str(uuid.uuid4()),
-            'name': 'user_name'
+            'name': 'user_name',
+            'disable_toopher_auth': False
         }
         self.user_id = self.user['id']
         self.user_name = self.user['name']
         self.reason = 'it is a test'
         self.terminal = {
             'id': str(uuid.uuid4()),
-            'name': 'terminal_name'
+            'name': 'terminal_name',
+            'name_extra': 'requester_terminal_id',
+            'user' : self.user
         }
         self.terminal_id = self.terminal['id']
         self.terminal_name = self.terminal['name']
@@ -208,8 +211,9 @@ class ToopherTests(unittest.TestCase):
         pairing = self.api.get_pairing_by_id(self.id)
         self.assertEqual(self.api.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
-        self.assertEqual(pairing.user_name, self.user_name)
-        self.assertEqual(pairing.user_id, self.user_id)
+        self.assertEqual(pairing.user.name, self.user_name)
+        self.assertEqual(pairing.user.id, self.user_id)
+        self.assertFalse(pairing.user.disable_toopher_auth)
         self.assertTrue(pairing.enabled)
         self.assertTrue(pairing.pending)
 
@@ -226,7 +230,8 @@ class ToopherTests(unittest.TestCase):
                     'granted': True,
                     'automated': False,
                     'reason': self.reason,
-                    'terminal': self.terminal
+                    'terminal': self.terminal,
+                    'user': self.user
                 })
             )
         })
@@ -255,7 +260,8 @@ class ToopherTests(unittest.TestCase):
                     'granted': True,
                     'automated': False,
                     'reason': self.reason,
-                    'terminal': self.terminal
+                    'terminal': self.terminal,
+                    'user': self.user
                 })
             )
         })
@@ -266,8 +272,8 @@ class ToopherTests(unittest.TestCase):
         self.assertTrue(auth_request.granted)
         self.assertFalse(auth_request.automated)
         self.assertEqual(auth_request.reason, self.reason)
-        self.assertEqual(auth_request.terminal_id, self.terminal_id)
-        self.assertEqual(auth_request.terminal_name, self.terminal_name)
+        self.assertEqual(auth_request.terminal.id, self.terminal_id)
+        self.assertEqual(auth_request.terminal.name, self.terminal_name)
 
         def fn():
             foo = auth_request.random_key
@@ -299,7 +305,8 @@ class ToopherTests(unittest.TestCase):
                     'granted': True,
                     'automated': False,
                     'reason': self.reason,
-                    'terminal': self.terminal
+                    'terminal': self.terminal,
+                    'user': self.user
                 })
             )
         })
@@ -324,8 +331,9 @@ class ToopherTests(unittest.TestCase):
         pairing = self.api.get_pairing_by_id(self.id)
         self.assertEqual(self.api.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
-        self.assertEqual(pairing.user_name, self.user_name)
-        self.assertEqual(pairing.user_id, self.user_id)
+        self.assertEqual(pairing.user.name, self.user_name)
+        self.assertEqual(pairing.user.id, self.user_id)
+        self.assertFalse(pairing.user.disable_toopher_auth)
         self.assertTrue(pairing.enabled)
         self.assertEqual(pairing.random_key, "84")
 
@@ -339,6 +347,7 @@ class ToopherTests(unittest.TestCase):
                     'automated': False,
                     'reason': self.reason,
                     'terminal': self.terminal,
+                    'user': self.user,
                     'random_key': '84'
                 })
             )
@@ -350,8 +359,10 @@ class ToopherTests(unittest.TestCase):
         self.assertTrue(auth_request.granted)
         self.assertFalse(auth_request.automated)
         self.assertEqual(auth_request.reason, self.reason)
-        self.assertEqual(auth_request.terminal_id, self.terminal_id)
-        self.assertEqual(auth_request.terminal_name, self.terminal_name)
+        self.assertEqual(auth_request.terminal.id, self.terminal_id)
+        self.assertEqual(auth_request.terminal.name, self.terminal_name)
+        self.assertEqual(auth_request.user.id, self.user_id)
+        self.assertEqual(auth_request.user.name, self.user_name)
         self.assertEqual(auth_request.random_key, "84")
 
     def test_pair_qr(self):
@@ -361,10 +372,7 @@ class ToopherTests(unittest.TestCase):
                     'id': 'id',
                     'enabled': True,
                     'pending': True,
-                    'user': {
-                        'id': 'id',
-                        'name': 'name'
-                    }
+                    'user': self.user
                 })
             )
         })
@@ -428,7 +436,8 @@ class ZeroStorageTests(unittest.TestCase):
         self.requester_terminal_id = 'requester_terminal_id'
         self.user = {
             'id': str(uuid.uuid4()),
-            'name': 'user_name'
+            'name': 'user_name',
+            'disable_toopher_auth': False
         }
         self.user_id = self.user['id']
         self.user_name = self.user['name']
@@ -447,8 +456,8 @@ class ZeroStorageTests(unittest.TestCase):
         user_terminal = self.api.create_user_terminal(self.user_name, self.terminal_name, self.requester_terminal_id)
         self.assertEqual(self.api.client.last_called_method, 'POST')
         self.assertEqual(user_terminal.id, self.id)
-        self.assertEqual(user_terminal.user_name, self.user_name)
-        self.assertEqual(user_terminal.user_id, self.user_id)
+        self.assertEqual(user_terminal.user.name, self.user_name)
+        self.assertEqual(user_terminal.user.id, self.user_id)
         self.assertEqual(user_terminal.name, self.terminal_name)
         self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
 
@@ -468,8 +477,8 @@ class ZeroStorageTests(unittest.TestCase):
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, self.terminal_name)
         self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
-        self.assertEqual(user_terminal.user_name, self.user_name)
-        self.assertEqual(user_terminal.user_id, self.user_id)
+        self.assertEqual(user_terminal.user.name, self.user_name)
+        self.assertEqual(user_terminal.user.id, self.user_id)
 
     def test_enable_toopher_user(self):
         self.api.client = HttpClientMock({
@@ -531,26 +540,6 @@ class ZeroStorageTests(unittest.TestCase):
         def fn():
             self.api.enable_user('no users')
         self.assertRaises(toopher.ToopherApiError, fn)
-
-    def test_get_pairing_reset_link(self):
-        self.api.client = HttpClientMock({
-            'pairings/{0}/generate_reset_link'.format(self.id): (200,
-                json.dumps({
-                    'url': 'http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id)
-                })
-            )
-        })
-        reset_link = self.api.get_pairing_reset_link(self.id)
-        self.assertEqual('http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id), reset_link)
-
-    def test_email_pairing_reset_link_to_user(self):
-        self.api.client = HttpClientMock({
-            'pairings/{0}/send_reset_link'.format(self.id): (201,
-                                           '[]'
-            )
-        })
-        result = self.api.email_pairing_reset_link_to_user(self.id, 'email')
-        self.assertTrue(result)
 
     def test_get(self):
         self.api.client = HttpClientMock({
@@ -675,10 +664,18 @@ class AuthenticationRequestTests(unittest.TestCase):
     def setUp(self):
         self.api = toopher.ToopherApi('key', 'secret')
         self.id = str(uuid.uuid4())
-        self.reason = 'it is a test',
+        self.reason = 'it is a test'
+        self.user_id = '1'
+        self.user = {
+            'id': self.user_id,
+            'name': 'user_name',
+            'disable_toopher_auth': False
+        }
         self.terminal = {
             'id': str(uuid.uuid4()),
-            'name': 'terminal_name'
+            'name': 'terminal_name',
+            'name_extra': 'requester_terminal_id',
+            'user': self.user
         }
         self.terminal_id = self.terminal['id']
 
@@ -705,7 +702,8 @@ class AuthenticationRequestTests(unittest.TestCase):
             'granted':False,
             'automated': False,
             'reason': self.reason,
-            'terminal': self.terminal
+            'terminal': self.terminal,
+            'user': self.user
         }
         auth_request = toopher.AuthenticationRequest(response)
 
@@ -717,11 +715,12 @@ class AuthenticationRequestTests(unittest.TestCase):
                     'granted': True,
                     'automated': True,
                     'reason': self.reason,
-                    'terminal': self.terminal
+                    'terminal': self.terminal,
+                    'user': self.user
                 })
             )
         })
-        auth_request.authenticate_with_otp('otp', self.api)
+        auth_request.authenticate_with_otp(self.api, 'otp')
         self.assertEqual(self.api.client.last_called_method, 'POST')
         self.assertEqual(self.api.client.last_called_data['otp'], 'otp')
         self.assertFalse(auth_request.pending)
@@ -735,7 +734,8 @@ class AuthenticationRequestTests(unittest.TestCase):
             'granted': True,
             'automated': False,
             'reason': self.reason,
-            'terminal': self.terminal
+            'terminal': self.terminal,
+            'user': self.user
         }
         auth_request = toopher.AuthenticationRequest(response)
 
@@ -749,7 +749,14 @@ class AuthenticationRequestTests(unittest.TestCase):
                     'reason': 'it is a test CHANGED',
                     'terminal': {
                         'id': self.terminal_id,
-                        'name': 'terminal_name changed'
+                        'name': 'terminal_name changed',
+                        'name_extra': 'requester_terminal_id',
+                        'user': self.user
+                    },
+                    'user': {
+                        'id': self.user_id,
+                        'name': 'user_name changed',
+                        'disable_toopher_auth': True
                     }
                 })
             )
@@ -761,8 +768,11 @@ class AuthenticationRequestTests(unittest.TestCase):
         self.assertTrue(auth_request.granted)
         self.assertTrue(auth_request.automated)
         self.assertEqual(auth_request.reason, 'it is a test CHANGED')
-        self.assertEqual(auth_request.terminal_id, self.terminal_id)
-        self.assertEqual(auth_request.terminal_name, 'terminal_name changed')
+        self.assertEqual(auth_request.terminal.id, self.terminal_id)
+        self.assertEqual(auth_request.terminal.name, 'terminal_name changed')
+        self.assertEqual(auth_request.user.id, self.user_id)
+        self.assertEqual(auth_request.user.name, 'user_name changed')
+        self.assertTrue(auth_request.user.disable_toopher_auth)
         
 
 class PairingTests(unittest.TestCase):
@@ -771,7 +781,8 @@ class PairingTests(unittest.TestCase):
         self.id = str(uuid.uuid4())
         self.user = {
             'id': str(uuid.uuid4()),
-            'name': 'user_name'
+            'name': 'user_name',
+            'disable_toopher_auth': False
         }
         self.user_id = self.user['id']
         self.user_name = self.user['name']
@@ -809,7 +820,8 @@ class PairingTests(unittest.TestCase):
                     'pending': False,
                     'user': {
                         'id': self.user_id,
-                        'name': 'user_name changed'
+                        'name': 'user_name changed',
+                        'disable_toopher_auth': True
                     }
                 })
             )
@@ -817,8 +829,9 @@ class PairingTests(unittest.TestCase):
         pairing.refresh_from_server(self.api)
         self.assertEqual(self.api.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
-        self.assertEqual(pairing.user_id, self.user_id)
-        self.assertEqual(pairing.user_name, 'user_name changed')
+        self.assertEqual(pairing.user.id, self.user_id)
+        self.assertEqual(pairing.user.name, 'user_name changed')
+        self.assertTrue(pairing.user.disable_toopher_auth)
         self.assertFalse(pairing.enabled)
         self.assertFalse(pairing.pending)
 
@@ -826,7 +839,7 @@ class PairingTests(unittest.TestCase):
         response = {'id': 'id',
                     'enabled': True,
                     'pending': True,
-                    'user': {'id': 'id', 'name': 'name'}}
+                    'user': self.user }
         pairing = toopher.Pairing(response)
 
         with open('qr_image.png', 'rb') as qr_image:
@@ -847,6 +860,39 @@ class PairingTests(unittest.TestCase):
                 self.assertTrue(False)
             os.remove('new_image.png')
 
+    def test_get_reset_link(self):
+        response = {'id':self.id,
+                    'enabled': False,
+                    'pending': True,
+                    'user': self.user }
+        pairing = toopher.Pairing(response)
+
+        self.api.client = HttpClientMock({
+            'pairings/{0}/generate_reset_link'.format(self.id): (200,
+                json.dumps({
+                    'url': 'http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id)
+                })
+            )
+        })
+        reset_link = pairing.get_reset_link(self.api)
+        self.assertEqual('http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id), reset_link)
+
+    def test_email_reset_link(self):
+        response = {'id':self.id,
+                    'enabled': False,
+                    'pending': True,
+                    'user': self.user }
+        pairing = toopher.Pairing(response)
+        self.api.client = HttpClientMock({
+            'pairings/{0}/send_reset_link'.format(self.id): (201,
+                                           '[]'
+            )
+        })
+        try:
+            pairing.email_reset_link(self.api, 'email')
+        except:
+            self.assertTrue(False)
+
 
 class UserTerminalTests(unittest.TestCase):
     def setUp(self):
@@ -855,7 +901,8 @@ class UserTerminalTests(unittest.TestCase):
         self.name_extra = 'name_extra'
         self.user = {
             'id': str(uuid.uuid4()),
-            'name': 'user_name'
+            'name': 'user_name',
+            'disable_toopher_auth': False
         }
         self.user_id = self.user['id']
 
@@ -882,7 +929,8 @@ class UserTerminalTests(unittest.TestCase):
                     'name_extra': 'name_extra changed',
                     'user': {
                         'id': self.user_id,
-                        'name': 'user_name changed'
+                        'name': 'user_name changed',
+                        'disable_toopher_auth': True
                     }
                 })
             )
@@ -892,8 +940,9 @@ class UserTerminalTests(unittest.TestCase):
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, "name changed")
         self.assertEqual(user_terminal.name_extra, "name_extra changed")
-        self.assertEqual(user_terminal.user_name, "user_name changed")
-        self.assertEqual(user_terminal.user_id, self.user_id)
+        self.assertEqual(user_terminal.user.name, "user_name changed")
+        self.assertEqual(user_terminal.user.id, self.user_id)
+        self.assertTrue(user_terminal.user.disable_toopher_auth)
 
 
 class UserTests(unittest.TestCase):
@@ -938,15 +987,11 @@ class UserTests(unittest.TestCase):
         }
         user = toopher.User(response)
         self.api.client = HttpClientMock({
-            'users': (200,
-                json.dumps([{
-                    'id': self.id,
-                    'name': self.name
-                }])
-            ),
             'users/{0}'.format(user.id): (200,
                 json.dumps({
-                    'name': self.name
+                    'id': self.id,
+                    'name': self.name,
+                    'disable_toopher_auth': False
                 })
             )
         })
@@ -963,15 +1008,11 @@ class UserTests(unittest.TestCase):
         }
         user = toopher.User(response)
         self.api.client = HttpClientMock({
-            'users': (200,
-                json.dumps([{
-                    'id': self.id,
-                    'name': self.name
-                }])
-            ),
             'users/{0}'.format(self.id): (200,
                 json.dumps({
-                    'name': self.name
+                    'id': self.id,
+                    'name': self.name,
+                    'disable_toopher_auth': True
                 })
             )
         })
@@ -991,8 +1032,10 @@ class UserTests(unittest.TestCase):
                             '[]'
             )
         })
-        result = user.reset(self.api)
-        self.assertTrue(result)
+        try:
+            user.reset(self.api)
+        except:
+            self.assertTrue(False) # reset failed
 
 def main():
     unittest.main()
