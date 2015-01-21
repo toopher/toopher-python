@@ -200,16 +200,18 @@ api.disable_user(username)
 
 Disable Toopher for user by username.
 
+# ApiRawRequester
+
 ## get
 
 ```python
-api.get(endpoint, **kwargs)
+api.advanced.raw.get(endpoint, **kwargs)
 ```
 
 ## post
 
 ```python
-api.post(endpoint, **kwargs)
+api.advanced.raw.post(endpoint, **kwargs)
 ```
 
 # Pairing

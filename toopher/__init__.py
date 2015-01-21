@@ -139,6 +139,7 @@ class ToopherApi(object):
 
         base_url = api_url if api_url else DEFAULT_BASE_URL
         self.base_url = base_url.rstrip('/')
+        self.advanced = AdvancedApiUsageFactory(self.client, self.base_url)
 
     def pair(self, username, phrase_or_num=None, **kwargs):
         params = {'user_name': username}
@@ -282,6 +283,52 @@ class ToopherApi(object):
             self._parse_request_error(content)
 
         return response.content
+
+    def _parse_request_error(self, content):
+        error_code = content['error_code']
+        error_message = content['error_message']
+        if error_code in error_codes_to_errors:
+            error = error_codes_to_errors[error_code]
+            raise error(error_message)
+
+        if 'pairing has not been authorized' in error_message.lower():
+            raise PairingDeactivatedError(error_message)
+
+        raise ToopherApiError(error_message)
+
+
+class AdvancedApiUsageFactory(object):
+    def __init__(self, client, base_url):
+        self.raw = ApiRawRequester(client, base_url)
+
+
+class ApiRawRequester(object):
+    def __init__(self, client, base_url):
+        self.client = client
+        self.base_url = base_url
+
+    def get(self, endpoint, **kwargs):
+        url = self.base_url + endpoint
+        return self._request(url, 'GET', kwargs)
+
+    def post(self, endpoint, **kwargs):
+        url = self.base_url + endpoint
+        return self._request(url, 'POST', kwargs)
+
+    def _request(self, uri, method, params=None):
+        data = {'params' if method == 'GET' else 'data': params}
+        header_data = {'User-Agent':'Toopher-Python/%s (Python %s)' % (VERSION, sys.version.split()[0])}
+
+        response = self.client.request(method, uri, headers=header_data, **data)
+        try:
+            content = response.json()
+        except ValueError:
+            raise ToopherApiError('Response from server could not be decoded as JSON.')
+
+        if response.status_code >= 400:
+            self._parse_request_error(content)
+
+        return content
 
     def _parse_request_error(self, content):
         error_code = content['error_code']

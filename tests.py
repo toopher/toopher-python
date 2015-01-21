@@ -542,7 +542,7 @@ class ZeroStorageTests(unittest.TestCase):
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_get(self):
-        self.api.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'pairings/{0}'.format(self.id): (200,
                 json.dumps({
                     'id': self.id,
@@ -551,15 +551,15 @@ class ZeroStorageTests(unittest.TestCase):
                 })
             )
         })
-        result = self.api.get('/pairings/{0}'.format(self.id))
-        self.assertEqual(self.api.client.last_called_method, 'GET')
+        result = self.api.advanced.raw.get('/pairings/{0}'.format(self.id))
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(result['id'], self.id)
         self.assertEqual(result['user']['name'], self.user_name)
         self.assertEqual(result['user']['id'], self.user_id)
         self.assertTrue(result['enabled'])
 
     def test_post(self):
-        self.api.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'user_terminals/create': (200,
                 json.dumps({
                   'id': self.id,
@@ -569,11 +569,11 @@ class ZeroStorageTests(unittest.TestCase):
                 })
             )
         })
-        result = self.api.post('/user_terminals/create',
+        result = self.api.advanced.raw.post('/user_terminals/create',
                                name='terminal_name',
                                name_extra='requester_terminal_id',
                                user_name='user_name')
-        self.assertEqual(self.api.client.last_called_method, 'POST')
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertEqual(result['id'], self.id)
         self.assertEqual(result['user']['name'], self.user_name)
         self.assertEqual(result['user']['id'], self.user_id)
