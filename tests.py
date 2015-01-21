@@ -155,13 +155,6 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(user.name, self.name)
         self.assertFalse(user.disable_toopher_auth)
 
-    def test_reset_user(self):
-        self.api.client = HttpClientMock({
-            'users/reset': (200, '[]')
-        })
-        result = self.api.reset_user('name')
-        self.assertTrue(result)
-
     def test_get_user_by_id(self):
         self.api.advanced.raw.client = HttpClientMock({
             'users/{0}'.format(self.id): (200,
@@ -527,67 +520,6 @@ class ZeroStorageTests(unittest.TestCase):
         self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
         self.assertEqual(user_terminal.user.name, self.user_name)
         self.assertEqual(user_terminal.user.id, self.user_id)
-
-    def test_enable_toopher_user(self):
-        self.api.client = HttpClientMock({
-            'users': (200,
-                json.dumps([{
-                    'id': self.user_id,
-                    'name': self.user_name
-                }])
-            ),
-            'users/{0}'.format(self.user_id): (200,
-                json.dumps({
-                    'name': self.user_name
-                })
-            )
-        })
-        self.api.enable_user(self.user_name)
-        self.assertEqual(self.api.client.last_called_method, 'POST')
-        self.assertFalse(self.api.client.last_called_data['disable_toopher_auth'])
-
-    def test_disable_toopher_user(self):
-        self.api.client = HttpClientMock({
-            'users': (200,
-                json.dumps([{
-                    'id': self.user_id,
-                    'name': self.user_name
-                }])
-            ),
-            'users/{0}'.format(self.user_id): (200,
-                json.dumps({
-                    'name': self.user_name
-                })
-            )
-        })
-        self.api.disable_user(self.user_name)
-        self.assertEqual(self.api.client.last_called_method, 'POST')
-        self.assertTrue(self.api.client.last_called_data['disable_toopher_auth'])
-
-    def test_enable_toopher_multiple_users(self):
-        self.api.client = HttpClientMock({
-            'users': (200,
-                json.dumps([{
-                    'name': 'first user'
-                }, {
-                    'name': 'second user'
-                }])
-            )
-        })
-        def fn():
-            self.api.enable_user('multiple users')
-        self.assertRaises(toopher.ToopherApiError, fn)
-
-    def test_enable_toopher_no_users(self):
-        self.api.client = HttpClientMock({
-            'users': (200,
-                      '[]'
-            )
-        })
-
-        def fn():
-            self.api.enable_user('no users')
-        self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_get(self):
         self.api.advanced.raw.client = HttpClientMock({
@@ -1075,7 +1007,7 @@ class UserTests(unittest.TestCase):
             'name': self.name,
             'disable_toopher_auth': False}
         user = toopher.User(response)
-        self.api.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'users/reset': (200,
                             '[]'
             )

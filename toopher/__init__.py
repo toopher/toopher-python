@@ -180,12 +180,6 @@ class ToopherApi(object):
         result = self.post(url, **params)
         return User(result)
 
-    def reset_user(self, username):
-        url = '/users/reset'
-        params = {'name': username}
-        self.post(url, **params)
-        return True # would raise error in _request if failed
-
     def create_user_terminal(self, username, terminal_name, requester_terminal_id, **kwargs):
         url = '/user_terminals/create'
         params = {'user_name': username,
@@ -194,24 +188,6 @@ class ToopherApi(object):
         params.update(kwargs)
         result = self.post(url, **params)
         return UserTerminal(result)
-
-    def _set_toopher_disabled_for_user(self, username, disable):
-        url = '/users'
-        users = self.get(url, user_name=username)
-
-        if len(users) > 1:
-            raise ToopherApiError('Multiple users with name = %s' % username)
-        elif not len(users):
-            raise ToopherApiError('No users with name = %s' % username)
-
-        url = '/users/' + users[0]['id']
-        self.post(url, disable_toopher_auth=disable)
-
-    def enable_user(self, username):
-        self._set_toopher_disabled_for_user(username, False)
-
-    def disable_user(self, username):
-        self._set_toopher_disabled_for_user(username, True)
 
     def get(self, endpoint, **kwargs):
         url = self.base_url + endpoint
@@ -517,7 +493,10 @@ class User(object):
         self.update(result)
 
     def reset(self, api):
-        api.reset_user(self.name)
+        url = '/users/reset'
+        params = {'name': self.name}
+        api.advanced.raw.post(url, **params)
+        return True # would raise error in _request if failed
 
     def update(self, json_response):
         try:
