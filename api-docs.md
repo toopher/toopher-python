@@ -9,32 +9,40 @@ Toopher API
 2. ToopherApi
     * [pair](#pair)
     * [authenticate](#authenticate)
-    * [get\_pairing\_by\_id](#get\_pairing\_by\_id)
-    * [get\_authentication\_request\_by\_id](#get\_authentication\_request\_by\_id)
     * [create\_user](#create\_user)
-    * [reset\_user](#reset\_user)
-    * [get\_user\_by\_id](#get\_user\_by\_id)
     * [create\_user\_terminal](#create\_user\_terminal)
-    * [get\_user\_terminal\_by\_id](#get\_user\_terminal\_by\_id)
-    * [enable\_user](#enable\_user)
-    * [disable\_user](#disable\_user)
+
+3. ApiRawRequester
     * [get](#get)
     * [post](#post)
 
-3. Pairing
+4. PairingFinder
+    * [get\_by\_id](#get\_by\_id)
+
+5. Pairing
     * [refresh\_from\_server](#refresh\_from\_server)
     * [get\_qr\_code\_image](#get\_qr\_code\_image)
     * [get\_reset\_link](#get\_reset\_link)
     * [email\_reset\_link\_to\_user](#email\_reset\_link\_to\_user)
 
-4. AuthenticationRequest
+6. AuthenticationRequestFinder
+    * [get\_by\_id](#get\_by\_id)
+
+7. AuthenticationRequest
     * [refresh\_from\_server](#refresh\_from\_server)
     * [authenticate\_with\_otp](#authenticate\_with\_otp)
 
-5. UserTerminal
+8. UserTerminalFinder
+    * [get\_by\_id](#get\_by\_id)
+
+9. UserTerminal
     * [refresh\_from\_server](#refresh\_from\_server)
 
-6. User
+10. UserFinder
+    * [get\_by\_id](#get\_by\_id)
+    * [get\_by\_name](#get\_by\_name)
+
+11. User
     * [refresh\_from\_server](#refresh\_from\_server)
     * [enable](#enable)
     * [disable](#disable)
