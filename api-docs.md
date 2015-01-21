@@ -136,14 +136,6 @@ api.create_user(username, **kwargs)
 
 Create user with username.
 
-## reset\_user
-
-```python
-api.reset_user(username)
-```
-
-Reset user with username.
-
 ## create\_user\_terminal
 
 ```python
@@ -151,22 +143,6 @@ api.create_user_terminal(username, terminal_name, requester_terminal_id, **kwarg
 ```
 
 Create terminal for user with username.
-
-## enable\_user
-
-```python
-api.enable_user(username)
-```
-
-Enable Toopher for user by username.
-
-## disable\_user
-
-```python
-api.disable_user(username)
-```
-
-Disable Toopher for user by username.
 
 # ApiRawRequester
 
@@ -210,7 +186,7 @@ pairing.get_qr_code_image(api)
 
 Retrieve QR code image for pairing.
 
-## get\_pairing\_reset\_link
+## get\_reset\_link
 
 ```python
 pairing.get_reset_link(api, **kwargs)
@@ -218,7 +194,7 @@ pairing.get_reset_link(api, **kwargs)
 
 Retrieve pairing reset link for user to reset their pairing.
 
-## email\_pairing\_reset\_link\_to\_user
+## email\_reset\_link\_to\_user
 
 ```python
 pairing.email_reset_link_to_user(api, email, **kwargs)
