@@ -98,7 +98,7 @@ Retrieves OAuth-signed pairing IFrame URL.
 ##### Example
 ```python
 # Create an instance of ToopherIframe
-api.get_user_management_iframe_url('username@yourservice.com', 'reset_email@yourservice.com')
+api.get_user_management_url('username@yourservice.com', 'reset_email@yourservice.com')
 ```
 
 ### validate\_postback(data, request_token=None, **kwargs)

@@ -41,7 +41,7 @@ class ToopherIframe(object):
         api_uri = api_uri if api_uri else DEFAULT_BASE_URL
         self.base_uri = api_uri.rstrip('/')
 
-    def get_user_management_iframe_url(self, username, reset_email, **kwargs):
+    def get_user_management_url(self, username, reset_email, **kwargs):
         if not 'ttl' in kwargs:
             ttl = DEFAULT_IFRAME_TTL
         else:
