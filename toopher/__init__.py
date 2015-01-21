@@ -134,12 +134,7 @@ class ToopherIframe(object):
 
 class ToopherApi(object):
     def __init__(self, key, secret, api_url=None):
-        self.client = requests_oauthlib.OAuth1Session(key, client_secret=secret)
-        self.client.verify = True
-
-        base_url = api_url if api_url else DEFAULT_BASE_URL
-        self.base_url = base_url.rstrip('/')
-        self.advanced = AdvancedApiUsageFactory(self.client, self.base_url)
+        self.advanced = AdvancedApiUsageFactory(key, secret, api_url)
 
     def pair(self, username, phrase_or_num=None, **kwargs):
         params = {'user_name': username}
@@ -154,7 +149,7 @@ class ToopherApi(object):
         else:
             url = '/pairings/create/qr'
 
-        result = self.post(url, **params)
+        result = self.advanced.raw.post(url, **params)
         return Pairing(result)
 
     def authenticate(self, id_or_username, terminal, action_name=None, **kwargs):
@@ -170,14 +165,14 @@ class ToopherApi(object):
             params['action_name'] = action_name
         params.update(kwargs)
 
-        result = self.post(url, **params)
+        result = self.advanced.raw.post(url, **params)
         return AuthenticationRequest(result)
 
     def create_user(self, username, **kwargs):
         url = '/users/create'
         params = {'name': username}
         params.update(kwargs)
-        result = self.post(url, **params)
+        result = self.advanced.raw.post(url, **params)
         return User(result)
 
     def create_user_terminal(self, username, terminal_name, requester_terminal_id, **kwargs):
@@ -186,8 +181,26 @@ class ToopherApi(object):
                   'name': terminal_name,
                   'name_extra': requester_terminal_id}
         params.update(kwargs)
-        result = self.post(url, **params)
+        result = self.advanced.raw.post(url, **params)
         return UserTerminal(result)
+
+
+class AdvancedApiUsageFactory(object):
+    def __init__(self, key, secret, api_url):
+        self.raw = ApiRawRequester(key, secret, api_url)
+        self.pairing_finder = PairingFinder(self.raw)
+        self.authentication_request_finder = AuthenticationRequestFinder(self.raw)
+        self.user_finder = UserFinder(self.raw)
+        self.user_terminal_finder = UserTerminalFinder(self.raw)
+
+
+class ApiRawRequester(object):
+    def __init__(self, key, secret, api_url):
+        self.client = requests_oauthlib.OAuth1Session(key, client_secret=secret)
+        self.client.verify = True
+
+        base_url = api_url if api_url else DEFAULT_BASE_URL
+        self.base_url = base_url.rstrip('/')
 
     def get(self, endpoint, **kwargs):
         url = self.base_url + endpoint
@@ -219,59 +232,13 @@ class ToopherApi(object):
         response = self.client.request(method, uri, headers=header_data, **data)
 
         if response.status_code >= 400:
+            try:
+                content = response.json()
+            except ValueError:
+                raise ToopherApiError('Error response from server could not be decoded as JSON')
             self._parse_request_error(content)
 
         return response.content
-
-    def _parse_request_error(self, content):
-        error_code = content['error_code']
-        error_message = content['error_message']
-        if error_code in error_codes_to_errors:
-            error = error_codes_to_errors[error_code]
-            raise error(error_message)
-
-        if 'pairing has not been authorized' in error_message.lower():
-            raise PairingDeactivatedError(error_message)
-
-        raise ToopherApiError(error_message)
-
-
-class AdvancedApiUsageFactory(object):
-    def __init__(self, client, base_url):
-        self.raw = ApiRawRequester(client, base_url)
-        self.pairing_finder = PairingFinder(self.raw)
-        self.authentication_request_finder = AuthenticationRequestFinder(self.raw)
-        self.user_finder = UserFinder(self.raw)
-        self.user_terminal_finder = UserTerminalFinder(self.raw)
-
-
-class ApiRawRequester(object):
-    def __init__(self, client, base_url):
-        self.client = client
-        self.base_url = base_url
-
-    def get(self, endpoint, **kwargs):
-        url = self.base_url + endpoint
-        return self._request(url, 'GET', kwargs)
-
-    def post(self, endpoint, **kwargs):
-        url = self.base_url + endpoint
-        return self._request(url, 'POST', kwargs)
-
-    def _request(self, uri, method, params=None):
-        data = {'params' if method == 'GET' else 'data': params}
-        header_data = {'User-Agent':'Toopher-Python/%s (Python %s)' % (VERSION, sys.version.split()[0])}
-
-        response = self.client.request(method, uri, headers=header_data, **data)
-        try:
-            content = response.json()
-        except ValueError:
-            raise ToopherApiError('Response from server could not be decoded as JSON.')
-
-        if response.status_code >= 400:
-            self._parse_request_error(content)
-
-        return content
 
     def _parse_request_error(self, content):
         error_code = content['error_code']
@@ -315,12 +282,12 @@ class Pairing(object):
 
     def refresh_from_server(self, api):
         url = '/pairings/' + self.id
-        result = api.get(url)
+        result = api.advanced.raw.get(url)
         self.update(result)
 
     def get_qr_code_image(self, api):
-        url = api.base_url + '/qr/pairings/' + self.id
-        return api._request_raw(url, 'GET')
+        url = api.advanced.raw.base_url + '/qr/pairings/' + self.id
+        return api.advanced.raw._request_raw(url, 'GET')
 
     def get_reset_link(self, api, **kwargs):
         if not 'security_question' in kwargs:
@@ -329,14 +296,14 @@ class Pairing(object):
             kwargs['security_answer'] = None
 
         url = '/pairings/' + self.id + '/generate_reset_link'
-        result = api.post(url, **kwargs)
+        result = api.advanced.raw.post(url, **kwargs)
         return result['url']
 
     def email_reset_link(self, api, email, **kwargs):
         params = {'reset_email': email}
         params.update(kwargs)
         url = '/pairings/' + self.id + '/send_reset_link'
-        api.post(url, **params)
+        api.advanced.raw.post(url, **params)
 
     def update(self, json_response):
         try:
@@ -382,12 +349,12 @@ class AuthenticationRequest(object):
         url = '/authentication_requests/' + self.id + '/otp_auth'
         params = {'otp' : otp}
         params.update(kwargs)
-        result = api.post(url, **params)
+        result = api.advanced.raw.post(url, **params)
         self.update(result)
 
     def refresh_from_server(self, api):
         url = '/authentication_requests/' + self.id
-        result = api.get(url)
+        result = api.advanced.raw.get(url)
         self.update(result)
 
     def update(self, json_response):
@@ -431,7 +398,7 @@ class UserTerminal(object):
 
     def refresh_from_server(self, api):
         url = '/user_terminals/' + self.id
-        result = api.get(url)
+        result = api.advanced.raw.get(url)
         self.update(result)
 
     def update(self, json_response):
@@ -479,17 +446,17 @@ class User(object):
 
     def refresh_from_server(self, api):
         url = '/users/' + self.id
-        result = api.get(url)
+        result = api.advanced.raw.get(url)
         self.update(result)
 
     def enable(self, api):
         url = '/users/' + self.id
-        result = api.post(url, disable_toopher_auth=False)
+        result = api.advanced.raw.post(url, disable_toopher_auth=False)
         self.update(result)
 
     def disable(self, api):
         url = '/users/' + self.id
-        result = api.post(url, disable_toopher_auth=True)
+        result = api.advanced.raw.post(url, disable_toopher_auth=True)
         self.update(result)
 
     def reset(self, api):
