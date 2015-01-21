@@ -144,14 +144,6 @@ api.reset_user(username)
 
 Reset user with username.
 
-## get\_user\_by\_id
-
-```python
-api.get_user_by_id(user_id)
-```
-
-Retrieve user by user ID.
-
 ## create\_user\_terminal
 
 ```python
@@ -279,6 +271,16 @@ user_terminal.refresh_from_server(api)
 ```
 
 Update user terminal from server.
+
+# UserFinder
+
+## get\_by\_id
+
+```python
+api.advanced.user_finder.get_by_id(user_id)
+```
+
+Retrieve user by user ID.
 
 # User
 

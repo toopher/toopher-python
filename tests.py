@@ -163,7 +163,7 @@ class ToopherTests(unittest.TestCase):
         self.assertTrue(result)
 
     def test_get_user_by_id(self):
-        self.api.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'users/{0}'.format(self.id): (200,
                 json.dumps({
                     'id': self.id,
@@ -172,8 +172,8 @@ class ToopherTests(unittest.TestCase):
                 })
             )
         })
-        user = self.api.get_user_by_id(self.id)
-        self.assertEqual(self.api.client.last_called_method, 'GET')
+        user = self.api.advanced.user_finder.get_by_id(self.id)
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(user.id, self.id)
         self.assertEqual(user.name, self.name)
         self.assertFalse(user.disable_toopher_auth)

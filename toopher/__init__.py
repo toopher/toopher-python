@@ -186,11 +186,6 @@ class ToopherApi(object):
         self.post(url, **params)
         return True # would raise error in _request if failed
 
-    def get_user_by_id(self, user_id):
-        url = '/users/' + user_id
-        result = self.get(url)
-        return User(result)
-
     def create_user_terminal(self, username, terminal_name, requester_terminal_id, **kwargs):
         url = '/user_terminals/create'
         params = {'user_name': username,
@@ -275,6 +270,7 @@ class AdvancedApiUsageFactory(object):
         self.raw = ApiRawRequester(client, base_url)
         self.pairing_finder = PairingFinder(self.raw)
         self.authentication_request_finder = AuthenticationRequestFinder(self.raw)
+        self.user_finder = UserFinder(self.raw)
 
 
 class ApiRawRequester(object):
@@ -466,6 +462,16 @@ class UserTerminal(object):
             raise ToopherApiError("Could not parse user terminal from response")
 
         self._raw_data = json_response
+
+
+class UserFinder(object):
+    def __init__(self, raw):
+        self.raw = raw
+
+    def get_by_id(self, user_id):
+        url = '/users/' + user_id
+        result = self.raw.get(url)
+        return User(result)
 
 
 class User(object):
