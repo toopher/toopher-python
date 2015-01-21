@@ -62,7 +62,7 @@ api = toopher.ToopherIframe('<your_consumer_key>', '<your_consumer_secret>')
 Retrieves an OAuth-signed combined pairing and authentication IFrame URL.
 
 #### Arguments
-| Name | | Format |
+| Name |  Required? | Format | Default |
 | -----: | :----- | :----- | :--- |
 | username | required | string | |
 | reset_email | required | string | |
@@ -81,7 +81,7 @@ api.get_auth_iframe_url('username@yourservice.com', 'reset_email@yourservice.com
 
 Retrieves OAuth-signed pairing IFrame URL.
 #### Arguments
-| Name | | Format |
+| Name | Required? | Format |
 | -----: | :----- | :----- |
 | username | required | string |
 | reset_email | required | string |
@@ -97,7 +97,7 @@ api.get_user_management_iframe_url('username@yourservice.com', 'reset_email@your
 
 Validates authentication request from IFrame.
 #### Arguments
-| Name | | Format |
+| Name | Required? | Format | Default |
 | -----: | :----- | :----- | :---- |
 | username | required | string | |
 | data | required | dict | |
