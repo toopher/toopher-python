@@ -45,14 +45,14 @@ Toopher API
 
 Toopher's IFrame-based authentication flow is the simplest way for web developers to integrate Toopher Two-Factor Authentication into an application. The IFrame-based authentication flow works by inserting an `<iframe>` element into the HTML displayed to the user after a successful username/password validation (but before they are actually logged-in to the service).
 
-#### Arguments
+##### Arguments
 | Name | | Format | Default |
 | -----: | :----- | :----- | :---- |
 | key | required | string ||
 | secret | required | string ||
-| api_uri | optional | string | default is 'https://api.toopher.com/v1'|
+| api_uri | optional | string | 'https://api.toopher.com/v1'|
 
-#### Example
+##### Example
 ```python
 api = toopher.ToopherIframe('<your_consumer_key>', '<your_consumer_secret>')
 ```
@@ -61,17 +61,17 @@ api = toopher.ToopherIframe('<your_consumer_key>', '<your_consumer_secret>')
 
 Retrieves an OAuth-signed combined pairing and authentication IFrame URL.
 
-#### Arguments
+##### Arguments
 | Name |  Required? | Format | Default |
 | -----: | :----- | :----- | :--- |
 | username | required | string | |
 | reset_email | required | string | |
 | request_token | required | string | |
-| action_name | optional | string | default is 'Log In'|
-| requester_metadata | optional | string | default is None|
+| action_name | optional | string | 'Log In'|
+| requester_metadata | optional | string | None|
 | **kwargs | optional | dict | |
 
-#### Example
+##### Example
 ```python
 # Create an instance of ToopherIframe
 api.get_auth_iframe_url('username@yourservice.com', 'reset_email@yourservice.com', 'request_token')
@@ -80,14 +80,14 @@ api.get_auth_iframe_url('username@yourservice.com', 'reset_email@yourservice.com
 ### get\_user\_management\_iframe\_url
 
 Retrieves OAuth-signed pairing IFrame URL.
-#### Arguments
+##### Arguments
 | Name | Required? | Format |
 | -----: | :----- | :----- |
 | username | required | string |
 | reset_email | required | string |
 | **kwargs | optional | dict |
 
-#### Example
+##### Example
 ```python
 # Create an instance of ToopherIframe
 api.get_user_management_iframe_url('username@yourservice.com', 'reset_email@yourservice.com')
@@ -96,15 +96,15 @@ api.get_user_management_iframe_url('username@yourservice.com', 'reset_email@your
 ### validate\_postback(data, request_token=None, **kwargs)
 
 Validates authentication request from IFrame.
-#### Arguments
+##### Arguments
 | Name | Required? | Format | Default |
 | -----: | :----- | :----- | :---- |
 | username | required | string | |
 | data | required | dict | |
-| request_token | optional | string | default is None |
+| request_token | optional | string | None |
 | **kwargs | optional | dict | |
 
-#### Example
+##### Example
 ```python
 data = {
     'timestamp': 'timestamp',
