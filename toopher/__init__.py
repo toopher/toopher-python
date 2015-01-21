@@ -233,23 +233,6 @@ class ToopherApi(object):
     def disable_user(self, username):
         self._set_toopher_disabled_for_user(username, True)
 
-    def get_pairing_reset_link(self, pairing_id, **kwargs):
-        if not 'security_question' in kwargs:
-            kwargs['security_question'] = None
-        if not 'security_answer' in kwargs:
-            kwargs['security_answer'] = None
-
-        url = '/pairings/' + pairing_id + '/generate_reset_link'
-        result = self.post(url, **kwargs)
-        return result['url']
-
-    def email_pairing_reset_link_to_user(self, pairing_id, email, **kwargs):
-        params = {'reset_email': email}
-        params.update(kwargs)
-        url = '/pairings/' + pairing_id + '/send_reset_link'
-        self.post(url, **params)
-        return True #would raise error in _request if failed
-
     def get(self, endpoint, **kwargs):
         url = self.base_url + endpoint
         return self._request(url, 'GET', kwargs)
