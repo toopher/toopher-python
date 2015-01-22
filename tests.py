@@ -176,15 +176,9 @@ class ToopherTests(unittest.TestCase):
             'users': (200,
                 json.dumps([{
                     'id': self.user_id,
-                    'name': self.user_name
-                }])
-            ),
-            'users/{0}'.format(self.user_id): (200,
-                json.dumps({
-                    'id': self.user_id,
                     'name': self.user_name,
                     'disable_toopher_auth': False
-                })
+                }])
             )
         })
         user = self.api.advanced.users.get_by_name(self.user_name)
@@ -198,10 +192,12 @@ class ToopherTests(unittest.TestCase):
             'users': (200,
                 json.dumps([{
                     'id': self.user_id,
-                    'name': self.user_name
+                    'name': self.user_name,
+                    'disable_toopher_auth': False
                 }, {
                     'id': '2',
-                    'name': self.user_name
+                    'name': self.user_name,
+                    'disable_toopher_auth': False
                 }])
             )
         })

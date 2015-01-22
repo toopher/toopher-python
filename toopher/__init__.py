@@ -431,7 +431,7 @@ class Users(object):
         elif not len(users):
             raise ToopherApiError('No users with name = %s' % username)
 
-        return self.get_by_id(users[0]['id'])
+        return User(users[0])
 
 
 class User(object):
