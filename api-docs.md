@@ -10,39 +10,39 @@ Toopher API
     * [pair](#pair)
     * [authenticate](#authenticate)
 
-3. ApiRawRequester
-    * [get](#get)
-    * [post](#post)
+    a. Advanced - ApiRawRequester
+        * [get](#get)
+        * [post](#post)
 
-4. Pairings
-    * [get\_by\_id](#get\_by\_id)
+    b. Advanced - Pairings
+        * [get\_by\_id](#get\_by\_id)
 
-5. Pairing
+    c. Advanced - AuthenticationRequests
+        * [get\_by\_id](#get\_by\_id)
+
+    d. Advanced - UserTerminals
+        * [create](#create)
+        * [get\_by\_id](#get\_by\_id)
+
+    e. Advanced - Users
+        * [create](#create)
+        * [get\_by\_id](#get\_by\_id)
+        * [get\_by\_name](#get\_by\_name)
+
+3. Pairing
     * [refresh\_from\_server](#refresh\_from\_server)
     * [get\_qr\_code\_image](#get\_qr\_code\_image)
     * [get\_reset\_link](#get\_reset\_link)
     * [email\_reset\_link\_to\_user](#email\_reset\_link\_to\_user)
 
-6. AuthenticationRequests
-    * [get\_by\_id](#get\_by\_id)
-
-7. AuthenticationRequest
+4. AuthenticationRequest
     * [refresh\_from\_server](#refresh\_from\_server)
     * [authenticate\_with\_otp](#authenticate\_with\_otp)
 
-8. UserTerminals
-    * [create](#create)
-    * [get\_by\_id](#get\_by\_id)
-
-9. UserTerminal
+5. UserTerminal
     * [refresh\_from\_server](#refresh\_from\_server)
 
-10. Users
-    * [create](#create)
-    * [get\_by\_id](#get\_by\_id)
-    * [get\_by\_name](#get\_by\_name)
-
-11. User
+6. User
     * [refresh\_from\_server](#refresh\_from\_server)
     * [enable](#enable)
     * [disable](#disable)
@@ -67,7 +67,7 @@ api = toopher.ToopherIframe('<your_consumer_key>', '<your_consumer_secret>')
 
 ### get\_auth\_iframe\_url
 
-Retrieves an OAuth-signed combined pairing and authentication IFrame URL.
+Retrieves an OAuth-signed pairing and authentication IFrame URL for a given user.
 
 ##### Arguments
 | Name |  Required? | Format | Default |
@@ -87,7 +87,8 @@ api.get_authentication_url('username@yourservice.com', 'reset_email@yourservice.
 
 ### get\_user\_management\_iframe\_url
 
-Retrieves OAuth-signed pairing IFrame URL.
+Retrieves an OAuth-signed pairing IFrame URL for a given user.
+
 ##### Arguments
 | Name | Required? | Format |
 | -----: | :----- | :----- |
@@ -103,7 +104,8 @@ api.get_user_management_url('username@yourservice.com', 'reset_email@yourservice
 
 ### validate\_postback(data, request_token=None, **kwargs)
 
-Validates authentication request from IFrame.
+Verifies the authenticity of data returned from ToopherIframe by validating the cryptographic signature.
+
 ##### Arguments
 | Name | Required? | Format | Default |
 | -----: | :----- | :----- | :---- |
@@ -125,139 +127,77 @@ api.validate_postback(data, 'request_token')
 
 # ToopherApi
 
-## pair
+### pair
+
+Create a pairing using a pairing phrase, phone number or QR code.
 
 ```python
 api.pair(username, phrase_or_num=None, **kwargs)
 ```
 
-Pairing using pairing phrase, phone number or QR code.
+### authenticate
 
-## authenticate
+Initiate a login authentication request using a username or pairing ID.
 
 ```python
 api.authenticate(id_or_username, terminal, action_name=None, **kwargs)
 ```
 
-Authenticate pairing with username or pairing ID.
+# Advanced - ApiRawRequester
 
-# ApiRawRequester
-
-## get
+### get
 
 ```python
 api.advanced.raw.get(endpoint, **kwargs)
 ```
 
-## post
+### post
 
 ```python
 api.advanced.raw.post(endpoint, **kwargs)
 ```
 
-# Pairings
+# Advanced - Pairings
 
-## get\_by\_id
+### get\_by\_id
+
+Retrieve a pairing using a pairing ID.
 
 ```python
 api.advanced.pairings.get_by_id(pairing_id)
 ```
 
-Retrieve pairing by pairing ID.
+# Advanced - AuthenticationRequests
 
-# Pairing
+### get\_by\_id
 
-## refresh\_from\_server
-
-```python
-pairing.refresh_from_server(api)
-```
-
-Update pairing from server.
-
-## get\_qr\_code\_image
-
-```python
-pairing.get_qr_code_image(api)
-```
-
-Retrieve QR code image for pairing.
-
-## get\_reset\_link
-
-```python
-pairing.get_reset_link(api, **kwargs)
-```
-
-Retrieve pairing reset link for user to reset their pairing.
-
-## email\_reset\_link\_to\_user
-
-```python
-pairing.email_reset_link_to_user(api, email, **kwargs)
-```
-
-Email pairing reset link to user.
-
-# AuthenticationRequests
-
-## get\_by\_id
+Retrieve an authentication request using an authentication request ID.
 
 ```python
 api.advanced.authentication_requests.get_by_id(authentication_request_id)
 ```
 
-Retrieve authentication request by authentication request ID.
+# Advanced - UserTerminals
 
-# AuthenticationRequest
+### create
 
-## refresh\_from\_server
-
-```python
-authentication_request.refresh_from_server(api)
-```
-
-Update authentication request from server.
-
-## authenticate\_with\_otp
-
-```python
-authentication_request.authenticate_with_otp(api, otp, **kwargs)
-```
-
-Authenticate authentication request with one-time password (OTP).
-
-# UserTerminals
-
-## create
+Create a terminal for a user using a username.
 
 ```python
 api.advanced.user_terminals.create(username, terminal_name, requester_terminal_id, **kwargs)
 ```
 
-Create terminal for user with username.
+### get\_by\_id
 
-## get\_by\_id
+Retrieve a terminal using a terminal ID.
 
 ```python
 api.advanced.user_terminals.get_by_id(terminal_id)
 ```
 
-Retrieve terminal by terminal ID.
+# Advanced - Users
 
-# UserTerminal
-
-## refresh\_from\_server
-
-```python
-user_terminal.refresh_from_server(api)
-```
-
-Update user terminal from server.
-
-# Users
-
-## create
+### create
 
 ```python
 api.advanced.users.create(username, **kwargs)
@@ -265,7 +205,7 @@ api.advanced.users.create(username, **kwargs)
 
 Create user with username.
 
-## get\_by\_id
+### get\_by\_id
 
 ```python
 api.advanced.users.get_by_id(user_id)
@@ -273,7 +213,7 @@ api.advanced.users.get_by_id(user_id)
 
 Retrieve user by user ID.
 
-## get\_by\_name
+### get\_by\_name
 
 ```python
 api.advanced.users.get_by_name(username)
@@ -281,33 +221,95 @@ api.advanced.users.get_by_name(username)
 
 Retrieve user by user name.
 
+# Pairing
+
+### refresh\_from\_server
+
+Update a pairing from server.
+
+```python
+pairing.refresh_from_server(api)
+```
+
+### get\_qr\_code\_image
+
+Retrieve a QR code image for pairing.
+
+```python
+pairing.get_qr_code_image(api)
+```
+
+### get\_reset\_link
+
+Retrieve a pairing reset link for a user to reset their pairing.
+
+```python
+pairing.get_reset_link(api, **kwargs)
+```
+
+### email\_reset\_link\_to\_user
+
+Email a pairing reset link to a user.
+
+```python
+pairing.email_reset_link_to_user(api, email, **kwargs)
+```
+
+# AuthenticationRequest
+
+### refresh\_from\_server
+
+Update an authentication request from server.
+
+```python
+authentication_request.refresh_from_server(api)
+```
+
+### authenticate\_with\_otp
+
+Authenticate an authentication request with a one-time password (OTP).
+
+```python
+authentication_request.authenticate_with_otp(api, otp, **kwargs)
+```
+
+# UserTerminal
+
+### refresh\_from\_server
+
+Update a user terminal from server.
+
+```python
+user_terminal.refresh_from_server(api)
+```
+
 # User
 
-## refresh\_from\_server
+### refresh\_from\_server
+
+Update a user from server.
 
 ```python
 user.refresh_from_server(api)
 ```
 
-Update user from server.
+### enable
 
-## enable
+Enable Toopher for a user.
 
 ```python
 user.enable(api)
 ```
 
-Enable Toopher for the user.
+### disable
 
-## disable
+Disable Toopher for a user.
 
 ```python
 user.disable(api)
 ```
 
-Disable Toopher for the user.
-
-## reset
+### reset
 
 ```python
 user.reset(api)
