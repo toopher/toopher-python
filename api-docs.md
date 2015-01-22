@@ -198,27 +198,27 @@ api.advanced.user_terminals.get_by_id(terminal_id)
 
 ### create
 
+Create a user using a username.
+
 ```python
 api.advanced.users.create(username, **kwargs)
 ```
 
-Create user with username.
-
 ### get\_by\_id
+
+Retrieve a user by user ID.
 
 ```python
 api.advanced.users.get_by_id(user_id)
 ```
 
-Retrieve user by user ID.
-
 ### get\_by\_name
+
+Retrieve a user using a user name.
 
 ```python
 api.advanced.users.get_by_name(username)
 ```
-
-Retrieve user by user name.
 
 # Pairing
 
