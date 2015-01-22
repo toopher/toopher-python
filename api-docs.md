@@ -54,7 +54,7 @@ Toopher API
 Toopher's IFrame-based authentication flow is the simplest way for web developers to integrate Toopher Two-Factor Authentication into an application. The IFrame-based authentication flow works by inserting an `<iframe>` element into the HTML displayed to the user after a successful username/password validation (but before they are actually logged-in to the service).
 
 ##### Arguments
-| Name | | Format | Default |
+| Name | Required? | Format | Default |
 | -----: | :----- | :----- | :---- |
 | key | required | string ||
 | secret | required | string ||
