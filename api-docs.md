@@ -10,39 +10,39 @@ Toopher API
     * [pair](#pair)
     * [authenticate](#authenticate)
 
-    a. Advanced - ApiRawRequester
-        * [get](#get)
-        * [post](#post)
+3. Advanced - ApiRawRequester
+    * [get](#get)
+    * [post](#post)
 
-    b. Advanced - Pairings
-        * [get\_by\_id](#get\_by\_id)
+4. Advanced - Pairings
+    * [get\_by\_id](#get\_by\_id)
 
-    c. Advanced - AuthenticationRequests
-        * [get\_by\_id](#get\_by\_id)
+5. Advanced - AuthenticationRequests
+    * [get\_by\_id](#get\_by\_id)
 
-    d. Advanced - UserTerminals
-        * [create](#create)
-        * [get\_by\_id](#get\_by\_id)
+6. Advanced - UserTerminals
+    * [create](#create)
+    * [get\_by\_id](#get\_by\_id)
 
-    e. Advanced - Users
-        * [create](#create)
-        * [get\_by\_id](#get\_by\_id)
-        * [get\_by\_name](#get\_by\_name)
+7. Advanced - Users
+    * [create](#create)
+    * [get\_by\_id](#get\_by\_id)
+    * [get\_by\_name](#get\_by\_name)
 
-3. Pairing
+8. Pairing
     * [refresh\_from\_server](#refresh\_from\_server)
     * [get\_qr\_code\_image](#get\_qr\_code\_image)
     * [get\_reset\_link](#get\_reset\_link)
     * [email\_reset\_link\_to\_user](#email\_reset\_link\_to\_user)
 
-4. AuthenticationRequest
+9. AuthenticationRequest
     * [refresh\_from\_server](#refresh\_from\_server)
     * [authenticate\_with\_otp](#authenticate\_with\_otp)
 
-5. UserTerminal
+10. UserTerminal
     * [refresh\_from\_server](#refresh\_from\_server)
 
-6. User
+11. User
     * [refresh\_from\_server](#refresh\_from\_server)
     * [enable](#enable)
     * [disable](#disable)
