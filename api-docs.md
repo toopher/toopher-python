@@ -102,7 +102,7 @@ Retrieves an OAuth-signed pairing IFrame URL for a given user.
 api.get_user_management_url('username@yourservice.com', 'reset_email@yourservice.com')
 ```
 
-### validate\_postback(data, request_token=None, **kwargs)
+### validate\_postback
 
 Verifies the authenticity of data returned from ToopherIframe by validating the cryptographic signature.
 
