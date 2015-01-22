@@ -109,7 +109,6 @@ Verifies the authenticity of data returned from ToopherIframe by validating the 
 ##### Arguments
 | Name | Required? | Format | Default |
 | -----: | :----- | :----- | :---- |
-| username | required | string | |
 | data | required | dict | |
 | request_token | optional | string | None |
 | **kwargs | optional | dict | |
