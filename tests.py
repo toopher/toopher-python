@@ -517,7 +517,7 @@ class ZeroStorageTests(unittest.TestCase):
         self.assertEqual(user_terminal.user.name, self.user_name)
         self.assertEqual(user_terminal.user.id, self.user_id)
 
-    def test_get(self):
+    def test_raw_get(self):
         self.api.advanced.raw.client = HttpClientMock({
             'pairings/{0}'.format(self.id): (200,
                 json.dumps({
@@ -534,7 +534,7 @@ class ZeroStorageTests(unittest.TestCase):
         self.assertEqual(result['user']['id'], self.user_id)
         self.assertTrue(result['enabled'])
 
-    def test_post(self):
+    def test_raw_post(self):
         self.api.advanced.raw.client = HttpClientMock({
             'user_terminals/create': (200,
                 json.dumps({
