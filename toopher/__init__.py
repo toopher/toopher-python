@@ -491,7 +491,8 @@ class User(object):
         try:
             self.id = json_response['id']
             self.name = json_response['name']
-            self.disable_toopher_auth = json_response['disable_toopher_auth']
+            if 'disable_toopher_auth' in json_response:
+                self.disable_toopher_auth = json_response['disable_toopher_auth']
         except Exception:
             raise ToopherApiError("Could not parse user from response")
 
