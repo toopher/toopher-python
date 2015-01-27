@@ -117,7 +117,12 @@ class ToopherTests(unittest.TestCase):
         self.terminal_id = self.terminal['id']
         self.terminal_name = self.terminal['name']
         self.requester_terminal_id = self.terminal['name_extra']
-        self.action_name = 'action_name'
+        self.action = {
+            'id': str(uuid.uuid4()),
+            'name': 'action_name'
+        }
+        self.action_id = self.action['id']
+        self.action_name = self.action['name']
 
     def test_constructor(self):
         def fn():
@@ -269,7 +274,8 @@ class ToopherTests(unittest.TestCase):
                     'automated': False,
                     'reason': self.reason,
                     'terminal': self.terminal,
-                    'user': self.user
+                    'user': self.user,
+                    'action': self.action
                 })
             )
         })
@@ -299,7 +305,8 @@ class ToopherTests(unittest.TestCase):
                     'automated': False,
                     'reason': self.reason,
                     'terminal': self.terminal,
-                    'user': self.user
+                    'user': self.user,
+                    'action': self.action
                 })
             )
         })
@@ -312,6 +319,8 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(auth_request.reason, self.reason)
         self.assertEqual(auth_request.terminal.id, self.terminal_id)
         self.assertEqual(auth_request.terminal.name, self.terminal_name)
+        self.assertEqual(auth_request.action.id, self.action_id)
+        self.assertEqual(auth_request.action.name, self.action_name)
 
         def fn():
             foo = auth_request.random_key
@@ -344,7 +353,8 @@ class ToopherTests(unittest.TestCase):
                     'automated': False,
                     'reason': self.reason,
                     'terminal': self.terminal,
-                    'user': self.user
+                    'user': self.user,
+                    'action': self.action
                 })
             )
         })
@@ -386,6 +396,7 @@ class ToopherTests(unittest.TestCase):
                     'reason': self.reason,
                     'terminal': self.terminal,
                     'user': self.user,
+                    'action': self.action,
                     'random_key': '84'
                 })
             )
@@ -401,6 +412,8 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(auth_request.terminal.name, self.terminal_name)
         self.assertEqual(auth_request.user.id, self.user_id)
         self.assertEqual(auth_request.user.name, self.user_name)
+        self.assertEqual(auth_request.action.id, self.action_id)
+        self.assertEqual(auth_request.action.name, self.action_name)
         self.assertEqual(auth_request.random_key, "84")
 
     def test_pair_qr(self):
@@ -640,6 +653,11 @@ class AuthenticationRequestTests(unittest.TestCase):
             'user': self.user
         }
         self.terminal_id = self.terminal['id']
+        self.action = {
+            'id': str(uuid.uuid4()),
+            'name': 'action_name'
+        }
+        self.action_id = self.action['id']
 
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
@@ -665,7 +683,8 @@ class AuthenticationRequestTests(unittest.TestCase):
             'automated': False,
             'reason': self.reason,
             'terminal': self.terminal,
-            'user': self.user
+            'user': self.user,
+            'action': self.action
         }
         auth_request = toopher.AuthenticationRequest(response)
 
@@ -678,7 +697,8 @@ class AuthenticationRequestTests(unittest.TestCase):
                     'automated': True,
                     'reason': self.reason,
                     'terminal': self.terminal,
-                    'user': self.user
+                    'user': self.user,
+                    'action': self.action
                 })
             )
         })
@@ -697,7 +717,8 @@ class AuthenticationRequestTests(unittest.TestCase):
             'automated': False,
             'reason': self.reason,
             'terminal': self.terminal,
-            'user': self.user
+            'user': self.user,
+            'action': self.action
         }
         auth_request = toopher.AuthenticationRequest(response)
 
@@ -719,6 +740,10 @@ class AuthenticationRequestTests(unittest.TestCase):
                         'id': self.user_id,
                         'name': 'user_name changed',
                         'disable_toopher_auth': True
+                    },
+                    'action': {
+                        'id': self.action_id,
+                        'name': 'action_name changed'
                     }
                 })
             )
@@ -735,6 +760,8 @@ class AuthenticationRequestTests(unittest.TestCase):
         self.assertEqual(auth_request.user.id, self.user_id)
         self.assertEqual(auth_request.user.name, 'user_name changed')
         self.assertTrue(auth_request.user.disable_toopher_auth)
+        self.assertEqual(auth_request.action.id, self.action_id)
+        self.assertEqual(auth_request.action.name, 'action_name changed')
         
 
 class PairingTests(unittest.TestCase):

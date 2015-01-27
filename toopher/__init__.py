@@ -316,6 +316,7 @@ class AuthenticationRequest(object):
         try:
             self.terminal = UserTerminal(json_response['terminal'])
             self.user = User(json_response['user'])
+            self.action = Action(json_response['action'])
         except Exception:
             raise ToopherApiError("Could not parse authentication from response")
         self._update(json_response)
@@ -350,8 +351,29 @@ class AuthenticationRequest(object):
             self.reason = json_response['reason']
             self.terminal._update(json_response['terminal'])
             self.user._update(json_response['user'])
+            self.action._update(json_response['action'])
         except Exception:
             raise ToopherApiError("Could not parse authentication status from response")
+
+        self._raw_data = json_response
+
+
+class Action(object):
+    def __init__(self, json_response):
+        self._update(json_response)
+
+    def __getattr__(self, name):
+        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
+            return super(AuthenticationRequest, self).__getattr__(name)
+        else:
+            return self._raw_data[name]
+
+    def _update(self, json_response):
+        try:
+            self.id = json_response['id']
+            self.name = json_response['name']
+        except Exception:
+            raise ToopherApiError('Could not parse action from response')
 
         self._raw_data = json_response
 
@@ -474,6 +496,3 @@ class User(object):
             raise ToopherApiError("Could not parse user from response")
 
         self._raw_data = json_response
-
-
-class ToopherApiError(Exception): pass
