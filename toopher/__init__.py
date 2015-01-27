@@ -30,7 +30,7 @@ error_codes_to_errors = {ERROR_CODE_USER_DISABLED: UserDisabledError,
                          ERROR_CODE_TERMINAL_UNKNOWN: TerminalUnknownError,
                          ERROR_CODE_PAIRING_DEACTIVATED: PairingDeactivatedError}
 
-class SignatureValidationError(Exception): pass
+class SignatureValidationError(ToopherApiError): pass
 
 
 class ToopherIframe(object):
