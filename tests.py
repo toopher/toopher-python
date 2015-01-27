@@ -702,7 +702,7 @@ class AuthenticationRequestTests(unittest.TestCase):
                 })
             )
         })
-        auth_request.authenticate_with_otp(self.api, 'otp')
+        auth_request.grant_with_otp(self.api, 'otp')
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertEqual(self.api.advanced.raw.client.last_called_data['otp'], 'otp')
         self.assertFalse(auth_request.pending)
