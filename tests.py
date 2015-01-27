@@ -833,7 +833,7 @@ class PairingTests(unittest.TestCase):
             try:
                 im.verify()
             except:
-                self.assertTrue(False)
+                self.fail('im.verify() causes an error only if im is not a valid image')
             os.remove('new_image.png')
 
     def test_get_reset_link(self):
@@ -866,8 +866,8 @@ class PairingTests(unittest.TestCase):
         })
         try:
             pairing.email_reset_link(self.api, 'email')
-        except:
-            self.assertTrue(False)
+        except toopher.ToopherApiError as e:
+            self.fail('pairing.email_reset_link() returned a status code of >= 400: %s' % e)
 
 
 class UserTerminalTests(unittest.TestCase):
@@ -1010,8 +1010,8 @@ class UserTests(unittest.TestCase):
         })
         try:
             user.reset(self.api)
-        except:
-            self.assertTrue(False) # reset failed
+        except toopher.ToopherApiError as e:
+            self.fail('pairing.email_reset_link() returned a status code of >= 400: %s' % e)
 
 def main():
     unittest.main()
