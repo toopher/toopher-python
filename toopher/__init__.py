@@ -10,7 +10,7 @@ import requests_oauthlib
 import sys
 
 DEFAULT_BASE_URL = "https://api.toopher.com/v1"
-DEFAULT_IFRAME_TTL = 100
+DEFAULT_IFRAME_TTL = 300
 IFRAME_VERSION = '2'
 VERSION = '2.0.0'
 
