@@ -10,7 +10,7 @@ import requests_oauthlib
 import sys
 
 DEFAULT_BASE_URL = "https://api.toopher.com/v1"
-DEFAULT_IFRAME_TTL = 100
+DEFAULT_IFRAME_TTL = 300
 IFRAME_VERSION = '2'
 VERSION = '2.0.0'
 
@@ -491,7 +491,8 @@ class User(object):
         try:
             self.id = json_response['id']
             self.name = json_response['name']
-            self.disable_toopher_auth = json_response['disable_toopher_auth']
+            if 'disable_toopher_auth' in json_response:
+                self.disable_toopher_auth = json_response['disable_toopher_auth']
         except Exception:
             raise ToopherApiError("Could not parse user from response")
 
