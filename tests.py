@@ -116,6 +116,7 @@ class ToopherTests(unittest.TestCase):
         }
         self.terminal_id = self.terminal['id']
         self.terminal_name = self.terminal['name']
+        self.requester_terminal_id = self.terminal['name_extra']
         self.action_name = 'action_name'
 
     def test_constructor(self):
@@ -463,21 +464,6 @@ class ToopherTests(unittest.TestCase):
         def fn():
             self.api.authenticate(self.user_name, self.terminal_name)
         self.assertRaises(toopher.ToopherApiError, fn)
-
-
-class ZeroStorageTests(unittest.TestCase):
-    def setUp(self):
-        self.api = toopher.ToopherApi('key', 'secret')
-        self.id = str(uuid.uuid4())
-        self.terminal_name = 'terminal_name'
-        self.requester_terminal_id = 'requester_terminal_id'
-        self.user = {
-            'id': str(uuid.uuid4()),
-            'name': 'user_name',
-            'disable_toopher_auth': False
-        }
-        self.user_id = self.user['id']
-        self.user_name = self.user['name']
 
     def test_create_user_terminal(self):
         self.api.advanced.raw.client = HttpClientMock({
