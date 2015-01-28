@@ -56,12 +56,6 @@ class ToopherIframe(object):
 
     # Params still TBD
     def get_authentication_url(self, username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs):
-        if not 'allow_inline_pairing' in kwargs:
-            kwargs['allow_inline_pairing'] = True
-        if not 'automation_allowed' in kwargs:
-            kwargs['automation_allowed'] = True
-        if not 'challenge_required' in kwargs:
-            kwargs['challenge_required'] = False
         if not 'ttl' in kwargs:
             ttl = DEFAULT_IFRAME_TTL
         else:
