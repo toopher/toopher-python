@@ -269,7 +269,7 @@ authentication_request.refresh_from_server(api)
 Authenticate an authentication request with a one-time password (OTP).
 
 ```python
-authentication_request.authenticate_with_otp(api, otp, **kwargs)
+authentication_request.grant_with_otp(api, otp, **kwargs)
 ```
 
 # UserTerminal
