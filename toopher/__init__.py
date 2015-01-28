@@ -453,6 +453,7 @@ class Users(object):
 
 class User(object):
     def __init__(self, json_response):
+        self.toopher_authentication_enabled = None;
         self._update(json_response)
 
     def __getattr__(self, name):
@@ -487,7 +488,9 @@ class User(object):
             self.id = json_response['id']
             self.name = json_response['name']
             if 'disable_toopher_auth' in json_response:
-                self.disable_toopher_auth = json_response['disable_toopher_auth']
+                self.toopher_authentication_enabled = not json_response['disable_toopher_auth']
+            else:
+                self.toopher_authentication_enabled = True
         except Exception:
             raise ToopherApiError("Could not parse user from response")
 

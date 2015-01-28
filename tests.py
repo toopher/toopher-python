@@ -1000,7 +1000,7 @@ class UserTests(unittest.TestCase):
         user.enable_toopher_authentication(self.api)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertFalse(self.api.advanced.raw.client.last_called_data['disable_toopher_auth'])
-        self.assertFalse(user.disable_toopher_auth)
+        self.assertTrue(user.toopher_authentication_enabled)
 
     def test_disable(self):
         response = {
@@ -1021,7 +1021,7 @@ class UserTests(unittest.TestCase):
         user.disable_toopher_authentication(self.api)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertTrue(self.api.advanced.raw.client.last_called_data['disable_toopher_auth'])
-        self.assertTrue(user.disable_toopher_auth)
+        self.assertFalse(user.toopher_authentication_enabled)
 
     def test_reset(self):
         response = {
