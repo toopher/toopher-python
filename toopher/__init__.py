@@ -343,6 +343,7 @@ class AuthenticationRequest(object):
             self.granted = json_response['granted']
             self.automated = json_response['automated']
             self.reason = json_response['reason']
+            self.reason_code = json_response['reason_code']
             self.terminal._update(json_response['terminal'])
             self.user._update(json_response['user'])
             self.action._update(json_response['action'])

@@ -108,6 +108,7 @@ class ToopherTests(unittest.TestCase):
         self.user_id = self.user['id']
         self.user_name = self.user['name']
         self.reason = 'it is a test'
+        self.reason_code = '0'
         self.terminal = {
             'id': str(uuid.uuid4()),
             'name': 'terminal_name',
@@ -273,6 +274,7 @@ class ToopherTests(unittest.TestCase):
                     'granted': True,
                     'automated': False,
                     'reason': self.reason,
+                    'reason_code': self.reason_code,
                     'terminal': self.terminal,
                     'user': self.user,
                     'action': self.action
@@ -304,6 +306,7 @@ class ToopherTests(unittest.TestCase):
                     'granted': True,
                     'automated': False,
                     'reason': self.reason,
+                    'reason_code': self.reason_code,
                     'terminal': self.terminal,
                     'user': self.user,
                     'action': self.action
@@ -317,6 +320,7 @@ class ToopherTests(unittest.TestCase):
         self.assertTrue(auth_request.granted)
         self.assertFalse(auth_request.automated)
         self.assertEqual(auth_request.reason, self.reason)
+        self.assertEqual(auth_request.reason_code, self.reason_code)
         self.assertEqual(auth_request.terminal.id, self.terminal_id)
         self.assertEqual(auth_request.terminal.name, self.terminal_name)
         self.assertEqual(auth_request.action.id, self.action_id)
@@ -352,6 +356,7 @@ class ToopherTests(unittest.TestCase):
                     'granted': True,
                     'automated': False,
                     'reason': self.reason,
+                    'reason_code': self.reason_code,
                     'terminal': self.terminal,
                     'user': self.user,
                     'action': self.action
@@ -394,6 +399,7 @@ class ToopherTests(unittest.TestCase):
                     'granted': True,
                     'automated': False,
                     'reason': self.reason,
+                    'reason_code': self.reason_code,
                     'terminal': self.terminal,
                     'user': self.user,
                     'action': self.action,
@@ -408,6 +414,7 @@ class ToopherTests(unittest.TestCase):
         self.assertTrue(auth_request.granted)
         self.assertFalse(auth_request.automated)
         self.assertEqual(auth_request.reason, self.reason)
+        self.assertEqual(auth_request.reason_code, self.reason_code)
         self.assertEqual(auth_request.terminal.id, self.terminal_id)
         self.assertEqual(auth_request.terminal.name, self.terminal_name)
         self.assertEqual(auth_request.user.id, self.user_id)
@@ -640,6 +647,7 @@ class AuthenticationRequestTests(unittest.TestCase):
         self.api = toopher.ToopherApi('key', 'secret')
         self.id = str(uuid.uuid4())
         self.reason = 'it is a test'
+        self.reason_code = '0'
         self.user_id = '1'
         self.user = {
             'id': self.user_id,
@@ -682,6 +690,7 @@ class AuthenticationRequestTests(unittest.TestCase):
             'granted':False,
             'automated': False,
             'reason': self.reason,
+            'reason_code': self.reason_code,
             'terminal': self.terminal,
             'user': self.user,
             'action': self.action
@@ -696,6 +705,7 @@ class AuthenticationRequestTests(unittest.TestCase):
                     'granted': True,
                     'automated': True,
                     'reason': self.reason,
+                    'reason_code': self.reason_code,
                     'terminal': self.terminal,
                     'user': self.user,
                     'action': self.action
@@ -716,6 +726,7 @@ class AuthenticationRequestTests(unittest.TestCase):
             'granted': True,
             'automated': False,
             'reason': self.reason,
+            'reason_code': self.reason_code,
             'terminal': self.terminal,
             'user': self.user,
             'action': self.action
@@ -730,6 +741,7 @@ class AuthenticationRequestTests(unittest.TestCase):
                     'granted': True,
                     'automated': True,
                     'reason': 'it is a test CHANGED',
+                    'reason_code': self.reason_code,
                     'terminal': {
                         'id': self.terminal_id,
                         'name': 'terminal_name changed',
@@ -755,6 +767,7 @@ class AuthenticationRequestTests(unittest.TestCase):
         self.assertTrue(auth_request.granted)
         self.assertTrue(auth_request.automated)
         self.assertEqual(auth_request.reason, 'it is a test CHANGED')
+        self.assertEqual(auth_request.reason_code, self.reason_code)
         self.assertEqual(auth_request.terminal.id, self.terminal_id)
         self.assertEqual(auth_request.terminal.name, 'terminal_name changed')
         self.assertEqual(auth_request.user.id, self.user_id)
