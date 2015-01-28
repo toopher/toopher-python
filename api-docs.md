@@ -44,8 +44,8 @@ Toopher API
 
 11. User
     * [refresh\_from\_server](#refresh\_from\_server)
-    * [enable](#enable)
-    * [disable](#disable)
+    * [enable_toopher_authentication](#enable_toopher_authentication)
+    * [disable_toopher_authentication](#disable_toopher_authentication)
     * [reset](#reset)
 
 
@@ -292,20 +292,20 @@ Update a user from server.
 user.refresh_from_server(api)
 ```
 
-### enable
+### enable_toopher_authentication
 
 Enable Toopher for a user.
 
 ```python
-user.enable(api)
+user.enable_toopher_authentication(api)
 ```
 
-### disable
+### disable_toopher_authentication
 
 Disable Toopher for a user.
 
 ```python
-user.disable(api)
+user.disable_toopher_authentication(api)
 ```
 
 ### reset

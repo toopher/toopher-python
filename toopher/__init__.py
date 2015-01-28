@@ -466,12 +466,12 @@ class User(object):
         result = api.advanced.raw.get(url)
         self._update(result)
 
-    def enable(self, api):
+    def enable_toopher_authentication(self, api):
         url = '/users/' + self.id
         result = api.advanced.raw.post(url, disable_toopher_auth=False)
         self._update(result)
 
-    def disable(self, api):
+    def disable_toopher_authentication(self, api):
         url = '/users/' + self.id
         result = api.advanced.raw.post(url, disable_toopher_auth=True)
         self._update(result)
