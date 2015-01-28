@@ -183,7 +183,7 @@ api.advanced.authentication_requests.get_by_id(authentication_request_id)
 Create a terminal for a user using a username.
 
 ```python
-api.advanced.user_terminals.create(username, terminal_name, requester_terminal_id, **kwargs)
+api.advanced.user_terminals.create(username, terminal_name, requester_specified_id, **kwargs)
 ```
 
 ### get\_by\_id

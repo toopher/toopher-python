@@ -112,12 +112,12 @@ class ToopherTests(unittest.TestCase):
         self.terminal = {
             'id': str(uuid.uuid4()),
             'name': 'terminal_name',
-            'name_extra': 'requester_terminal_id',
+            'name_extra': 'requester_specified_id',
             'user' : self.user
         }
         self.terminal_id = self.terminal['id']
         self.terminal_name = self.terminal['name']
-        self.requester_terminal_id = self.terminal['name_extra']
+        self.requester_specified_id = self.terminal['name_extra']
         self.action = {
             'id': str(uuid.uuid4()),
             'name': 'action_name'
@@ -491,18 +491,18 @@ class ToopherTests(unittest.TestCase):
                 json.dumps({
                     'id': self.id,
                     'name': self.terminal_name,
-                    'name_extra': self.requester_terminal_id,
+                    'name_extra': self.requester_specified_id,
                     'user': self.user
                 })
             )
         })
-        user_terminal = self.api.advanced.user_terminals.create(self.user_name, self.terminal_name, self.requester_terminal_id)
+        user_terminal = self.api.advanced.user_terminals.create(self.user_name, self.terminal_name, self.requester_specified_id)
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.user.name, self.user_name)
         self.assertEqual(user_terminal.user.id, self.user_id)
         self.assertEqual(user_terminal.name, self.terminal_name)
-        self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
+        self.assertEqual(user_terminal.requester_specified_id, self.requester_specified_id)
 
     def test_get_user_terminal_by_id(self):
         self.api.advanced.raw.client = HttpClientMock({
@@ -510,7 +510,7 @@ class ToopherTests(unittest.TestCase):
                 json.dumps({
                     'id': self.id,
                     'name': self.terminal_name,
-                    'name_extra': self.requester_terminal_id,
+                    'name_extra': self.requester_specified_id,
                     'user': self.user
                 })
             )
@@ -519,7 +519,7 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(self.api.advanced.raw.client.last_called_method, "GET")
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, self.terminal_name)
-        self.assertEqual(user_terminal.name_extra, self.requester_terminal_id)
+        self.assertEqual(user_terminal.requester_specified_id, self.requester_specified_id)
         self.assertEqual(user_terminal.user.name, self.user_name)
         self.assertEqual(user_terminal.user.id, self.user_id)
 
@@ -546,21 +546,21 @@ class ToopherTests(unittest.TestCase):
                 json.dumps({
                   'id': self.id,
                   'name': self.terminal_name,
-                  'name_extra': self.requester_terminal_id,
+                  'name_extra': self.requester_specified_id,
                   'user': self.user
                 })
             )
         })
         result = self.api.advanced.raw.post('/user_terminals/create',
                                name='terminal_name',
-                               name_extra='requester_terminal_id',
+                               name_extra='requester_specified_id',
                                user_name='user_name')
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertEqual(result['id'], self.id)
         self.assertEqual(result['user']['name'], self.user_name)
         self.assertEqual(result['user']['id'], self.user_id)
         self.assertEqual(result['name'], self.terminal_name)
-        self.assertEqual(result['name_extra'], self.requester_terminal_id)
+        self.assertEqual(result['name_extra'], self.requester_specified_id)
 
     def test_disabled_user_raises_correct_error(self):
         self.api.advanced.raw.client = HttpClientMock({
@@ -657,7 +657,7 @@ class AuthenticationRequestTests(unittest.TestCase):
         self.terminal = {
             'id': str(uuid.uuid4()),
             'name': 'terminal_name',
-            'name_extra': 'requester_terminal_id',
+            'name_extra': 'requester_specified_id',
             'user': self.user
         }
         self.terminal_id = self.terminal['id']
@@ -745,7 +745,7 @@ class AuthenticationRequestTests(unittest.TestCase):
                     'terminal': {
                         'id': self.terminal_id,
                         'name': 'terminal_name changed',
-                        'name_extra': 'requester_terminal_id',
+                        'name_extra': 'requester_specified_id',
                         'user': self.user
                     },
                     'user': {
@@ -900,7 +900,7 @@ class UserTerminalTests(unittest.TestCase):
     def setUp(self):
         self.id = str(uuid.uuid4())
         self.name = 'name'
-        self.name_extra = 'name_extra'
+        self.requester_specified_id = 'requester_specified_id'
         self.user = {
             'id': str(uuid.uuid4()),
             'name': 'user_name',
@@ -918,7 +918,7 @@ class UserTerminalTests(unittest.TestCase):
         response = {
             'id': self.id,
             'name': self.name,
-            'name_extra': self.name_extra,
+            'name_extra': self.requester_specified_id,
             'user': self.user
         }
         user_terminal = toopher.UserTerminal(response)
@@ -928,7 +928,7 @@ class UserTerminalTests(unittest.TestCase):
                 json.dumps({
                     'id': self.id,
                     'name': 'name changed',
-                    'name_extra': 'name_extra changed',
+                    'name_extra': 'requester_specified_id changed',
                     'user': {
                         'id': self.user_id,
                         'name': 'user_name changed',
@@ -941,7 +941,7 @@ class UserTerminalTests(unittest.TestCase):
         self.assertEqual(api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, "name changed")
-        self.assertEqual(user_terminal.name_extra, "name_extra changed")
+        self.assertEqual(user_terminal.requester_specified_id, "requester_specified_id changed")
         self.assertEqual(user_terminal.user.name, "user_name changed")
         self.assertEqual(user_terminal.user.id, self.user_id)
         self.assertTrue(user_terminal.user.disable_toopher_auth)

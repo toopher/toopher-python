@@ -377,11 +377,11 @@ class UserTerminals(object):
     def __init__(self, raw):
         self.raw = raw
 
-    def create(self, username, terminal_name, requester_terminal_id, **kwargs):
+    def create(self, username, terminal_name, requester_specified_id, **kwargs):
         url = '/user_terminals/create'
         params = {'user_name': username,
                   'name': terminal_name,
-                  'name_extra': requester_terminal_id}
+                  'name_extra': requester_specified_id}
         params.update(kwargs)
         result = self.raw.post(url, **params)
         return UserTerminal(result)
@@ -415,7 +415,7 @@ class UserTerminal(object):
         try:
             self.id = json_response['id']
             self.name = json_response['name']
-            self.name_extra = json_response['name_extra']
+            self.requester_specified_id = json_response['name_extra']
             self.user._update(json_response['user'])
         except Exception:
             raise ToopherApiError("Could not parse user terminal from response")
