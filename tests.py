@@ -328,7 +328,7 @@ class ToopherTests(unittest.TestCase):
 
         def fn():
             foo = auth_request.random_key
-        self.assertRaises(AttributeError, fn)
+        self.assertRaisesRegexp(AttributeError, "'AuthenticationRequest' object has no attribute 'random_key'", fn)
 
     def test_pass_arbitrary_parameters_on_pair(self):
         self.api.advanced.raw.client = HttpClientMock({

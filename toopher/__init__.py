@@ -231,6 +231,14 @@ class ApiRawRequester(object):
         raise ToopherApiError(error_message)
 
 
+class ToopherBase(object):
+    def __getattr__(self, name):
+        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
+            return super(ToopherBase, self).__getattribute__(name)
+        else:
+            return self._raw_data[name]
+
+
 class Pairings(object):
     def __init__(self, raw):
         self.raw = raw
@@ -241,7 +249,7 @@ class Pairings(object):
         return Pairing(result)
 
 
-class Pairing(object):
+class Pairing(ToopherBase):
     def __init__(self, json_response):
         try:
             self.user = User(json_response['user'])
@@ -251,12 +259,6 @@ class Pairing(object):
 
     def __nonzero__(self):
         return self.enabled
-
-    def __getattr__(self, name):
-        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
-            return super(Pairing, self).__getattr__(name)
-        else:
-            return self._raw_data[name]
 
     def refresh_from_server(self, api):
         url = '/pairings/' + self.id
@@ -305,7 +307,7 @@ class AuthenticationRequests(object):
         return AuthenticationRequest(result)
 
 
-class AuthenticationRequest(object):
+class AuthenticationRequest(ToopherBase):
     def __init__(self, json_response):
         try:
             self.terminal = UserTerminal(json_response['terminal'])
@@ -318,11 +320,6 @@ class AuthenticationRequest(object):
     def __nonzero__(self):
         return self.granted
 
-    def __getattr__(self, name):
-        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
-            return super(AuthenticationRequest, self).__getattr__(name)
-        else:
-            return self._raw_data[name]
 
     def grant_with_otp(self, api, otp, **kwargs):
         url = '/authentication_requests/' + self.id + '/otp_auth'
@@ -353,15 +350,9 @@ class AuthenticationRequest(object):
         self._raw_data = json_response
 
 
-class Action(object):
+class Action(ToopherBase):
     def __init__(self, json_response):
         self._update(json_response)
-
-    def __getattr__(self, name):
-        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
-            return super(AuthenticationRequest, self).__getattr__(name)
-        else:
-            return self._raw_data[name]
 
     def _update(self, json_response):
         try:
@@ -392,19 +383,13 @@ class UserTerminals(object):
         return UserTerminal(result)
 
 
-class UserTerminal(object):
+class UserTerminal(ToopherBase):
     def __init__(self, json_response):
         try:
             self.user = User(json_response['user'])
         except Exception:
             raise ToopherApiError("Could not parse user terminal from response")
         self._update(json_response)
-
-    def __getattr__(self, name):
-        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
-            return super(UserTerminal, self).__getattr__(name)
-        else:
-            return self._raw_data[name]
 
     def refresh_from_server(self, api):
         url = '/user_terminals/' + self.id
@@ -451,16 +436,11 @@ class Users(object):
         return User(users[0])
 
 
-class User(object):
+class User(ToopherBase):
     def __init__(self, json_response):
         self.toopher_authentication_enabled = None;
         self._update(json_response)
 
-    def __getattr__(self, name):
-        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
-            return super(User, self).__getattr__(name)
-        else:
-            return self._raw_data[name]
 
     def refresh_from_server(self, api):
         url = '/users/' + self.id
