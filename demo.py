@@ -55,7 +55,7 @@ def pair_device_with_toopher(api):
         print 'Checking status of pairing request...'
         
         try:
-            pairing.refresh_from_server(api)
+            pairing.refresh_from_server()
             if pairing.pending:
                 print 'The pairing has not been authorized by the phone yet'
             elif pairing.enabled:

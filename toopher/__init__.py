@@ -128,7 +128,7 @@ class ToopherIframe(object):
 
 class ToopherApi(object):
     def __init__(self, key, secret, api_url=None):
-        self.advanced = AdvancedApiUsageFactory(key, secret, api_url)
+        self.advanced = AdvancedApiUsageFactory(key, secret, api_url, self)
 
     def pair(self, username, phrase_or_num=None, **kwargs):
         params = {'user_name': username}
@@ -144,7 +144,7 @@ class ToopherApi(object):
             url = '/pairings/create/qr'
 
         result = self.advanced.raw.post(url, **params)
-        return Pairing(result)
+        return Pairing(result, self)
 
     def authenticate(self, id_or_username, terminal, action_name=None, **kwargs):
         url = '/authentication_requests/initiate'
@@ -164,9 +164,9 @@ class ToopherApi(object):
 
 
 class AdvancedApiUsageFactory(object):
-    def __init__(self, key, secret, api_url):
+    def __init__(self, key, secret, api_url, api):
         self.raw = ApiRawRequester(key, secret, api_url)
-        self.pairings = Pairings(self.raw)
+        self.pairings = Pairings(self.raw, api)
         self.authentication_requests = AuthenticationRequests(self.raw)
         self.users = Users(self.raw)
         self.user_terminals = UserTerminals(self.raw)
@@ -240,17 +240,19 @@ class ToopherBase(object):
 
 
 class Pairings(object):
-    def __init__(self, raw):
+    def __init__(self, raw, api):
         self.raw = raw
+        self.api = api
 
     def get_by_id(self, pairing_id):
         url = '/pairings/' + pairing_id
         result = self.raw.get(url)
-        return Pairing(result)
+        return Pairing(result, self.api)
 
 
 class Pairing(ToopherBase):
-    def __init__(self, json_response):
+    def __init__(self, json_response, api):
+        self.api = api
         try:
             self.user = User(json_response['user'])
         except Exception as e:
@@ -260,30 +262,30 @@ class Pairing(ToopherBase):
     def __nonzero__(self):
         return self.enabled
 
-    def refresh_from_server(self, api):
+    def refresh_from_server(self):
         url = '/pairings/' + self.id
-        result = api.advanced.raw.get(url)
+        result = self.api.advanced.raw.get(url)
         self._update(result)
 
-    def get_qr_code_image(self, api):
-        url = api.advanced.raw.base_url + '/qr/pairings/' + self.id
-        return api.advanced.raw._request_raw(url, 'GET')
+    def get_qr_code_image(self):
+        url = self.api.advanced.raw.base_url + '/qr/pairings/' + self.id
+        return self.api.advanced.raw._request_raw(url, 'GET')
 
-    def get_reset_link(self, api, **kwargs):
+    def get_reset_link(self, **kwargs):
         if not 'security_question' in kwargs:
             kwargs['security_question'] = None
         if not 'security_answer' in kwargs:
             kwargs['security_answer'] = None
 
         url = '/pairings/' + self.id + '/generate_reset_link'
-        result = api.advanced.raw.post(url, **kwargs)
+        result = self.api.advanced.raw.post(url, **kwargs)
         return result['url']
 
-    def email_reset_link(self, api, email, **kwargs):
+    def email_reset_link(self, email, **kwargs):
         params = {'reset_email': email}
         params.update(kwargs)
         url = '/pairings/' + self.id + '/send_reset_link'
-        api.advanced.raw.post(url, **params)
+        self.api.advanced.raw.post(url, **params)
 
     def _update(self, json_response):
         try:

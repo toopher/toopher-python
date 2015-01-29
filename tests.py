@@ -792,17 +792,17 @@ class PairingTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
         def fn():
-            toopher.Pairing(response)
+            toopher.Pairing(response, self.api)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_nonzero_when_granted(self):
         response = ddict()
         response['enabled'] = True
-        allowed = toopher.Pairing(response)
+        allowed = toopher.Pairing(response, self.api)
         self.assertTrue(allowed)
 
         response['enabled'] = False
-        denied = toopher.Pairing(response)
+        denied = toopher.Pairing(response, self.api)
         self.assertFalse(denied)
 
     def test_refresh_from_server(self):
@@ -812,7 +812,7 @@ class PairingTests(unittest.TestCase):
             'pending': True,
             'user': self.user
         }
-        pairing = toopher.Pairing(response)
+        pairing = toopher.Pairing(response, self.api)
 
         self.api.advanced.raw.client = HttpClientMock({
             'pairings/{0}'.format(pairing.id): (200,
@@ -828,7 +828,7 @@ class PairingTests(unittest.TestCase):
                 })
             )
         })
-        pairing.refresh_from_server(self.api)
+        pairing.refresh_from_server()
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(pairing.id, self.id)
         self.assertEqual(pairing.user.id, self.user_id)
@@ -842,7 +842,7 @@ class PairingTests(unittest.TestCase):
                     'enabled': True,
                     'pending': True,
                     'user': self.user }
-        pairing = toopher.Pairing(response)
+        pairing = toopher.Pairing(response, self.api)
 
         with open('qr_image.png', 'rb') as qr_image:
             self.api.advanced.raw.client = HttpClientMock({
@@ -850,7 +850,7 @@ class PairingTests(unittest.TestCase):
                                                        qr_image.read()
                 )
             })
-            qr_image_data = pairing.get_qr_code_image(self.api)
+            qr_image_data = pairing.get_qr_code_image()
             self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
             with open('new_image.png', 'wb') as new_image:
                 new_image.write(qr_image_data)
@@ -867,7 +867,7 @@ class PairingTests(unittest.TestCase):
                     'enabled': False,
                     'pending': True,
                     'user': self.user }
-        pairing = toopher.Pairing(response)
+        pairing = toopher.Pairing(response, self.api)
 
         self.api.advanced.raw.client = HttpClientMock({
             'pairings/{0}/generate_reset_link'.format(self.id): (200,
@@ -876,7 +876,7 @@ class PairingTests(unittest.TestCase):
                 })
             )
         })
-        reset_link = pairing.get_reset_link(self.api)
+        reset_link = pairing.get_reset_link()
         self.assertEqual('http://api.toopher.test/v1/pairings/{0}/reset?reset_authorization=abcde'.format(self.id), reset_link)
 
     def test_email_reset_link(self):
@@ -884,14 +884,14 @@ class PairingTests(unittest.TestCase):
                     'enabled': False,
                     'pending': True,
                     'user': self.user }
-        pairing = toopher.Pairing(response)
+        pairing = toopher.Pairing(response, self.api)
         self.api.advanced.raw.client = HttpClientMock({
             'pairings/{0}/send_reset_link'.format(self.id): (201,
                                            '[]'
             )
         })
         try:
-            pairing.email_reset_link(self.api, 'email')
+            pairing.email_reset_link('email')
         except toopher.ToopherApiError as e:
             self.fail('pairing.email_reset_link() returned a status code of >= 400: %s' % e)
 

@@ -54,7 +54,7 @@ def pair_device_with_toopher(api):
         try:
             if args.qr_pairing:
                 pairing = api.pair(user_name)
-                qr_image_data = pairing.get_qr_code_image(api)
+                qr_image_data = pairing.get_qr_code_image()
                 with open('qr_demo.png', 'wb') as qr_image:
                     qr_image.write(qr_image_data)
                 print 'Please open qr_demo.png to scan the QR code'
@@ -70,7 +70,7 @@ def pair_device_with_toopher(api):
         print 'Checking status of pairing request...'
         
         try:
-            pairing.refresh_from_server(api)
+            pairing.refresh_from_server()
             if pairing.pending:
                 print 'The pairing has not been authorized by the phone yet'
             elif pairing.enabled:
