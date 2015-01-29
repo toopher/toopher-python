@@ -166,10 +166,10 @@ class ToopherApi(object):
 class AdvancedApiUsageFactory(object):
     def __init__(self, key, secret, api_url, api):
         self.raw = ApiRawRequester(key, secret, api_url)
-        self.pairings = Pairings(self.raw, api)
-        self.authentication_requests = AuthenticationRequests(self.raw, api)
-        self.users = Users(self.raw, api)
-        self.user_terminals = UserTerminals(self.raw, api)
+        self.pairings = Pairings(api)
+        self.authentication_requests = AuthenticationRequests(api)
+        self.users = Users(api)
+        self.user_terminals = UserTerminals(api)
 
 
 class ApiRawRequester(object):
@@ -240,13 +240,12 @@ class ToopherBase(object):
 
 
 class Pairings(object):
-    def __init__(self, raw, api):
-        self.raw = raw
+    def __init__(self, api):
         self.api = api
 
     def get_by_id(self, pairing_id):
         url = '/pairings/' + pairing_id
-        result = self.raw.get(url)
+        result = self.api.advanced.raw.get(url)
         return Pairing(result, self.api)
 
 
@@ -300,13 +299,12 @@ class Pairing(ToopherBase):
 
 
 class AuthenticationRequests(object):
-    def __init__(self, raw, api):
-        self.raw = raw
+    def __init__(self, api):
         self.api = api
 
     def get_by_id(self, authentication_request_id):
         url = '/authentication_requests/' + authentication_request_id
-        result = self.raw.get(url)
+        result = self.api.advanced.raw.get(url)
         return AuthenticationRequest(result, self.api)
 
 
@@ -369,8 +367,7 @@ class Action(ToopherBase):
 
 
 class UserTerminals(object):
-    def __init__(self, raw, api):
-        self.raw = raw
+    def __init__(self, api):
         self.api = api
 
     def create(self, username, terminal_name, requester_specified_id, **kwargs):
@@ -379,12 +376,12 @@ class UserTerminals(object):
                   'name': terminal_name,
                   'name_extra': requester_specified_id}
         params.update(kwargs)
-        result = self.raw.post(url, **params)
+        result = self.api.advanced.raw.post(url, **params)
         return UserTerminal(result, self.api)
 
     def get_by_id(self, terminal_id):
         url = '/user_terminals/' + terminal_id
-        result = self.raw.get(url)
+        result = self.api.advanced.raw.get(url)
         return UserTerminal(result, self.api)
 
 
@@ -415,25 +412,24 @@ class UserTerminal(ToopherBase):
 
 
 class Users(object):
-    def __init__(self, raw, api):
-        self.raw = raw
+    def __init__(self, api):
         self.api = api
 
     def create(self, username, **kwargs):
         url = '/users/create'
         params = {'name': username}
         params.update(kwargs)
-        result = self.raw.post(url, **params)
+        result = self.api.advanced.raw.post(url, **params)
         return User(result, self.api)
 
     def get_by_id(self, user_id):
         url = '/users/' + user_id
-        result = self.raw.get(url)
+        result = self.api.advanced.raw.get(url)
         return User(result, self.api)
 
     def get_by_name(self, username):
         url = '/users'
-        users = self.raw.get(url, user_name=username)
+        users = self.api.advanced.raw.get(url, user_name=username)
 
         if len(users) > 1:
             raise ToopherApiError('Multiple users with name = %s' % username)
