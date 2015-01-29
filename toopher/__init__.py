@@ -160,14 +160,14 @@ class ToopherApi(object):
         params.update(kwargs)
 
         result = self.advanced.raw.post(url, **params)
-        return AuthenticationRequest(result)
+        return AuthenticationRequest(result, self)
 
 
 class AdvancedApiUsageFactory(object):
     def __init__(self, key, secret, api_url, api):
         self.raw = ApiRawRequester(key, secret, api_url)
         self.pairings = Pairings(self.raw, api)
-        self.authentication_requests = AuthenticationRequests(self.raw)
+        self.authentication_requests = AuthenticationRequests(self.raw, api)
         self.users = Users(self.raw)
         self.user_terminals = UserTerminals(self.raw)
 
@@ -300,17 +300,19 @@ class Pairing(ToopherBase):
 
 
 class AuthenticationRequests(object):
-    def __init__(self, raw):
+    def __init__(self, raw, api):
         self.raw = raw
+        self.api = api
 
     def get_by_id(self, authentication_request_id):
         url = '/authentication_requests/' + authentication_request_id
         result = self.raw.get(url)
-        return AuthenticationRequest(result)
+        return AuthenticationRequest(result, self.api)
 
 
 class AuthenticationRequest(ToopherBase):
-    def __init__(self, json_response):
+    def __init__(self, json_response, api):
+        self.api = api
         try:
             self.terminal = UserTerminal(json_response['terminal'])
             self.user = User(json_response['user'])
@@ -323,16 +325,16 @@ class AuthenticationRequest(ToopherBase):
         return self.granted
 
 
-    def grant_with_otp(self, api, otp, **kwargs):
+    def grant_with_otp(self, otp, **kwargs):
         url = '/authentication_requests/' + self.id + '/otp_auth'
         params = {'otp' : otp}
         params.update(kwargs)
-        result = api.advanced.raw.post(url, **params)
+        result = self.api.advanced.raw.post(url, **params)
         self._update(result)
 
-    def refresh_from_server(self, api):
+    def refresh_from_server(self):
         url = '/authentication_requests/' + self.id
-        result = api.advanced.raw.get(url)
+        result = self.api.advanced.raw.get(url)
         self._update(result)
 
     def _update(self, json_response):

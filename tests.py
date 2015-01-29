@@ -670,17 +670,17 @@ class AuthenticationRequestTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
         def fn():
-            toopher.AuthenticationRequest(response)
+            toopher.AuthenticationRequest(response, self.api)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_nonzero_when_granted(self):
         response = ddict()
         response['granted'] = True
-        allowed = toopher.AuthenticationRequest(response)
+        allowed = toopher.AuthenticationRequest(response, self.api)
         self.assertTrue(allowed)
 
         response['granted'] = False
-        denied = toopher.AuthenticationRequest(response)
+        denied = toopher.AuthenticationRequest(response, self.api)
         self.assertFalse(denied)
 
     def test_authenticate_with_otp(self):
@@ -695,7 +695,7 @@ class AuthenticationRequestTests(unittest.TestCase):
             'user': self.user,
             'action': self.action
         }
-        auth_request = toopher.AuthenticationRequest(response)
+        auth_request = toopher.AuthenticationRequest(response, self.api)
 
         self.api.advanced.raw.client = HttpClientMock({
             'authentication_requests/{0}/otp_auth'.format(auth_request.id): (200,
@@ -712,7 +712,7 @@ class AuthenticationRequestTests(unittest.TestCase):
                 })
             )
         })
-        auth_request.grant_with_otp(self.api, 'otp')
+        auth_request.grant_with_otp('otp')
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertEqual(self.api.advanced.raw.client.last_called_data['otp'], 'otp')
         self.assertFalse(auth_request.pending)
@@ -731,7 +731,7 @@ class AuthenticationRequestTests(unittest.TestCase):
             'user': self.user,
             'action': self.action
         }
-        auth_request = toopher.AuthenticationRequest(response)
+        auth_request = toopher.AuthenticationRequest(response, self.api)
 
         self.api.advanced.raw.client = HttpClientMock({
             'authentication_requests/{0}'.format(auth_request.id): (200,
@@ -760,7 +760,7 @@ class AuthenticationRequestTests(unittest.TestCase):
                 })
             )
         })
-        auth_request.refresh_from_server(self.api)
+        auth_request.refresh_from_server()
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(auth_request.id, self.id)
         self.assertFalse(auth_request.pending)

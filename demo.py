@@ -98,7 +98,7 @@ def authenticate_with_toopher(api, pairing):
             print 'Checking status of authentication request...'
             
             try:
-                auth_request.refresh_from_server(api)
+                auth_request.refresh_from_server()
             except ToopherApiError, e:
                 print 'Could not check authentication request status (reason: %s)' % e
                 continue

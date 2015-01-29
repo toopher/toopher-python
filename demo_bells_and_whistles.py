@@ -119,9 +119,9 @@ def authenticate_with_toopher(api, pairing):
             
             try:
                 if otp:
-                    auth_request.grant_with_otp(api, otp)
+                    auth_request.grant_with_otp(otp)
                 else:
-                    auth_request.refresh_from_server(api)
+                    auth_request.refresh_from_server()
             except ToopherApiError, e:
                 print 'Could not check authentication request status (reason: %s)' % e
                 continue
