@@ -168,8 +168,8 @@ class AdvancedApiUsageFactory(object):
         self.raw = ApiRawRequester(key, secret, api_url)
         self.pairings = Pairings(self.raw, api)
         self.authentication_requests = AuthenticationRequests(self.raw, api)
-        self.users = Users(self.raw)
-        self.user_terminals = UserTerminals(self.raw)
+        self.users = Users(self.raw, api)
+        self.user_terminals = UserTerminals(self.raw, api)
 
 
 class ApiRawRequester(object):
@@ -254,7 +254,7 @@ class Pairing(ToopherBase):
     def __init__(self, json_response, api):
         self.api = api
         try:
-            self.user = User(json_response['user'])
+            self.user = User(json_response['user'], api)
         except Exception as e:
             raise ToopherApiError("Could not parse pairing status from response" + e.message)
         self._update(json_response)
@@ -314,8 +314,8 @@ class AuthenticationRequest(ToopherBase):
     def __init__(self, json_response, api):
         self.api = api
         try:
-            self.terminal = UserTerminal(json_response['terminal'])
-            self.user = User(json_response['user'])
+            self.terminal = UserTerminal(json_response['terminal'], api)
+            self.user = User(json_response['user'], api)
             self.action = Action(json_response['action'])
         except Exception:
             raise ToopherApiError("Could not parse authentication from response")
@@ -369,8 +369,9 @@ class Action(ToopherBase):
 
 
 class UserTerminals(object):
-    def __init__(self, raw):
+    def __init__(self, raw, api):
         self.raw = raw
+        self.api = api
 
     def create(self, username, terminal_name, requester_specified_id, **kwargs):
         url = '/user_terminals/create'
@@ -379,25 +380,26 @@ class UserTerminals(object):
                   'name_extra': requester_specified_id}
         params.update(kwargs)
         result = self.raw.post(url, **params)
-        return UserTerminal(result)
+        return UserTerminal(result, self.api)
 
     def get_by_id(self, terminal_id):
         url = '/user_terminals/' + terminal_id
         result = self.raw.get(url)
-        return UserTerminal(result)
+        return UserTerminal(result, self.api)
 
 
 class UserTerminal(ToopherBase):
-    def __init__(self, json_response):
+    def __init__(self, json_response, api):
+        self.api = api
         try:
-            self.user = User(json_response['user'])
+            self.user = User(json_response['user'], self.api)
         except Exception:
             raise ToopherApiError("Could not parse user terminal from response")
         self._update(json_response)
 
-    def refresh_from_server(self, api):
+    def refresh_from_server(self):
         url = '/user_terminals/' + self.id
-        result = api.advanced.raw.get(url)
+        result = self.api.advanced.raw.get(url)
         self._update(result)
 
     def _update(self, json_response):
@@ -413,20 +415,21 @@ class UserTerminal(ToopherBase):
 
 
 class Users(object):
-    def __init__(self, raw):
+    def __init__(self, raw, api):
         self.raw = raw
+        self.api = api
 
     def create(self, username, **kwargs):
         url = '/users/create'
         params = {'name': username}
         params.update(kwargs)
         result = self.raw.post(url, **params)
-        return User(result)
+        return User(result, self.api)
 
     def get_by_id(self, user_id):
         url = '/users/' + user_id
         result = self.raw.get(url)
-        return User(result)
+        return User(result, self.api)
 
     def get_by_name(self, username):
         url = '/users'
@@ -437,34 +440,35 @@ class Users(object):
         elif not len(users):
             raise ToopherApiError('No users with name = %s' % username)
 
-        return User(users[0])
+        return User(users[0], self.api)
 
 
 class User(ToopherBase):
-    def __init__(self, json_response):
+    def __init__(self, json_response, api):
         self.toopher_authentication_enabled = None;
+        self.api = api
         self._update(json_response)
 
 
-    def refresh_from_server(self, api):
+    def refresh_from_server(self):
         url = '/users/' + self.id
-        result = api.advanced.raw.get(url)
+        result = self.api.advanced.raw.get(url)
         self._update(result)
 
-    def enable_toopher_authentication(self, api):
+    def enable_toopher_authentication(self):
         url = '/users/' + self.id
-        result = api.advanced.raw.post(url, disable_toopher_auth=False)
+        result = self.api.advanced.raw.post(url, disable_toopher_auth=False)
         self._update(result)
 
-    def disable_toopher_authentication(self, api):
+    def disable_toopher_authentication(self):
         url = '/users/' + self.id
-        result = api.advanced.raw.post(url, disable_toopher_auth=True)
+        result = self.api.advanced.raw.post(url, disable_toopher_auth=True)
         self._update(result)
 
-    def reset(self, api):
+    def reset(self):
         url = '/users/reset'
         params = {'name': self.name}
-        api.advanced.raw.post(url, **params)
+        self.api.advanced.raw.post(url, **params)
         return True # would raise error in _request if failed
 
     def _update(self, json_response):

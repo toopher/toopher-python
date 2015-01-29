@@ -898,6 +898,7 @@ class PairingTests(unittest.TestCase):
 
 class UserTerminalTests(unittest.TestCase):
     def setUp(self):
+        self.api = toopher.ToopherApi('key', 'secret')
         self.id = str(uuid.uuid4())
         self.name = 'name'
         self.requester_specified_id = 'requester_specified_id'
@@ -911,7 +912,7 @@ class UserTerminalTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
         def fn():
-            toopher.UserTerminal(response)
+            toopher.UserTerminal(response, self.api)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_refresh_from_server(self):
@@ -921,9 +922,8 @@ class UserTerminalTests(unittest.TestCase):
             'name_extra': self.requester_specified_id,
             'user': self.user
         }
-        user_terminal = toopher.UserTerminal(response)
-        api = toopher.ToopherApi('key', 'secret')
-        api.advanced.raw.client = HttpClientMock({
+        user_terminal = toopher.UserTerminal(response, self.api)
+        self.api.advanced.raw.client = HttpClientMock({
             'user_terminals/{0}'.format(user_terminal.id): (200,
                 json.dumps({
                     'id': self.id,
@@ -937,8 +937,8 @@ class UserTerminalTests(unittest.TestCase):
                 })
             )
         })
-        user_terminal.refresh_from_server(api)
-        self.assertEqual(api.advanced.raw.client.last_called_method, 'GET')
+        user_terminal.refresh_from_server()
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, "name changed")
         self.assertEqual(user_terminal.requester_specified_id, "requester_specified_id changed")
@@ -956,7 +956,7 @@ class UserTests(unittest.TestCase):
     def test_incomplete_response_raises_exception(self):
         response = {'key': 'value'}
         def fn():
-            toopher.User(response)
+            toopher.User(response, self.api)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_refresh_from_server(self):
@@ -965,7 +965,7 @@ class UserTests(unittest.TestCase):
             'name': self.name,
             'disable_toopher_auth': False
         }
-        user = toopher.User(response)
+        user = toopher.User(response, self.api)
         self.api.advanced.raw.client = HttpClientMock({
             'users/{0}'.format(user.id): (200,
                 json.dumps({
@@ -975,7 +975,7 @@ class UserTests(unittest.TestCase):
                 })
             )
         })
-        user.refresh_from_server(self.api)
+        user.refresh_from_server()
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(user.id, self.id)
         self.assertEqual(user.name, 'name CHANGED')
@@ -987,7 +987,7 @@ class UserTests(unittest.TestCase):
             'name': self.name,
             'disable_toopher_auth': True
         }
-        user = toopher.User(response)
+        user = toopher.User(response, self.api)
         self.api.advanced.raw.client = HttpClientMock({
             'users/{0}'.format(user.id): (200,
                 json.dumps({
@@ -997,7 +997,7 @@ class UserTests(unittest.TestCase):
                 })
             )
         })
-        user.enable_toopher_authentication(self.api)
+        user.enable_toopher_authentication()
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertFalse(self.api.advanced.raw.client.last_called_data['disable_toopher_auth'])
         self.assertTrue(user.toopher_authentication_enabled)
@@ -1008,7 +1008,7 @@ class UserTests(unittest.TestCase):
             'name': self.name,
             'disable_toopher_auth': False
         }
-        user = toopher.User(response)
+        user = toopher.User(response, self.api)
         self.api.advanced.raw.client = HttpClientMock({
             'users/{0}'.format(self.id): (200,
                 json.dumps({
@@ -1018,7 +1018,7 @@ class UserTests(unittest.TestCase):
                 })
             )
         })
-        user.disable_toopher_authentication(self.api)
+        user.disable_toopher_authentication()
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertTrue(self.api.advanced.raw.client.last_called_data['disable_toopher_auth'])
         self.assertFalse(user.toopher_authentication_enabled)
@@ -1028,14 +1028,14 @@ class UserTests(unittest.TestCase):
             'id': self.id,
             'name': self.name,
             'disable_toopher_auth': False}
-        user = toopher.User(response)
+        user = toopher.User(response, self.api)
         self.api.advanced.raw.client = HttpClientMock({
             'users/reset': (200,
                             '[]'
             )
         })
         try:
-            user.reset(self.api)
+            user.reset()
         except toopher.ToopherApiError as e:
             self.fail('pairing.email_reset_link() returned a status code of >= 400: %s' % e)
 
