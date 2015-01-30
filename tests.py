@@ -1,12 +1,14 @@
+import imghdr
 import json
+from StringIO import StringIO
 import toopher
 import requests
 import unittest
 import uuid
 import time
 import werkzeug.datastructures
-import os
 from PIL import Image
+import qrcode
 
 class HttpClientMock(object):
     def __init__(self, paths):
@@ -838,29 +840,28 @@ class PairingTests(unittest.TestCase):
         self.assertFalse(pairing.pending)
 
     def test_get_qr_code_image(self):
-        response = {'id': 'id',
+        response = {'id': self.id,
                     'enabled': True,
                     'pending': True,
                     'user': self.user }
         pairing = toopher.Pairing(response, self.api)
 
-        with open('qr_image.png', 'rb') as qr_image:
-            self.api.advanced.raw.client = HttpClientMock({
-                'qr/pairings/{0}'.format(pairing.id): (200,
-                                                       qr_image.read()
-                )
-            })
-            qr_image_data = pairing.get_qr_code_image()
-            self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
-            with open('new_image.png', 'wb') as new_image:
-                new_image.write(qr_image_data)
+        qr = qrcode.QRCode()
+        qr.add_data('https://api.toopher.test/v1/r/pairings/{0}'.format(self.id))
+        qr.make()
+        image = qr.make_image()
+        fp = StringIO()
+        image.save(fp, 'png')
+        qr_code_image = fp.getvalue()
+        fp.close
 
-            im = Image.open('new_image.png')
-            try:
-                im.verify()
-            except:
-                self.fail('im.verify() causes an error only if im is not a valid image')
-            os.remove('new_image.png')
+        self.api.advanced.raw.client = HttpClientMock({
+            'qr/pairings/{0}'.format(pairing.id): (200,
+                    qr_code_image)
+        })
+        qr_image_data = pairing.get_qr_code_image()
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
+        self.assertEqual(imghdr.what(None, qr_image_data), 'png')
 
     def test_get_reset_link(self):
         response = {'id':self.id,
