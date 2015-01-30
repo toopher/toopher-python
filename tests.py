@@ -1,6 +1,7 @@
 import imghdr
 import json
 from StringIO import StringIO
+import pickle
 import toopher
 import requests
 import unittest
@@ -634,6 +635,29 @@ class ToopherTests(unittest.TestCase):
             auth_request = self.api.authenticate(self.user_name, self.terminal_name)
         self.assertRaises(toopher.PairingDeactivatedError, fn)
 
+class ToopherBaseTests(unittest.TestCase):
+    def test_pickling_and_unpickling(self):
+        response = {
+            'id': str(uuid.uuid4()),
+            'enabled': True,
+            'pending': True,
+            'user': {
+                'id': str(uuid.uuid4()),
+                'name': 'user_name'
+            }
+        }
+        pairing = toopher.Pairing(response, toopher.ToopherApi('key', 'secret'))
+        try:
+            pickled_pairing = pickle.loads(pickle.dumps(pairing))
+        except RuntimeError as e:
+            self.fail('Unable to unpickle a pickled object: %s' % e)
+
+        self.assertEqual(pairing.id, pickled_pairing.id)
+        self.assertEqual(pairing.user.id, pickled_pairing.user.id)
+        self.assertEqual(pairing.user.name, pickled_pairing.user.name)
+        self.assertTrue(pickled_pairing.enabled)
+        self.assertTrue(pickled_pairing.pending)
+        self.assertEqual(dir(pairing), dir(pickled_pairing))
 
 class ddict(dict):
     def __getitem__(self, key):
