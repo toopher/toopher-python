@@ -464,7 +464,6 @@ class User(ToopherBase):
         url = '/users/reset'
         params = {'name': self.name}
         self.api.advanced.raw.post(url, **params)
-        return True # would raise error in _request if failed
 
     def _update(self, json_response):
         try:
