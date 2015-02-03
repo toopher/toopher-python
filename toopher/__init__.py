@@ -232,10 +232,10 @@ class ApiRawRequester(object):
 
 class ToopherBase(object):
     def __getattr__(self, name):
-        if name.startswith('__') or name not in self._raw_data:  # Exclude 'magic' methods to allow for (un)pickling
+        if name.startswith('__') or name not in self.raw_response:  # Exclude 'magic' methods to allow for (un)pickling
             return super(ToopherBase, self).__getattribute__(name)
         else:
-            return self._raw_data[name]
+            return self.raw_response[name]
 
 
 class Pairings(object):
@@ -294,7 +294,7 @@ class Pairing(ToopherBase):
         except Exception as e:
             raise ToopherApiError("Could not parse pairing status from response" + e.message)
 
-        self._raw_data = json_response
+        self.raw_response = json_response
 
 
 class AuthenticationRequests(object):
@@ -348,7 +348,7 @@ class AuthenticationRequest(ToopherBase):
         except Exception:
             raise ToopherApiError("Could not parse authentication status from response")
 
-        self._raw_data = json_response
+        self.raw_response = json_response
 
 
 class Action(ToopherBase):
@@ -362,7 +362,7 @@ class Action(ToopherBase):
         except Exception:
             raise ToopherApiError('Could not parse action from response')
 
-        self._raw_data = json_response
+        self.raw_response = json_response
 
 
 class UserTerminals(object):
@@ -407,7 +407,7 @@ class UserTerminal(ToopherBase):
         except Exception:
             raise ToopherApiError("Could not parse user terminal from response")
 
-        self._raw_data = json_response
+        self.raw_response = json_response
 
 
 class Users(object):
@@ -476,4 +476,4 @@ class User(ToopherBase):
         except Exception:
             raise ToopherApiError("Could not parse user from response")
 
-        self._raw_data = json_response
+        self.raw_response = json_response
