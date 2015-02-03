@@ -54,7 +54,6 @@ class ToopherIframe(object):
                 }
         return self._get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
 
-    # Params still TBD
     def get_authentication_url(self, username, reset_email, request_token, action_name='Log In', requester_metadata='None', **kwargs):
         if not 'ttl' in kwargs:
             ttl = DEFAULT_IFRAME_TTL
