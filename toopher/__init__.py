@@ -388,7 +388,7 @@ class UserTerminal(ToopherBase):
     def __init__(self, json_response, api):
         self.api = api
         try:
-            self.user = User(json_response['user'], self.api)
+            self.user = User(json_response['user'], api)
         except Exception:
             raise ToopherApiError("Could not parse user terminal from response")
         self._update(json_response)
