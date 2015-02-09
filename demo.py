@@ -88,7 +88,6 @@ def authenticate_with_toopher(api, pairing):
         
         try:
             auth_request = api.authenticate(pairing.id, terminal_name, terminal_name_extra=terminal_extra)
-            auth_request_id = auth_request.id
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
             continue
