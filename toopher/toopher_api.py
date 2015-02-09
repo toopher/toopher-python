@@ -67,6 +67,7 @@ class AdvancedApiUsageFactory(object):
         self.authentication_requests = AuthenticationRequests(api)
         self.users = Users(api)
         self.user_terminals = UserTerminals(api)
+        self.oath_otp_validators = OathOtpValidators(api)
 
 
 class ApiRawRequester(object):
@@ -313,6 +314,29 @@ class User(ToopherBase):
         params = {'name': self.name}
         self.api.advanced.raw.post(url, **params)
 
+    def associate_oath_otp_validator(self, oath_otp_validator):
+        url = '/users/{0}/oath_otp_validators/associate'.format(self.id)
+        params = {}
+        if oath_otp_validator.id:
+            # identifying a previously-provisioned validator by ID
+            params['id'] = oath_otp_validator.id
+        elif oath_otp_validator.requester_specified_id and not oath_otp_validator.secret:
+            # identifying a previously-provisioned validator by requester_specified_id
+            params['requester_specified_id'] = oath_otp_validator.requester_specified_id
+        elif oath_otp_validator.secret:
+            # create and return a new validator
+            params.update(oath_otp_validator._creation_dict())
+
+        result = self.api.advanced.raw.post(url, **params)
+        return OathOtpValidator(result, self.api)
+
+    def dissociate_oath_otp_validator(self, oath_otp_validator):
+        url = '/users/{0}/oath_otp_validators/associate'.format(self.id)
+        params = { 'id' : oath_otp_validator.id }
+
+        result = self.api.advanced.raw.post(url, **params)
+        return OathOtpValidator(result, self.api)
+
     def _update(self, json_response):
         self.raw_response = json_response
         try:
@@ -363,3 +387,74 @@ class Action(ToopherBase):
             self.name = json_response['name']
         except Exception as e:
             raise ToopherApiError('Could not parse action from response: %s' % e.args)
+
+
+class OathOtpValidators(object):
+    def __init__(self, api):
+        self.api = api
+
+    def provision(self, secret, requester_specified_id=None, otp_type='totp', otp_digits=8, algorithm='sha1', totp_step_size=30, **kwargs):
+        url = '/oath_otp_validators/provision'
+        params = {
+                'secret': secret,
+                'requester_specified_id': requester_specified_id,
+                'otp_type': otp_type,
+                'otp_digits': otp_digits,
+                'algorithm': algorithm,
+                'totp_step_size': totp_step_size
+                }
+        params.update(kwargs)
+        result = self.api.advanced.raw.post(url, **params)
+        return OathOtpValidator(result, self.api)
+
+    def get_by_id(self, validator_id):
+        url = '/oath_otp_validators/{0}'.format(validator_id)
+        return OathOtpValidator(self.api.advanced.raw.get(url), api)
+
+    def get_by_requester_specified_id(self, validator_requester_specified_id):
+        url = '/oath_otp_validators'
+        params = { 'requester_specified_id' : validator_requester_specified_id }
+        return OathOtpValidator(self.api.advanced.raw.get(url, **params), api)
+
+
+class OathOtpValidator(ToopherBase):
+    def __init__(self, json_response, api ):
+        self.api = api
+        self._update(json_response)
+
+    def associate_with_user(self, user):
+        url = '/users/{0}/oath_otp_validators/associate'.format(user.id)
+        params = { 'id' : self.id }
+        result = self.api.advanced.raw.post(url, **params)
+        self._update(result)
+
+    def dissociate_from_user(self, user):
+        url = '/users/{0}/oath_otp_validators/dissociate'.format(user.id)
+        params = { 'id' : self.id }
+        result = self.api.advanced.raw.post(url, **params)
+
+    def resynchronize(self, otp_sequence):
+        url = '/oath_otp_validators/{0}/resync'.format(self.id)
+        params = { 'otp_sequence' : ','.join(otp_sequence) }
+        self.api.advanced.raw.post(url, **params)
+
+    def deactivate(self):
+        url = '/oath_otp_validators/{0}/deactivate'.format(self.id)
+        self.api.advanced.raw.post(url)
+
+    def _update(self, json_response):
+        try:
+            self.id = json_response['id']
+            self.requester_specified_id = json_response['requester_specified_id']
+            self.otp_type = json_response['otp_type']
+            self.otp_digits = json_response['otp_digits']
+            self.algorithm = json_response['algorithm']
+            self.totp_step_size = json_response['totp_step_size']
+            self.hotp_event_counter = json_response['hotp_event_counter']
+        except Exception:
+            import traceback
+            print traceback.format_exc()
+            raise ToopherApiError("Could not parse oath_otp_validator from response")
+
+        self._raw_data = json_response
+
