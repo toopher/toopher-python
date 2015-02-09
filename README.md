@@ -44,7 +44,7 @@ auth = api.authenticate(pairing.id, "my computer")
 auth = api.authenticate("username", "requester_specified_id")
 
 # Once they've responded you can then check the status
-auth.refresh_from_server(api)
+auth.refresh_from_server()
 if (auth.pending == False and auth.granted == True):
 	# Success!
 ```
