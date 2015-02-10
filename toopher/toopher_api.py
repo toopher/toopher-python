@@ -1,6 +1,9 @@
 import uuid
 import requests_oauthlib
 import sys
+import binascii
+import csv
+import json
 
 DEFAULT_BASE_URL = 'https://api.toopher.com/v1'
 VERSION = '2.0.0'
@@ -390,6 +393,21 @@ class Action(ToopherBase):
 
 
 class OathOtpValidators(object):
+    class ImportFormat(object):
+        SAFENET = {
+                'csv_dialect' : 'whitespace',
+                'secret_format' : 'hex',
+                'header_map' : {
+                    'Serial' : 'requester_specified_id',
+                    'Seed' : 'secret'
+                    },
+                'defaults' : {
+                    'otp_type' : 'hotp',
+                    'otp_digits' : 6,
+                    'algorithm' : 'sha1'
+                    }
+                }
+
     def __init__(self, api):
         self.api = api
 
@@ -406,6 +424,45 @@ class OathOtpValidators(object):
         params.update(kwargs)
         result = self.api.advanced.raw.post(url, **params)
         return OathOtpValidator(result, self.api)
+
+    def bulk_provision_from_csv(self, file_or_filename, style):
+        def decode_validator_secret(encoded_secret, encoding):
+            if encoding == 'hex':
+                return encoded_secret
+            elif encoding == 'ascii':
+                return binascii.hexlify(bytearray(encoded_secret, 'utf-8'))
+            else:
+                raise ValueError('Unsupport secret encoding {0}'.format(encoding))
+
+        def read_csv(f):
+            csv.register_dialect('whitespace', delimiter=' ', skipinitialspace=True)
+            dialect = style['csv_dialect']
+            f.seek(0)
+            reader = csv.DictReader(f, dialect=dialect)
+            validators = []
+            for row in reader:
+                validator = style['defaults'].copy()
+                for csv_field_name, api_field_name in style['header_map'].iteritems():
+                    validator[api_field_name] = row[csv_field_name]
+                if 'secret_format' in style:
+                    validator['secret'] = decode_validator_secret(validator['secret'], style['secret_format'])
+                validators.append(validator)
+            return validators
+
+        if isinstance(file_or_filename, basestring):
+            with open(file_or_filename) as f:
+                validators = read_csv(f)
+        else:
+            validators = read_csv(file_or_filename)
+
+        url = '/oath_otp_validators/bulk_provision'
+        params = {
+            'oath_otp_validators' : json.dumps(validators)
+            }
+        response = self.api.advanced.raw.post(url, **params)
+        validators_json_list = response['oath_otp_validators']
+        validators_list = [OathOtpValidator(json_validator, self.api) for json_validator in validators_json_list]
+        return validators_list
 
     def get_by_id(self, validator_id):
         url = '/oath_otp_validators/{0}'.format(validator_id)
