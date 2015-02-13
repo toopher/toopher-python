@@ -307,13 +307,19 @@ class AuthenticationRequests(ToopherObjectFactory):
 class AuthenticationRequest(ToopherBase):
     def __init__(self, json_response, api):
         self.api = api
+        self.raw_response = json_response
         try:
+            self.id = json_response['id']
+            self.pending = json_response['pending']
+            self.granted = json_response['granted']
+            self.automated = json_response['automated']
+            self.reason = json_response['reason']
+            self.reason_code = json_response['reason_code']
             self.terminal = UserTerminal(json_response['terminal'], api)
             self.user = User(json_response['user'], api)
             self.action = Action(json_response['action'])
         except Exception:
             raise ToopherApiError("Could not parse authentication from response")
-        self._update(json_response)
 
     def __nonzero__(self):
         return self.granted
@@ -332,8 +338,8 @@ class AuthenticationRequest(ToopherBase):
         self._update(result)
 
     def _update(self, json_response):
+        self.raw_response = json_response
         try:
-            self.id = json_response['id']
             self.pending = json_response['pending']
             self.granted = json_response['granted']
             self.automated = json_response['automated']
@@ -345,7 +351,6 @@ class AuthenticationRequest(ToopherBase):
         except Exception:
             raise ToopherApiError("Could not parse authentication status from response")
 
-        self.raw_response = json_response
 
 
 class Action(ToopherBase):
