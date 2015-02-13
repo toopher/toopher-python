@@ -1,6 +1,4 @@
-import imghdr
 import json
-from StringIO import StringIO
 import pickle
 import toopher
 import requests
@@ -8,8 +6,6 @@ import unittest
 import uuid
 import time
 import werkzeug.datastructures
-from PIL import Image
-import qrcode
 
 class HttpClientMock(object):
     def __init__(self, paths):
@@ -869,23 +865,13 @@ class PairingTests(unittest.TestCase):
                     'pending': True,
                     'user': self.user }
         pairing = toopher.Pairing(response, self.api)
-
-        qr = qrcode.QRCode()
-        qr.add_data('https://api.toopher.test/v1/r/pairings/{0}'.format(self.id))
-        qr.make()
-        image = qr.make_image()
-        fp = StringIO()
-        image.save(fp, 'png')
-        qr_code_image = fp.getvalue()
-        fp.close
-
         self.api.advanced.raw.client = HttpClientMock({
             'qr/pairings/{0}'.format(pairing.id): (200,
-                    qr_code_image)
+                    "{}")
         })
-        qr_image_data = pairing.get_qr_code_image()
+        pairing.get_qr_code_image()
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
-        self.assertEqual(imghdr.what(None, qr_image_data), 'png')
+        self.assertEqual(self.api.advanced.raw.client.last_called_uri, 'https://api.toopher.test/v1/qr/pairings/{0}'.format(pairing.id))
 
     def test_get_reset_link(self):
         response = {'id':self.id,
