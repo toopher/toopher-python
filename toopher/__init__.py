@@ -254,7 +254,7 @@ class Pairing(ToopherBase):
         try:
             self.user = User(json_response['user'], api)
         except Exception as e:
-            raise ToopherApiError("Could not parse pairing status from response" + e.message)
+            raise ToopherApiError("Could not parse pairing status from response")
         self._update(json_response)
 
     def __nonzero__(self):
@@ -292,7 +292,7 @@ class Pairing(ToopherBase):
             self.pending = json_response['pending']
             self.user._update(json_response['user'])
         except Exception as e:
-            raise ToopherApiError("Could not parse pairing status from response" + e.message)
+            raise ToopherApiError("Could not parse pairing status from response")
 
         self.raw_response = json_response
 
