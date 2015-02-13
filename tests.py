@@ -111,12 +111,12 @@ class ToopherTests(unittest.TestCase):
         self.terminal = {
             'id': str(uuid.uuid4()),
             'name': 'terminal_name',
-            'name_extra': 'requester_specified_id',
+            'requester_specified_id': 'requester_specified_id',
             'user' : self.user
         }
         self.terminal_id = self.terminal['id']
         self.terminal_name = self.terminal['name']
-        self.requester_specified_id = self.terminal['name_extra']
+        self.requester_specified_id = self.terminal['requester_specified_id']
         self.action = {
             'id': str(uuid.uuid4()),
             'name': 'action_name'
@@ -490,7 +490,7 @@ class ToopherTests(unittest.TestCase):
                 json.dumps({
                     'id': self.id,
                     'name': self.terminal_name,
-                    'name_extra': self.requester_specified_id,
+                    'requester_specified_id': self.requester_specified_id,
                     'user': self.user
                 })
             )
@@ -509,7 +509,7 @@ class ToopherTests(unittest.TestCase):
                 json.dumps({
                     'id': self.id,
                     'name': self.terminal_name,
-                    'name_extra': self.requester_specified_id,
+                    'requester_specified_id': self.requester_specified_id,
                     'user': self.user
                 })
             )
@@ -545,21 +545,21 @@ class ToopherTests(unittest.TestCase):
                 json.dumps({
                   'id': self.id,
                   'name': self.terminal_name,
-                  'name_extra': self.requester_specified_id,
+                  'requester_specified_id': self.requester_specified_id,
                   'user': self.user
                 })
             )
         })
         result = self.api.advanced.raw.post('/user_terminals/create',
                                name='terminal_name',
-                               name_extra='requester_specified_id',
+                               requester_specified_id='requester_specified_id',
                                user_name='user_name')
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertEqual(result['id'], self.id)
         self.assertEqual(result['user']['name'], self.user_name)
         self.assertEqual(result['user']['id'], self.user_id)
         self.assertEqual(result['name'], self.terminal_name)
-        self.assertEqual(result['name_extra'], self.requester_specified_id)
+        self.assertEqual(result['requester_specified_id'], self.requester_specified_id)
 
     def test_disabled_user_raises_correct_error(self):
         self.api.advanced.raw.client = HttpClientMock({
@@ -680,7 +680,7 @@ class AuthenticationRequestTests(unittest.TestCase):
         self.terminal = {
             'id': str(uuid.uuid4()),
             'name': 'terminal_name',
-            'name_extra': 'requester_specified_id',
+            'requester_specified_id': 'requester_specified_id',
             'user': self.user
         }
         self.terminal_id = self.terminal['id']
@@ -768,7 +768,7 @@ class AuthenticationRequestTests(unittest.TestCase):
                     'terminal': {
                         'id': self.terminal_id,
                         'name': 'terminal_name changed',
-                        'name_extra': 'requester_specified_id',
+                        'requester_specified_id': 'requester_specified_id',
                         'user': self.user
                     },
                     'user': {
@@ -931,7 +931,7 @@ class UserTerminalTests(unittest.TestCase):
         response = {
             'id': self.id,
             'name': self.name,
-            'name_extra': self.requester_specified_id,
+            'requester_specified_id': self.requester_specified_id,
             'user': self.user
         }
         user_terminal = toopher.UserTerminal(response, self.api)
@@ -940,7 +940,7 @@ class UserTerminalTests(unittest.TestCase):
                 json.dumps({
                     'id': self.id,
                     'name': 'name changed',
-                    'name_extra': 'requester_specified_id changed',
+                    'requester_specified_id': 'requester_specified_id changed',
                     'user': {
                         'id': self.user_id,
                         'name': 'user_name changed',

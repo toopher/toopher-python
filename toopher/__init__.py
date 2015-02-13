@@ -381,11 +381,14 @@ class UserTerminals(ToopherObjectFactory):
 class UserTerminal(ToopherBase):
     def __init__(self, json_response, api):
         self.api = api
+        self.raw_response = json_response
         try:
+            self.id = json_response['id']
+            self.name = json_response['name']
+            self.requester_specified_id = json_response['requester_specified_id']
             self.user = User(json_response['user'], api)
         except Exception:
             raise ToopherApiError("Could not parse user terminal from response")
-        self._update(json_response)
 
     def refresh_from_server(self):
         url = '/user_terminals/' + self.id
@@ -393,15 +396,13 @@ class UserTerminal(ToopherBase):
         self._update(result)
 
     def _update(self, json_response):
+        self.raw_response = json_response
         try:
-            self.id = json_response['id']
             self.name = json_response['name']
-            self.requester_specified_id = json_response['name_extra']
+            self.requester_specified_id = json_response['requester_specified_id']
             self.user._update(json_response['user'])
         except Exception:
             raise ToopherApiError("Could not parse user terminal from response")
-
-        self.raw_response = json_response
 
 
 class Users(ToopherObjectFactory):
