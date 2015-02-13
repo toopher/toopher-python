@@ -153,7 +153,7 @@ class ToopherApi(object):
                       'terminal_name': terminal}
         except:
             params = {'user_name': id_or_username,
-                      'terminal_name_extra': terminal}
+                      'requester_specified_terminal_id': terminal}
         if action_name:
             params['action_name'] = action_name
         params.update(kwargs)
