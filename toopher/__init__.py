@@ -237,11 +237,11 @@ class ToopherBase(object):
         else:
             return self.raw_response[name]
 
-
-class Pairings(object):
+class ToopherObjectFactory(object):
     def __init__(self, api):
         self.api = api
 
+class Pairings(ToopherObjectFactory):
     def get_by_id(self, pairing_id):
         url = '/pairings/' + pairing_id
         result = self.api.advanced.raw.get(url)
@@ -297,10 +297,7 @@ class Pairing(ToopherBase):
         self.raw_response = json_response
 
 
-class AuthenticationRequests(object):
-    def __init__(self, api):
-        self.api = api
-
+class AuthenticationRequests(ToopherObjectFactory):
     def get_by_id(self, authentication_request_id):
         url = '/authentication_requests/' + authentication_request_id
         result = self.api.advanced.raw.get(url)
@@ -365,10 +362,7 @@ class Action(ToopherBase):
         self.raw_response = json_response
 
 
-class UserTerminals(object):
-    def __init__(self, api):
-        self.api = api
-
+class UserTerminals(ToopherObjectFactory):
     def create(self, username, terminal_name, requester_specified_id, **kwargs):
         url = '/user_terminals/create'
         params = {'user_name': username,
@@ -410,10 +404,7 @@ class UserTerminal(ToopherBase):
         self.raw_response = json_response
 
 
-class Users(object):
-    def __init__(self, api):
-        self.api = api
-
+class Users(ToopherObjectFactory):
     def create(self, username, **kwargs):
         url = '/users/create'
         params = {'name': username}
