@@ -431,10 +431,14 @@ class Users(ToopherObjectFactory):
 
 class User(ToopherBase):
     def __init__(self, json_response, api):
-        self.toopher_authentication_enabled = None;
         self.api = api
-        self._update(json_response)
-
+        self.raw_response = json_response
+        try:
+            self.id = json_response['id']
+            self.name = json_response['name']
+            self.toopher_authentication_enabled = json_response['toopher_authentication_enabled']
+        except Exception:
+            raise ToopherApiError("Could not parse user from response")
 
     def refresh_from_server(self):
         url = '/users/' + self.id
@@ -443,12 +447,12 @@ class User(ToopherBase):
 
     def enable_toopher_authentication(self):
         url = '/users/' + self.id
-        result = self.api.advanced.raw.post(url, disable_toopher_auth=False)
+        result = self.api.advanced.raw.post(url, toopher_authentication_enabled=True)
         self._update(result)
 
     def disable_toopher_authentication(self):
         url = '/users/' + self.id
-        result = self.api.advanced.raw.post(url, disable_toopher_auth=True)
+        result = self.api.advanced.raw.post(url, toopher_authentication_enabled=False)
         self._update(result)
 
     def reset(self):
@@ -457,14 +461,10 @@ class User(ToopherBase):
         self.api.advanced.raw.post(url, **params)
 
     def _update(self, json_response):
+        self.raw_response = json_response
         try:
-            self.id = json_response['id']
             self.name = json_response['name']
-            if 'disable_toopher_auth' in json_response:
-                self.toopher_authentication_enabled = not json_response['disable_toopher_auth']
-            else:
-                self.toopher_authentication_enabled = True
+            self.toopher_authentication_enabled = json_response['toopher_authentication_enabled']
         except Exception:
             raise ToopherApiError("Could not parse user from response")
 
-        self.raw_response = json_response
