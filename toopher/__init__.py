@@ -251,11 +251,14 @@ class Pairings(ToopherObjectFactory):
 class Pairing(ToopherBase):
     def __init__(self, json_response, api):
         self.api = api
+        self.raw_response = json_response
         try:
+            self.id = json_response['id']
+            self.enabled = json_response['enabled']
+            self.pending = json_response['pending']
             self.user = User(json_response['user'], api)
         except Exception as e:
             raise ToopherApiError("Could not parse pairing status from response")
-        self._update(json_response)
 
     def __nonzero__(self):
         return self.enabled
@@ -286,15 +289,14 @@ class Pairing(ToopherBase):
         self.api.advanced.raw.post(url, **params)
 
     def _update(self, json_response):
+        self.raw_response = json_response
         try:
-            self.id = json_response['id']
             self.enabled = json_response['enabled']
             self.pending = json_response['pending']
             self.user._update(json_response['user'])
         except Exception as e:
             raise ToopherApiError("Could not parse pairing status from response")
 
-        self.raw_response = json_response
 
 
 class AuthenticationRequests(ToopherObjectFactory):
