@@ -350,16 +350,20 @@ class AuthenticationRequest(ToopherBase):
 
 class Action(ToopherBase):
     def __init__(self, json_response):
-        self._update(json_response)
-
-    def _update(self, json_response):
+        self.raw_response = json_response
         try:
             self.id = json_response['id']
             self.name = json_response['name']
         except Exception:
+            raise ToopherApi('Could not parse action from response')
+
+    def _update(self, json_response):
+        self.raw_response = json_response
+        try:
+            self.name = json_response['name']
+        except Exception:
             raise ToopherApiError('Could not parse action from response')
 
-        self.raw_response = json_response
 
 
 class UserTerminals(ToopherObjectFactory):
