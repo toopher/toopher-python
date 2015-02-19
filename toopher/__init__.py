@@ -149,11 +149,13 @@ class ToopherApi(object):
         url = '/authentication_requests/initiate'
         try:
             uuid.UUID(id_or_username)
-            params = {'pairing_id': id_or_username,
-                      'terminal_name': terminal_name}
+            params = {'pairing_id': id_or_username}
         except:
-            params = {'user_name': id_or_username,
-                      'requester_specified_terminal_id': requester_specified_id}
+            params = {'user_name': id_or_username}
+        if terminal_name:
+            params['terminal_name'] = terminal_name
+        if requester_specified_id:
+            params['requester_specified_terminal_id'] = requester_specified_id
         if action_name:
             params['action_name'] = action_name
         params.update(kwargs)
