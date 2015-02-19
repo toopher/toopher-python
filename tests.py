@@ -289,7 +289,7 @@ class ToopherTests(unittest.TestCase):
             self.assertEqual(self.api.advanced.raw.client.last_called_data['test_param'], '42')
         self.assertRaises(KeyError, fn)
 
-        self.api.authenticate(self.id, self.terminal_name, self.action_name)
+        self.api.authenticate(self.id, self.terminal_name, action_name=self.action_name)
         last_called_data = self.api.advanced.raw.client.last_called_data
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
         self.assertEqual(last_called_data['pairing_id'], self.id)
@@ -467,7 +467,7 @@ class ToopherTests(unittest.TestCase):
                 'lol if you think this is json')})
 
         def fn():
-            self.api.authenticate(self.user_name, self.requester_specified_id)
+            self.api.authenticate(self.user_name, requester_specified_id=self.requester_specified_id)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_unrecognized_error_still_raises_error(self):
@@ -481,7 +481,7 @@ class ToopherTests(unittest.TestCase):
         })
 
         def fn():
-            self.api.authenticate(self.user_name, self.requester_specified_id)
+            self.api.authenticate(self.user_name, requester_specified_id=self.requester_specified_id)
         self.assertRaises(toopher.ToopherApiError, fn)
 
     def test_create_user_terminal(self):
@@ -614,7 +614,7 @@ class ToopherTests(unittest.TestCase):
         })
 
         def fn():
-            auth_request = self.api.authenticate(self.user_name, self.requester_specified_id)
+            auth_request = self.api.authenticate(self.user_name, requester_specified_id=self.requester_specified_id)
         self.assertRaises(toopher.PairingDeactivatedError, fn)
 
     def test_unauthorized_pairing_raises_correct_error(self):
@@ -628,7 +628,7 @@ class ToopherTests(unittest.TestCase):
         })
 
         def fn():
-            auth_request = self.api.authenticate(self.user_name, self.requester_specified_id)
+            auth_request = self.api.authenticate(self.user_name, requester_specified_id=self.requester_specified_id)
         self.assertRaises(toopher.PairingDeactivatedError, fn)
 
 class ToopherBaseTests(unittest.TestCase):

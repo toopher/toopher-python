@@ -145,15 +145,15 @@ class ToopherApi(object):
         result = self.advanced.raw.post(url, **params)
         return Pairing(result, self)
 
-    def authenticate(self, id_or_username, terminal, action_name=None, **kwargs):
+    def authenticate(self, id_or_username, terminal_name=None, requester_specified_id=None, action_name=None, **kwargs):
         url = '/authentication_requests/initiate'
         try:
             uuid.UUID(id_or_username)
             params = {'pairing_id': id_or_username,
-                      'terminal_name': terminal}
+                      'terminal_name': terminal_name}
         except:
             params = {'user_name': id_or_username,
-                      'requester_specified_terminal_id': terminal}
+                      'requester_specified_terminal_id': requester_specified_id}
         if action_name:
             params['action_name'] = action_name
         params.update(kwargs)
