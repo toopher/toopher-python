@@ -178,7 +178,7 @@ class ApiRawRequester(object):
         self.client = requests_oauthlib.OAuth1Session(key, client_secret=secret)
         self.client.verify = True
 
-        base_url = api_url if api_url else DEFAULT_BASE_URL
+        base_url = api_url or DEFAULT_BASE_URL
         self.base_url = base_url.rstrip('/')
 
     def get(self, endpoint, **kwargs):
