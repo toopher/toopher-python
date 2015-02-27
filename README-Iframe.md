@@ -74,47 +74,25 @@ pair_iframe_url = iframe_api.get_user_management_url(username, reset_email)
 ```
 
 #### Validating postback data from Authentication iframe and parsing API errors
-In this example, `data` is a `dict` of the form data POSTed to your server from the Toopher Authentication iframe.  You should replace the commented blocks with code appropriate for the condition described in the comment.
+In this example, `data` is a `dict` of the form data POSTed to your server from the Toopher Authentication iframe.  You should replace the commented blocks in the `except` with code appropriate for the condition described in the comment.
+
+There are two ways to validate postback data:
 
 ```python
 
-request_token = request.session.get('ToopherRequestToken')
-# invalidate the Request Token to guard against replay attacks
-if 'ToopherRequestToken' in request.session:
-    del request.session['ToopherRequestToken']
-
 try:
-    validated_data = iframe_api.validate_postback(data, request_token)
-    if 'error_code' in validated_data:
-        error_code = validated_data['error_code']
-        # check for API errors
+    # returns AuthenticationRequest object
+    authentication_request = iframe_api.process_postback(data)
+except toopher.ToopherApiError e:
+    # e.message will return more information about what specifically went wrong
+    # (incorrect session token, expired TTL, invalid signature, pairing deactivated, user disabled, user unknown)
+```
 
-        if error_code == toopher.ERROR_CODE_PAIRING_DEACTIVATED:
-            # User deleted the pairing on their mobile device.
-            # 
-            # Your server should display a Toopher Pairing iframe so their account can be re-paired
-            #
-        elif error_code == toopher.ERROR_CODE_USER_DISABLED:
-            # User has been marked as "Opt-Out" in the Toopher API
-            #
-            # If your service allows opt-out, the user should be granted access.
-            #
-        elif error_code == toopher.ERROR_CODE_USER_UNKNOWN:
-            # User has never authenticated with Toopher on this server
-            #
-            # Your server should display a Toopher Pairing iframe so their account can be paired
-            #
-    else:
-        # signature is valid, and no api errors.  check authentication result
-        auth_pending = validated_data.get('pending').lower() == 'true'
-        auth_granted = validated_data.get('granted').lower() == 'true'
-
-        # authentication_result is the ultimate result of Toopher second-factor authentication
-        authentication_result = auth_granted and not auth_pending
-except toopher.SignatureValidationError, e:
-    # signature was invalid.  User should not authenticated
-    # 
-    # e.message will return more information about what specifically
-    # went wrong (incorrect session token, expired TTL, invalid signature)
-    # 
+```python
+try:
+    # returns boolean indicating if AuthenticationRequest was granted
+    postback_granted = iframe_api.is_postback_granted(data)
+except toopher.ToopherApiError e:
+    # e.message will return more information about what specifically went wrong
+    # (incorrect session token, expired TTL, invalid signature, pairing deactivated, user disabled, user unknown)
 ```
