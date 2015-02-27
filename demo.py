@@ -12,7 +12,7 @@ def print_horizontal_line(char='-'):
     print char*72
 
 def print_text_with_underline(text, char='-'):
-    print text
+    print '\n' + text
     print_horizontal_line(char)
 
 def initialize_api():
@@ -51,6 +51,7 @@ def pair_device_with_toopher(api):
             print 'The pairing phrase was not accepted (reason: %s)' % e
             
     while True:
+        print
         raw_input('Authorize pairing on phone and then press return to continue.')
         print 'Checking status of pairing request...'
         
@@ -60,7 +61,6 @@ def pair_device_with_toopher(api):
                 print 'The pairing has not been authorized by the phone yet'
             elif pairing.enabled:
                 print 'Pairing complete'
-                print
                 break
             else:
                 print 'The pairing has been denied'
@@ -72,27 +72,26 @@ def pair_device_with_toopher(api):
     return pairing
 
 def authenticate_with_toopher(api, pairing):
-    terminal_extras = {}
+    requester_specified_id = None
     while True:
         print_text_with_underline('Step 2: Authenticate log in')
         terminal_name = raw_input('Enter a terminal name for this authentication request [%s]: ' % DEFAULT_TERMINAL_NAME)
         if not terminal_name:
             terminal_name = DEFAULT_TERMINAL_NAME
 
-        if terminal_name in terminal_extras:
-            terminal_extra = terminal_extras[terminal_name]
-        else:
-            terminal_extra = terminal_extras[terminal_name] = uuid.uuid4()
-            
+        if not requester_specified_id:
+            requester_specified_id = uuid.uuid4()
+
         print 'Sending authentication request...'
         
         try:
-            auth_request = api.authenticate(pairing.user.name, terminal_name=terminal_extra)
+            auth_request = api.authenticate(pairing.user.name, terminal_name=terminal_name, requester_specified_id=requester_specified_id)
         except ToopherApiError, e:
             print 'Error initiating authentication (reason: %s)' % e
-            continue
+            break
         
         while True:
+            print
             raw_input('Response to authentication request on phone (if prompted) and then press return to continue.')
             print 'Checking status of authentication request...'
             
@@ -120,6 +119,5 @@ def demo():
        authenticate_with_toopher(api, pairing)
 
 if __name__ == '__main__':
-    print_horizontal_line('=')
     print_text_with_underline('Toopher Library Demo', '=')
     demo()
