@@ -260,7 +260,7 @@ class Pairing(ToopherBase):
             self.pending = json_response['pending']
             self.user = User(json_response['user'], api)
         except Exception as e:
-            raise ToopherApiError("Could not parse pairing status from response")
+            raise ToopherApiError('Could not parse pairing from response: ' + e.message)
 
     def __nonzero__(self):
         return self.enabled
@@ -297,7 +297,7 @@ class Pairing(ToopherBase):
             self.pending = json_response['pending']
             self.user._update(json_response['user'])
         except Exception as e:
-            raise ToopherApiError("Could not parse pairing status from response")
+            raise ToopherApiError('Could not parse pairing from response: ' + e.message)
 
 
 
@@ -322,8 +322,8 @@ class AuthenticationRequest(ToopherBase):
             self.terminal = UserTerminal(json_response['terminal'], api)
             self.user = User(json_response['user'], api)
             self.action = Action(json_response['action'])
-        except Exception:
-            raise ToopherApiError("Could not parse authentication from response")
+        except Exception as e:
+            raise ToopherApiError('Could not parse authentication request from response: ' + e.message)
 
     def __nonzero__(self):
         return self.granted
@@ -352,8 +352,8 @@ class AuthenticationRequest(ToopherBase):
             self.terminal._update(json_response['terminal'])
             self.user._update(json_response['user'])
             self.action._update(json_response['action'])
-        except Exception:
-            raise ToopherApiError("Could not parse authentication status from response")
+        except Exception as e:
+            raise ToopherApiError('Could not parse authentication request from response: ' + e.message)
 
 
 
@@ -363,15 +363,15 @@ class Action(ToopherBase):
         try:
             self.id = json_response['id']
             self.name = json_response['name']
-        except Exception:
-            raise ToopherApi('Could not parse action from response')
+        except Exception as e:
+            raise ToopherApi('Could not parse action from response: ' + e.message)
 
     def _update(self, json_response):
         self.raw_response = json_response
         try:
             self.name = json_response['name']
-        except Exception:
-            raise ToopherApiError('Could not parse action from response')
+        except Exception as e:
+            raise ToopherApiError('Could not parse action from response: ' + e.message)
 
 
 
@@ -400,8 +400,8 @@ class UserTerminal(ToopherBase):
             self.name = json_response['name']
             self.requester_specified_id = json_response['requester_specified_id']
             self.user = User(json_response['user'], api)
-        except Exception:
-            raise ToopherApiError("Could not parse user terminal from response")
+        except Exception as e:
+            raise ToopherApiError('Could not parse user terminal from response: ' + e.message)
 
     def refresh_from_server(self):
         url = '/user_terminals/' + self.id
@@ -414,8 +414,8 @@ class UserTerminal(ToopherBase):
             self.name = json_response['name']
             self.requester_specified_id = json_response['requester_specified_id']
             self.user._update(json_response['user'])
-        except Exception:
-            raise ToopherApiError("Could not parse user terminal from response")
+        except Exception as e:
+            raise ToopherApiError('Could not parse user terminal from response: ' + e.message)
 
 
 class Users(ToopherObjectFactory):
@@ -451,8 +451,8 @@ class User(ToopherBase):
             self.id = json_response['id']
             self.name = json_response['name']
             self.toopher_authentication_enabled = json_response['toopher_authentication_enabled']
-        except Exception:
-            raise ToopherApiError("Could not parse user from response")
+        except Exception as e:
+            raise ToopherApiError('Could not parse user from response: ' + e.message)
 
     def refresh_from_server(self):
         url = '/users/' + self.id
@@ -479,6 +479,6 @@ class User(ToopherBase):
         try:
             self.name = json_response['name']
             self.toopher_authentication_enabled = json_response['toopher_authentication_enabled']
-        except Exception:
-            raise ToopherApiError("Could not parse user from response")
+        except Exception as e:
+            raise ToopherApiError('Could not parse user from response: ' + e.message)
 
