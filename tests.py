@@ -140,7 +140,7 @@ class ToopherTests(unittest.TestCase):
     def test_version_number_in_setup(self):
         ''' Ensure that the setup.py file has the same version number as the toopher/__init__.py file '''
         for line in open('setup.py'):
-            if "version" in line:
+            if 'version' in line:
                 # in setup.py the version is written as "version='1.0.6'," so we need to remove version=' and ',
                 version_number = line.strip().replace("version='", "").replace("',", "")
                 self.assertEqual(version_number, toopher.VERSION)
@@ -387,7 +387,7 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(pairing.user.id, self.user_id)
         self.assertTrue(pairing.user.toopher_authentication_enabled)
         self.assertTrue(pairing.enabled)
-        self.assertEqual(pairing.random_key, "84")
+        self.assertEqual(pairing.random_key, '84')
 
     def test_access_arbitrary_keys_in_authentication_request(self):
         self.api.advanced.raw.client = HttpClientMock({
@@ -420,7 +420,7 @@ class ToopherTests(unittest.TestCase):
         self.assertEqual(auth_request.user.name, self.user_name)
         self.assertEqual(auth_request.action.id, self.action_id)
         self.assertEqual(auth_request.action.name, self.action_name)
-        self.assertEqual(auth_request.random_key, "84")
+        self.assertEqual(auth_request.random_key, '84')
 
     def test_pair_qr(self):
         self.api.advanced.raw.client = HttpClientMock({
@@ -515,7 +515,7 @@ class ToopherTests(unittest.TestCase):
             )
         })
         user_terminal = self.api.advanced.user_terminals.get_by_id(self.id)
-        self.assertEqual(self.api.advanced.raw.client.last_called_method, "GET")
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(user_terminal.id, self.id)
         self.assertEqual(user_terminal.name, self.terminal_name)
         self.assertEqual(user_terminal.requester_specified_id, self.requester_specified_id)
@@ -868,7 +868,7 @@ class PairingTests(unittest.TestCase):
         pairing = toopher.Pairing(response, self.api)
         self.api.advanced.raw.client = HttpClientMock({
             'qr/pairings/{0}'.format(pairing.id): (200,
-                    "{}")
+                    '{}')
         })
         pairing.get_qr_code_image()
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
@@ -952,9 +952,9 @@ class UserTerminalTests(unittest.TestCase):
         user_terminal.refresh_from_server()
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'GET')
         self.assertEqual(user_terminal.id, self.id)
-        self.assertEqual(user_terminal.name, "name changed")
-        self.assertEqual(user_terminal.requester_specified_id, "requester_specified_id changed")
-        self.assertEqual(user_terminal.user.name, "user_name changed")
+        self.assertEqual(user_terminal.name, 'name changed')
+        self.assertEqual(user_terminal.requester_specified_id, 'requester_specified_id changed')
+        self.assertEqual(user_terminal.user.name, 'user_name changed')
         self.assertEqual(user_terminal.user.id, self.user_id)
         self.assertFalse(user_terminal.user.toopher_authentication_enabled)
 
