@@ -1,6 +1,7 @@
 import os
 from oauthlib import oauth1
 import urllib
+import urlparse
 import hashlib
 import hmac
 import base64
@@ -36,6 +37,7 @@ class SignatureValidationError(ToopherApiError): pass
 class ToopherIframe(object):
 
     def __init__(self, key, secret, api_uri=None):
+        self.key = key
         self.secret = secret
         self.client = oauth1.Client(key, client_secret=secret, signature_type=oauth1.SIGNATURE_TYPE_QUERY)
         api_uri = api_uri if api_uri else DEFAULT_BASE_URL
@@ -72,18 +74,39 @@ class ToopherIframe(object):
 
         return self._get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
 
-    def validate_postback(self, data, request_token=None, **kwargs):
-        if not 'ttl' in kwargs:
-            ttl = DEFAULT_IFRAME_TTL
+    def process_postback(self, urlencoded_form_data, request_token=None, **kwargs):
+        toopher_data = self._urldecode_data(urlencoded_form_data)
+
+        if 'error_code' in toopher_data:
+            error_message = toopher_data['error_message']
+            error = error_codes_to_errors[int(toopher_data['error_code'])]
+            raise error(error_message)
         else:
-            ttl = kwargs.pop('ttl')
+            validated_data = self._validate_data(toopher_data, request_token, kwargs)
+            toopher_api = ToopherApi(self.key, self.secret)
+            resource_type = validated_data['resource_type']
+            if resource_type == 'authentication_request':
+                return AuthenticationRequest(self._create_authentication_request_dict(validated_data), toopher_api)
+            elif resource_type == 'pairing':
+                return Pairing(self._create_pairing_dict(validated_data), toopher_api)
+            elif resource_type == 'requester_user':
+                return User(self._create_user_dict(validated_data), toopher_api)
+            else:
+                raise ToopherApiError('The postback resource type is not valid: {0}'.format(resource_type))
 
-        # make a mutable copy of the data
-        data = dict(data)
+    def is_postback_granted(self, data, request_token=None, **kwargs):
+        authentication_request_or_pairing = self.process_postback(data, request_token)
+        if isinstance(authentication_request_or_pairing, AuthenticationRequest):
+            return True if authentication_request_or_pairing.granted and not authentication_request_or_pairing.pending else False
+        else:
+            raise ToopherApiError('The postback did not return an AuthenticationRequest')
 
-        # flatten data if necessary
-        if hasattr(data.values()[0], '__iter__'):
-            data = dict((k,v[0]) for (k,v) in data.items())
+    def _urldecode_data(self, data):
+        data_dict = urlparse.parse_qs(data['toopher_iframe_data'])
+        return dict((k,v[0]) for (k,v) in data_dict.items())
+
+    def _validate_data(self, data, request_token, kwargs):
+        ttl = kwargs.pop('ttl') if 'ttl' in kwargs else DEFAULT_IFRAME_TTL
 
         missing_keys = []
         for required_key in ('toopher_sig', 'timestamp', 'session_token'):
@@ -91,29 +114,77 @@ class ToopherIframe(object):
                 missing_keys.append(required_key)
 
         if missing_keys:
-            raise SignatureValidationError("Missing required keys: {0}".format(missing_keys))
+            raise SignatureValidationError('Missing required keys: {0}'.format(', '.join(missing_keys)))
 
         if request_token:
             if request_token != data.get('session_token'):
-                raise SignatureValidationError("Session token does not match expected value!")
+                raise SignatureValidationError('Session token does not match expected value!')
 
         maybe_sig = data['toopher_sig']
         del data['toopher_sig']
         signature_valid = False
         try:
-            computed_signature  =self._signature(data)
+            computed_signature = self._signature(data)
             signature_valid = maybe_sig == computed_signature
-        except Exception, e:
-            raise SignatureValidationError("Error while calculating signature", e)
+        except Exception as e:
+            raise SignatureValidationError('Error while calculating signature: %' + e.args)
 
         if not signature_valid:
-            raise SignatureValidationError("Computed signature does not match submitted signature: {0} vs {1}".format(computed_signature, maybe_sig))
+            raise SignatureValidationError('Computed signature does not match submitted signature: {0} vs {1}'.format(computed_signature, maybe_sig))
 
         ttl_valid = int(time.time()) - int(data['timestamp']) < ttl
         if not ttl_valid:
-            raise SignatureValidationError("TTL expired")
+            raise SignatureValidationError('TTL expired')
 
         return data
+
+    def _create_authentication_request_dict(self, data):
+        return {
+            'id': data['id'],
+            'pending': True if data['pending'] == 'True' else False,
+            'granted': True if data['granted'] == 'True' else False,
+            'automated': True if data['automated'] == 'True' else False,
+            'reason': data['reason'],
+            'reason_code': data['reason_code'],
+            'terminal': {
+                'id': data['terminal_id'],
+                'name': data['terminal_name'],
+                'requester_specified_id': data['terminal_requester_specified_id'],
+                'user': {
+                    'id': data['pairing_user_id'],
+                    'name': data['user_name'],
+                    'toopher_authentication_enabled': True if data['user_toopher_authentication_enabled'] == 'True' else False
+                }
+            },
+            'user': {
+                'id': data['pairing_user_id'],
+                'name': data['user_name'],
+                'toopher_authentication_enabled': True if data['user_toopher_authentication_enabled'] == 'True' else False
+            },
+            'action': {
+                'id': data['action_id'],
+                'name': data['action_name']
+            }
+        }
+
+    def _create_pairing_dict(self, data):
+        return {
+            'id': data['id'],
+            'enabled': True if data['enabled'] == 'True' else False,
+            'pending': True if data['pending'] == 'False' else False,
+            'user': {
+                'id': data['pairing_user_id'],
+                'name': data['user_name'],
+                'toopher_authentication_enabled': True if data['user_toopher_authentication_enabled'] == 'True' else False
+            }
+        }
+
+    def _create_user_dict(self, data):
+        return {
+            'id': data['id'],
+            'name': data['name'],
+            'toopher_authentication_enabled': True if data['toopher_authentication_enabled'] == 'True' else False
+        }
 
     def _signature(self, data):
         to_sign = urllib.urlencode(sorted(data.items())).encode('utf-8')

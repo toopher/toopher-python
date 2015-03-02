@@ -81,8 +81,8 @@ There are two ways to validate postback data:
 ```python
 
 try:
-    # returns AuthenticationRequest object
-    authentication_request = iframe_api.process_postback(data)
+    # returns an AuthenticationRequest, Pairing or User object
+    postback_object = iframe_api.process_postback(form_data)
 except toopher.ToopherApiError e:
     # e.message will return more information about what specifically went wrong
     # (incorrect session token, expired TTL, invalid signature, pairing deactivated, user disabled, user unknown)
@@ -91,7 +91,8 @@ except toopher.ToopherApiError e:
 ```python
 try:
     # returns boolean indicating if AuthenticationRequest was granted
-    postback_granted = iframe_api.is_postback_granted(data)
+    # raises ToopherApiError if postback returns a Pairing or User object
+    authentication_request_granted = iframe_api.is_postback_granted(form_data)
 except toopher.ToopherApiError e:
     # e.message will return more information about what specifically went wrong
     # (incorrect session token, expired TTL, invalid signature, pairing deactivated, user disabled, user unknown)

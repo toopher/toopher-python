@@ -5,7 +5,7 @@ import requests
 import unittest
 import uuid
 import time
-import werkzeug.datastructures
+import urllib
 
 class HttpClientMock(object):
     def __init__(self, paths):
@@ -43,41 +43,188 @@ class ToopherIframeTests(unittest.TestCase):
     def tearDown(self):
         time.time = self.old_time
 
-    def test_validate_good_signature_is_successful(self):
-        data = {
-            'foo': 'bar',
-            'timestamp': '1000',
+    def _get_auth_request_postback_data_as_dict(self):
+        return {
+            'id': '1',
+            'pending': 'False',
+            'granted': 'True',
+            'automated': 'False',
+            'reason': 'it is a test',
+            'reason_code': '100',
+            'terminal_id': '1',
+            'terminal_name': 'terminal name',
+            'terminal_requester_specified_id': 'requester specified id',
+            'pairing_user_id': '1',
+            'user_name': 'user name',
+            'user_toopher_authentication_enabled': 'True',
+            'action_id': '1',
+            'action_name': 'action name',
+            'toopher_sig': 'Z7qH+txabWaW7rPqWWU7EvDzs9M=',
             'session_token': ToopherIframeTests.request_token,
-            'toopher_sig': '6d2c7GlQssGmeYYGpcf+V/kirOI='
+            'timestamp': '1000',
+            'resource_type': 'authentication_request'
         }
-        try:
-            self.iframe_api.validate_postback(data, ToopherIframeTests.request_token)
-        except toopher.SignatureValidationError:
-            self.fail()
 
-    def test_arrays_get_flattened_for_validate(self):
-        data = {
-            'foo': ['bar'],
-            'timestamp': ['1000'],
-            'session_token': [ToopherIframeTests.request_token],
-            'toopher_sig': ['6d2c7GlQssGmeYYGpcf+V/kirOI=']
-        }
-        try:
-            self.iframe_api.validate_postback(data, ToopherIframeTests.request_token)
-        except toopher.SignatureValidationError:
-            self.fail()
+    def _get_urlencoded_auth_request_postback_data(self, auth_request_data = None):
+        data = auth_request_data if auth_request_data else self._get_auth_request_postback_data_as_dict()
+        return {'toopher_iframe_data': urllib.urlencode(data)}
 
-    def test_immutable_dictionaries_get_copied_for_validate(self):
-        data = werkzeug.datastructures.ImmutableMultiDict([
-            ('foo', 'bar'),
-            ('timestamp', '1000'),
-            ('session_token', ToopherIframeTests.request_token),
-            ('toopher_sig', '6d2c7GlQssGmeYYGpcf+V/kirOI=')
-        ])
+    def _get_urlencoded_pairing_postback_data(self):
+        return {'toopher_iframe_data': urllib.urlencode({
+            'id': '1',
+            'enabled': 'True',
+            'pending': 'False',
+            'pairing_user_id': '1',
+            'user_name': 'user name',
+            'user_toopher_authentication_enabled': 'True',
+            'toopher_sig': 'VFWBmtE49sn5DWUhq9sC9dem4Gg=',
+            'session_token': ToopherIframeTests.request_token,
+            'timestamp': '1000',
+            'resource_type': 'pairing'
+        })}
+
+    def _get_urlencoded_user_postback_data(self):
+        return {'toopher_iframe_data': urllib.urlencode({
+            'id': '1',
+            'name': 'user name',
+            'toopher_authentication_enabled': 'True',
+            'toopher_sig': '+pums3B+sw/w6kSQKKqXHBX0YBU=',
+            'session_token': ToopherIframeTests.request_token,
+            'timestamp': '1000',
+            'resource_type': 'requester_user'
+        })}
+
+    def test_process_postback_good_signature_returns_authentication_request(self):
+        auth_request = self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(), ToopherIframeTests.request_token)
+        self.assertEqual(type(auth_request), toopher.AuthenticationRequest)
+
+    def test_process_postback_good_signature_returns_pairing(self):
+        pairing = self.iframe_api.process_postback(self._get_urlencoded_pairing_postback_data(), ToopherIframeTests.request_token)
+        self.assertEqual(type(pairing), toopher.Pairing)
+
+    def test_process_postback_good_signature_returns_user(self):
+        user = self.iframe_api.process_postback(self._get_urlencoded_user_postback_data(), ToopherIframeTests.request_token)
+        self.assertEqual(type(user), toopher.User)
+
+    def test_process_postback_bad_signature_fails(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['toopher_sig'] = 'invalid'
         try:
-            self.iframe_api.validate_postback(data, ToopherIframeTests.request_token)
-        except toopher.SignatureValidationError:
-            self.fail()
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('SignatureValidationError was not raised for bad signature')
+        except toopher.SignatureValidationError as e:
+            self.assertEqual(e.message, 'Computed signature does not match submitted signature: {0} vs {1}'.format(self._get_auth_request_postback_data_as_dict()['toopher_sig'], data['toopher_sig']))
+
+    def test_process_postback_expired_signature_fails(self):
+        data = self._get_urlencoded_auth_request_postback_data()
+        time.time = lambda: 2000
+        try:
+            self.iframe_api.process_postback(data, ToopherIframeTests.request_token)
+            self.fail('SignatureValidationError was not raised for expired signature')
+        except toopher.SignatureValidationError as e:
+            self.assertEqual(e.message, 'TTL expired')
+
+    def test_process_postback_missing_signature_fails(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        del data['toopher_sig']
+        try:
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('SignatureValidationError was not raised for missing toopher_sig')
+        except toopher.SignatureValidationError as e:
+            self.assertEqual(e.message, 'Missing required keys: toopher_sig')
+
+    def test_process_postback_missing_timestamp_fails(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        del data['timestamp']
+        try:
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('SignatureValidationError was not raised for missing timestamp')
+        except toopher.SignatureValidationError as e:
+            self.assertEqual(e.message, 'Missing required keys: timestamp')
+
+    def test_process_postback_missing_session_token_fails(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        del data['session_token']
+        try:
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('SignatureValidationError was not raised for missing session_token')
+        except toopher.SignatureValidationError as e:
+            self.assertEqual(e.message, 'Missing required keys: session_token')
+
+    def test_process_postback_invalid_session_token_fails(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['session_token'] = 'invalid token'
+        try:
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('SignatureValidationError was not raised for invalid session_token')
+        except toopher.SignatureValidationError as e:
+            self.assertEqual(e.message, 'Session token does not match expected value!')
+
+    def test_process_postback_with_704_fails(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['error_code'] = 704
+        data['error_message'] = 'The specified user has disabled Toopher authentication.'
+        try:
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('UserDisabledError was not raised for error code 704')
+        except toopher.UserDisabledError as e:
+            self.assertEqual(e.message, 'The specified user has disabled Toopher authentication.')
+
+    def test_process_postback_with_705_fails(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['error_code'] = 705
+        data['error_message'] = 'No matching user exists'
+        try:
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('UserUnknownError was not raised for error code 705')
+        except toopher.UserUnknownError as e:
+            self.assertEqual(e.message, 'No matching user exists')
+
+    def test_process_postback_with_706_fails(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['error_code'] = 706
+        data['error_message'] = 'No matching terminal exists'
+        try:
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('TerminalUnknownError was not raised for error code 706')
+        except toopher.TerminalUnknownError as e:
+            self.assertEqual(e.message, 'No matching terminal exists')
+
+    def test_process_postback_with_707_fails(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['error_code'] = 707
+        data['error_message'] = 'Not allowed: This pairing has been deactivated.'
+        try:
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('PairingDeactivatedError was not raised for error code 707')
+        except toopher.PairingDeactivatedError as e:
+            self.assertEqual(e.message, 'Not allowed: This pairing has been deactivated.')
+
+    def test_is_postback_granted_is_true_with_auth_request_granted(self):
+        data = self._get_urlencoded_auth_request_postback_data()
+        postback_granted = self.iframe_api.is_postback_granted(data, ToopherIframeTests.request_token)
+        self.assertTrue(postback_granted, 'Postback should have been granted with AuthentiationRequest.granted = True')
+
+    def test_is_postback_granted_is_false_with_auth_request_not_granted(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['granted'] = 'False'
+        data['toopher_sig'] = 'h9fmsPhS+/TGhCGsoDwXkkmBAAU='
+        postback_granted = self.iframe_api.is_postback_granted(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+        self.assertFalse(postback_granted, 'Postback should not have been granted with AuthenticationRequest.granted = False')
+
+    def test_is_postback_granted_raises_error_when_pairing_is_returned(self):
+        try:
+            self.iframe_api.is_postback_granted(self._get_urlencoded_pairing_postback_data(), ToopherIframeTests.request_token)
+            self.fail('ToopherApiError was not raised when postback returned Pairing object')
+        except toopher.ToopherApiError as e:
+            self.assertEqual(e.message, 'The postback did not return an AuthenticationRequest')
+
+    def test_is_postback_granted_raises_error_when_user_is_returned(self):
+        try:
+            self.iframe_api.is_postback_granted(self._get_urlencoded_user_postback_data(), ToopherIframeTests.request_token)
+            self.fail('ToopherApiError was nont raised when postback returned User object')
+        except toopher.ToopherApiError as e:
+            self.assertEqual(e.message, 'The postback did not return an AuthenticationRequest')
 
     def test_get_user_management_url(self):
         expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=jdoe%40example.com&expires=1300&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=NjwH5yWPE2CCJL8v%2FMNknL%2BeTpE%3D'
