@@ -276,8 +276,6 @@ class ToopherTests(unittest.TestCase):
             api = toopher.ToopherApi()
         self.assertRaises(TypeError, fn)
 
-        api = toopher.ToopherApi('key', 'secret')
-
     def test_version_number_in_library(self):
         major, minor, patch = toopher.VERSION.split('.')
         self.assertTrue(int(major) >= 1)
@@ -945,6 +943,23 @@ class AuthenticationRequestTests(unittest.TestCase):
         self.assertFalse(auth_request.user.toopher_authentication_enabled)
         self.assertEqual(auth_request.action.id, self.action_id)
         self.assertEqual(auth_request.action.name, 'action_name changed')
+
+    def test_update_with_incomplete_response_raises_exception(self):
+        response = {
+            'id': self.id,
+            'pending':True,
+            'granted':False,
+            'automated': False,
+            'reason': self.reason,
+            'reason_code': self.reason_code,
+            'terminal': self.terminal,
+            'user': self.user,
+            'action': self.action
+        }
+        auth_request = toopher.AuthenticationRequest(response, self.api)
+        def fn():
+            auth_request._update({'key': 'value'})
+        self.assertRaises(toopher.ToopherApiError, fn)
         
 
 class PairingTests(unittest.TestCase):
@@ -1055,6 +1070,18 @@ class PairingTests(unittest.TestCase):
             self.fail('pairing.email_reset_link() returned a status code of >= 400: %s' % e)
 
 
+    def test_update_with_incomplete_response_raises_exception(self):
+        response = {'id': self.id,
+                    'enabled': False,
+                    'pending': True,
+                    'user': self.user
+        }
+        pairing = toopher.Pairing(response, self.api)
+        def fn():
+            pairing._update({'id': self.id, 'pending': True, 'user': self.user})
+        self.assertRaises(toopher.ToopherApiError, fn)
+
+
 class UserTerminalTests(unittest.TestCase):
     def setUp(self):
         self.api = toopher.ToopherApi('key', 'secret')
@@ -1104,6 +1131,18 @@ class UserTerminalTests(unittest.TestCase):
         self.assertEqual(user_terminal.user.name, 'user_name changed')
         self.assertEqual(user_terminal.user.id, self.user_id)
         self.assertFalse(user_terminal.user.toopher_authentication_enabled)
+
+    def test_update_with_incomplete_response_raises_exception(self):
+        response = {
+            'id': self.id,
+            'name': self.name,
+            'requester_specified_id': self.requester_specified_id,
+            'user': self.user
+        }
+        user_terminal = toopher.UserTerminal(response, self.api)
+        def fn():
+            user_terminal._update({'id': self.id, 'requester_specified_id': self.requester_specified_id, 'user': self.user})
+        self.assertRaises(toopher.ToopherApiError, fn)
 
 
 class UserTests(unittest.TestCase):
@@ -1197,6 +1236,18 @@ class UserTests(unittest.TestCase):
             user.reset()
         except toopher.ToopherApiError as e:
             self.fail('pairing.email_reset_link() returned a status code of >= 400: %s' % e)
+
+    def test_update_with_incomplete_response_raises_exception(self):
+        response = {
+            'id': self.id,
+            'name': self.name,
+            'toopher_authentication_enabled': True
+        }
+        user = toopher.User(response, self.api)
+        def fn():
+            user._update({'id': self.id, 'toopher_authentication_enabled': True})
+        self.assertRaises(toopher.ToopherApiError, fn)
+
 
 def main():
     unittest.main()
