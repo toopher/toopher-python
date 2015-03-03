@@ -14,5 +14,5 @@ $ pip install -r requirements.txt
 #### Tests
 To run tests enter:
 ```shell
-$ python tests.py
+$ nosetests test
 ```
