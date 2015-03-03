@@ -9,6 +9,7 @@ import uuid
 import time
 import requests_oauthlib
 import sys
+import logging
 
 DEFAULT_BASE_URL = 'https://api.toopher.com/v1'
 DEFAULT_IFRAME_TTL = 300
@@ -94,12 +95,17 @@ class ToopherIframe(object):
             else:
                 raise ToopherApiError('The postback resource type is not valid: {0}'.format(resource_type))
 
-    def is_postback_granted(self, data, request_token=None, **kwargs):
-        authentication_request_or_pairing = self.process_postback(data, request_token)
-        if isinstance(authentication_request_or_pairing, AuthenticationRequest):
-            return True if authentication_request_or_pairing.granted and not authentication_request_or_pairing.pending else False
-        else:
-            raise ToopherApiError('The postback did not return an AuthenticationRequest')
+    def is_authentication_granted(self, data, request_token=None, **kwargs):
+        try:
+            authentication_request = self.process_postback(data, request_token)
+            if isinstance(authentication_request, AuthenticationRequest):
+                return True if authentication_request.granted and not authentication_request.pending else False
+            else:
+                logging.warning('The postback did not return an AuthenticationRequest')
+                return False
+        except Exception as e:
+            logging.error(e)
+            return False
 
     def _urldecode_data(self, data):
         data_dict = urlparse.parse_qs(data['toopher_iframe_data'])

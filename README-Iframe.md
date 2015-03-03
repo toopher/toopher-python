@@ -92,7 +92,7 @@ except toopher.ToopherApiError e:
 try:
     # returns boolean indicating if AuthenticationRequest was granted
     # raises ToopherApiError if postback returns a Pairing or User object
-    authentication_request_granted = iframe_api.is_postback_granted(form_data)
+    authentication_request_granted = iframe_api.is_authentication_granted(form_data)
 except toopher.ToopherApiError e:
     # e.message will return more information about what specifically went wrong
     # (incorrect session token, expired TTL, invalid signature, pairing deactivated, user disabled, user unknown)
