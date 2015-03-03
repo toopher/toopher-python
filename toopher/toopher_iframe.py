@@ -8,6 +8,8 @@ import time
 import logging
 from toopher_api import *
 
+logging.basicConfig(format='%(levelname)s:%(message)s')
+
 DEFAULT_BASE_URL = 'https://api.toopher.com/v1'
 DEFAULT_IFRAME_TTL = 300
 IFRAME_VERSION = '2'
