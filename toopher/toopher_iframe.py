@@ -8,8 +8,6 @@ import time
 import logging
 from toopher_api import *
 
-logging.basicConfig(format='%(levelname)s:%(message)s')
-
 DEFAULT_BASE_URL = 'https://api.toopher.com/v1'
 DEFAULT_IFRAME_TTL = 300
 IFRAME_VERSION = '2'
@@ -17,6 +15,7 @@ IFRAME_VERSION = '2'
 class SignatureValidationError(ToopherApiError): pass
 
 class ToopherIframe(object):
+    logging.basicConfig(format='%(levelname)s: %(message)s')
 
     def __init__(self, key, secret, api_uri=None):
         self.key = key
@@ -93,8 +92,14 @@ class ToopherIframe(object):
         return dict((k,v[0]) for (k,v) in data_dict.items())
 
     def _validate_data(self, data, request_token, kwargs):
-        ttl = kwargs.pop('ttl') if 'ttl' in kwargs else DEFAULT_IFRAME_TTL
 
+        self._check_for_missing_keys(data)
+        self._verify_session_token(data.get('session_token'), request_token)
+        self._check_if_signature_is_expired(data.get('timestamp'), kwargs)
+        self._validate_signature(data)
+        return data
+
+    def _check_for_missing_keys(self, data):
         missing_keys = []
         for required_key in ('toopher_sig', 'timestamp', 'session_token'):
             if not required_key in data:
@@ -103,27 +108,28 @@ class ToopherIframe(object):
         if missing_keys:
             raise SignatureValidationError('Missing required keys: {0}'.format(', '.join(missing_keys)))
 
+    def _verify_session_token(self, session_token, request_token):
         if request_token:
-            if request_token != data.get('session_token'):
+            if request_token != session_token:
                 raise SignatureValidationError('Session token does not match expected value!')
 
-        maybe_sig = data['toopher_sig']
-        del data['toopher_sig']
-        signature_valid = False
-        try:
-            computed_signature = self._signature(data)
-            signature_valid = maybe_sig == computed_signature
-        except Exception as e:
-            raise SignatureValidationError('Error while calculating signature: %' + e.args)
-
-        if not signature_valid:
-            raise SignatureValidationError('Computed signature does not match submitted signature: {0} vs {1}'.format(computed_signature, maybe_sig))
-
-        ttl_valid = int(time.time()) - int(data['timestamp']) < ttl
+    def _check_if_signature_is_expired(self, timestamp, kwargs):
+        ttl = kwargs.pop('ttl') if 'ttl' in kwargs else DEFAULT_IFRAME_TTL
+        ttl_valid = int(time.time()) - int(timestamp) < ttl
         if not ttl_valid:
             raise SignatureValidationError('TTL expired')
 
-        return data
+    def _validate_signature(self, data):
+        maybe_sig = data['toopher_sig']
+        del data['toopher_sig']
+
+        try:
+            computed_signature = self._signature(data)
+        except Exception as e:
+            raise SignatureValidationError('Error while calculating signature: %' + e.args)
+
+        if not maybe_sig == computed_signature:
+            raise SignatureValidationError('Computed signature does not match submitted signature: {0} vs {1}'.format(computed_signature, maybe_sig))
 
     def _create_authentication_request_dict(self, data):
         return {
