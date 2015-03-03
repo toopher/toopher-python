@@ -33,7 +33,7 @@ class ToopherApiTests(unittest.TestCase):
     toopher.DEFAULT_BASE_URL = 'https://api.toopher.test/v1'
 
     def setUp(self):
-        self.api = toopher.ToopherApi('key', 'secret')
+        self.api = toopher.ToopherApi('key', 'secret', 'https://api.toopher.test/v1')
         self.id = str(uuid.uuid4())
         self.name = 'name'
         self.user = {
@@ -281,8 +281,7 @@ class ToopherApiTests(unittest.TestCase):
         self.assertEqual(self.api.advanced.raw.client.last_called_data['test_param'], '42')
 
     def test_pass_arbitrary_parameters_on_authenticate(self):
-        api = toopher.ToopherApi('key', 'secret')
-        api.advanced.raw.client = HttpClientMock({
+        self.api.advanced.raw.client = HttpClientMock({
             'authentication_requests/initiate': (200,
                 json.dumps({
                     'id': self.id,
@@ -297,11 +296,11 @@ class ToopherApiTests(unittest.TestCase):
                 })
             )
         })
-        api.authenticate(self.id, self.terminal_name, test_param='42')
-        self.assertEqual(api.advanced.raw.client.last_called_method, 'POST')
-        self.assertEqual(api.advanced.raw.client.last_called_data['pairing_id'], self.id)
-        self.assertEqual(api.advanced.raw.client.last_called_data['terminal_name'], self.terminal_name)
-        self.assertEqual(api.advanced.raw.client.last_called_data['test_param'], '42')
+        self.api.authenticate(self.id, self.terminal_name, test_param='42')
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
+        self.assertEqual(self.api.advanced.raw.client.last_called_data['pairing_id'], self.id)
+        self.assertEqual(self.api.advanced.raw.client.last_called_data['terminal_name'], self.terminal_name)
+        self.assertEqual(self.api.advanced.raw.client.last_called_data['test_param'], '42')
 
     def test_access_arbitrary_keys_in_pairing(self):
         self.api.advanced.raw.client = HttpClientMock({

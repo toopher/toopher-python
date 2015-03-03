@@ -28,8 +28,10 @@ class ResponseMock(requests.Response):
         self._content = response[1]
 
 class UserTerminalTests(unittest.TestCase):
+    toopher.DEFAULT_BASE_URL = 'https://api.toopher.test/v1'
+
     def setUp(self):
-        self.api = toopher.ToopherApi('key', 'secret')
+        self.api = toopher.ToopherApi('key', 'secret', 'https://api.toopher.test/v1')
         self.id = str(uuid.uuid4())
         self.name = 'name'
         self.requester_specified_id = 'requester_specified_id'

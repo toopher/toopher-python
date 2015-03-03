@@ -12,7 +12,7 @@ class ToopherIframeTests(unittest.TestCase):
     request_token = 's9s7vsb'
 
     def setUp(self):
-        self.iframe_api = toopher.ToopherIframe('abcdefg', 'hijklmnop')
+        self.iframe_api = toopher.ToopherIframe('abcdefg', 'hijklmnop', 'https://api.toopher.test/v1')
         self.iframe_api.client.nonce = '12345678'
         self.old_time = time.time
         time.time = lambda: 1000
