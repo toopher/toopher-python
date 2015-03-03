@@ -141,9 +141,9 @@ class ToopherIframe(object):
     def _create_authentication_request_dict(self, data):
         return {
             'id': data['id'],
-            'pending': True if data['pending'] == 'True' else False,
-            'granted': True if data['granted'] == 'True' else False,
-            'automated': True if data['automated'] == 'True' else False,
+            'pending': True if data['pending'] == 'true' else False,
+            'granted': True if data['granted'] == 'true' else False,
+            'automated': True if data['automated'] == 'true' else False,
             'reason': data['reason'],
             'reason_code': data['reason_code'],
             'terminal': {
@@ -153,13 +153,13 @@ class ToopherIframe(object):
                 'user': {
                     'id': data['pairing_user_id'],
                     'name': data['user_name'],
-                    'toopher_authentication_enabled': True if data['user_toopher_authentication_enabled'] == 'True' else False
+                    'toopher_authentication_enabled': True if data['user_toopher_authentication_enabled'] == 'true' else False
                 }
             },
             'user': {
                 'id': data['pairing_user_id'],
                 'name': data['user_name'],
-                'toopher_authentication_enabled': True if data['user_toopher_authentication_enabled'] == 'True' else False
+                'toopher_authentication_enabled': True if data['user_toopher_authentication_enabled'] == 'true' else False
             },
             'action': {
                 'id': data['action_id'],
@@ -170,12 +170,12 @@ class ToopherIframe(object):
     def _create_pairing_dict(self, data):
         return {
             'id': data['id'],
-            'enabled': True if data['enabled'] == 'True' else False,
-            'pending': True if data['pending'] == 'False' else False,
+            'enabled': True if data['enabled'] == 'true' else False,
+            'pending': True if data['pending'] == 'false' else False,
             'user': {
                 'id': data['pairing_user_id'],
                 'name': data['user_name'],
-                'toopher_authentication_enabled': True if data['user_toopher_authentication_enabled'] == 'True' else False
+                'toopher_authentication_enabled': True if data['user_toopher_authentication_enabled'] == 'true' else False
             }
         }
 
@@ -183,7 +183,7 @@ class ToopherIframe(object):
         return {
             'id': data['id'],
             'name': data['name'],
-            'toopher_authentication_enabled': True if data['toopher_authentication_enabled'] == 'True' else False
+            'toopher_authentication_enabled': True if data['toopher_authentication_enabled'] == 'true' else False
         }
 
     def _signature(self, data):

@@ -46,9 +46,9 @@ class ToopherIframeTests(unittest.TestCase):
     def _get_auth_request_postback_data_as_dict(self):
         return {
             'id': '1',
-            'pending': 'False',
-            'granted': 'True',
-            'automated': 'False',
+            'pending': 'false',
+            'granted': 'true',
+            'automated': 'false',
             'reason': 'it is a test',
             'reason_code': '100',
             'terminal_id': '1',
@@ -56,10 +56,10 @@ class ToopherIframeTests(unittest.TestCase):
             'terminal_requester_specified_id': 'requester specified id',
             'pairing_user_id': '1',
             'user_name': 'user name',
-            'user_toopher_authentication_enabled': 'True',
+            'user_toopher_authentication_enabled': 'true',
             'action_id': '1',
             'action_name': 'action name',
-            'toopher_sig': 'Z7qH+txabWaW7rPqWWU7EvDzs9M=',
+            'toopher_sig': 's+fYUtChrNMjES5Xa+755H7BQKE=',
             'session_token': ToopherIframeTests.request_token,
             'timestamp': '1000',
             'resource_type': 'authentication_request'
@@ -72,12 +72,12 @@ class ToopherIframeTests(unittest.TestCase):
     def _get_urlencoded_pairing_postback_data(self):
         return {'toopher_iframe_data': urllib.urlencode({
             'id': '1',
-            'enabled': 'True',
-            'pending': 'False',
+            'enabled': 'true',
+            'pending': 'false',
             'pairing_user_id': '1',
             'user_name': 'user name',
-            'user_toopher_authentication_enabled': 'True',
-            'toopher_sig': 'VFWBmtE49sn5DWUhq9sC9dem4Gg=',
+            'user_toopher_authentication_enabled': 'true',
+            'toopher_sig': 'ucwKhkPpN4VxNbx3dMypWzi4tBg=',
             'session_token': ToopherIframeTests.request_token,
             'timestamp': '1000',
             'resource_type': 'pairing'
@@ -87,8 +87,8 @@ class ToopherIframeTests(unittest.TestCase):
         return {'toopher_iframe_data': urllib.urlencode({
             'id': '1',
             'name': 'user name',
-            'toopher_authentication_enabled': 'True',
-            'toopher_sig': '+pums3B+sw/w6kSQKKqXHBX0YBU=',
+            'toopher_authentication_enabled': 'true',
+            'toopher_sig': 'RszgG9QE1rF9t7DVTGg+1I25yHM=',
             'session_token': ToopherIframeTests.request_token,
             'timestamp': '1000',
             'resource_type': 'requester_user'
@@ -207,10 +207,10 @@ class ToopherIframeTests(unittest.TestCase):
 
     def test_is_postback_granted_is_false_with_auth_request_not_granted(self):
         data = self._get_auth_request_postback_data_as_dict()
-        data['granted'] = 'False'
-        data['toopher_sig'] = 'h9fmsPhS+/TGhCGsoDwXkkmBAAU='
+        data['granted'] = 'false'
+        data['toopher_sig'] = 'nADNKdly9zA2IpczD6gvDumM48I='
         postback_granted = self.iframe_api.is_postback_granted(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
-        self.assertFalse(postback_granted, 'Postback should not have been granted with AuthenticationRequest.granted = False')
+        self.assertFalse(postback_granted, 'Postback should not have been granted with AuthenticationRequest not granted')
 
     def test_is_postback_granted_raises_error_when_pairing_is_returned(self):
         try:
