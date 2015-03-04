@@ -126,7 +126,7 @@ class ToopherIframe(object):
         del data['toopher_sig']
 
         try:
-            computed_signature = self._signature(data)
+            computed_signature = self._calculate_signature(data)
         except Exception as e:
             raise SignatureValidationError('Error while calculating signature: %' + e.args)
 
@@ -181,7 +181,7 @@ class ToopherIframe(object):
             'toopher_authentication_enabled': True if data['toopher_authentication_enabled'] == 'true' else False
         }
 
-    def _signature(self, data):
+    def _calculate_signature(self, data):
         to_sign = urllib.urlencode(sorted(data.items())).encode('utf-8')
         secret = self.client.client_secret.encode('utf-8')
         return base64.b64encode(hmac.new(secret, to_sign, hashlib.sha1).digest())
