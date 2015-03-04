@@ -355,7 +355,7 @@ class Action(ToopherBase):
             self.id = json_response['id']
             self.name = json_response['name']
         except Exception as e:
-            raise ToopherApi('Could not parse action from response: %s' % e.args)
+            raise ToopherApiError('Could not parse action from response %s' % e.args)
 
     def _update(self, json_response):
         self.raw_response = json_response

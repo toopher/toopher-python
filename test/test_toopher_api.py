@@ -456,6 +456,19 @@ class ToopherApiTests(unittest.TestCase):
         self.assertEqual(user_terminal.user.name, self.user_name)
         self.assertEqual(user_terminal.user.id, self.user_id)
 
+    def test_action_missing_id_raises_error(self):
+        data = self.action
+        del data['id']
+        def fn():
+            toopher.Action(data)
+        self.assertRaises(toopher.ToopherApiError, fn)
+
+    def test_action_update_missing_name_raises_error(self):
+        action = toopher.Action(self.action)
+        def fn():
+            action._update({'id':'1'})
+        self.assertRaises(toopher.ToopherApiError, fn)
+
     def test_raw_get(self):
         self.api.advanced.raw.client = HttpClientMock({
             'pairings/{0}'.format(self.id): (200,
