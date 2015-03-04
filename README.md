@@ -24,7 +24,7 @@ You have complete control over what actions you want to authenticate using Tooph
 This library makes it super simple to do the Toopher two-step.  Check it out:
 
 ```python
-import toopher
+from toopher import *
 
 # Create an API object using your credentials
 api = toopher.ToopherApi("<your consumer key>", "<your consumer secret>")
