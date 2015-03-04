@@ -85,11 +85,10 @@ class ApiRawRequester(object):
         url = self.base_url + endpoint
         return self._request(url, 'POST', kwargs)
 
-    def _request(self, uri, method, params=None):
+    def _request(self, uri, method, params=None, raw_request=False):
         data = {'params' if method == 'GET' else 'data': params}
         header_data = {'User-Agent':'Toopher-Python/%s (Python %s)' % (VERSION, sys.version.split()[0])}
 
-        print uri
         response = self.client.request(method, uri, headers=header_data, **data)
         try:
             content = response.json()
@@ -99,22 +98,10 @@ class ApiRawRequester(object):
         if response.status_code >= 400:
             self._parse_request_error(content)
 
-        return content
-
-    def _request_raw(self, uri, method, params=None):
-        data = {'params' if method == 'GET' else 'data': params}
-        header_data = {'User-Agent':'Toopher-Python/%s (Python %s)' % (VERSION, sys.version.split()[0])}
-
-        response = self.client.request(method, uri, headers=header_data, **data)
-
-        if response.status_code >= 400:
-            try:
-                content = response.json()
-            except ValueError:
-                raise ToopherApiError('Error response from server could not be decoded as JSON')
-            self._parse_request_error(content)
-
-        return response.content
+        if raw_request:
+            return response.content
+        else:
+            return content
 
     def _parse_request_error(self, content):
         error_code = content['error_code']
@@ -219,7 +206,7 @@ class Pairing(ToopherBase):
 
     def get_qr_code_image(self):
         url = self.api.advanced.raw.base_url + '/qr/pairings/' + self.id
-        return self.api.advanced.raw._request_raw(url, 'GET')
+        return self.api.advanced.raw._request(url, 'GET', raw_request=True)
 
     def get_reset_link(self, **kwargs):
         if not 'security_question' in kwargs:
