@@ -73,27 +73,48 @@ login_iframe_url = iframe_api.get_authentication_url(username, reset_email, requ
 pair_iframe_url = iframe_api.get_user_management_url(username, reset_email)
 ```
 
-#### Validating postback data from Authentication iframe and parsing API errors
+#### Validating postback data from Authentication iframe and parsing errors
 In this example, `data` is a `dict` of the form data POSTed to your server from the Toopher Authentication iframe.  You should replace the commented blocks in the `except` with code appropriate for the condition described in the comment.
 
 There are two ways to validate postback data:
 
 ```python
-
 try:
-    # returns an AuthenticationRequest, Pairing or User object
-    postback_object = iframe_api.process_postback(form_data)
-except toopher.ToopherApiError e:
-    # e.message will return more information about what specifically went wrong
-    # (incorrect session token, expired TTL, invalid signature, pairing deactivated, user disabled, user unknown)
-```
+    # returns an AuthenticationRequest
+    authentication_request = iframe_api.process_postback(form_data)
+except toopher.UserDisableError as e:
+    # User has disabled Toopher authentication
+except toopher.SignatureValidationError as e:
+    # postback was not valid
+    # (missing keys, incorrect session token, signature has expired, signature invalid)
+except toopher.ToopherApiError as e:
+    # postback resource type was not valid
+
+if not authentication_request.pending and authentication_request.granted:
+    # Success!
 
 ```python
 try:
     # returns boolean indicating if AuthenticationRequest was granted
-    # raises ToopherApiError if postback returns a Pairing or User object
-    authentication_request_granted = iframe_api.is_authentication_granted(form_data)
-except toopher.ToopherApiError e:
-    # e.message will return more information about what specifically went wrong
-    # (incorrect session token, expired TTL, invalid signature, pairing deactivated, user disabled, user unknown)
+authentication_request_granted = iframe_api.is_authentication_granted(form_data)
+
+if authentication_request_granted:
+    # Success!
 ```
+
+#### Validating postback data from Pairing iframe and parsing errors
+In this example, `data` is a `dict` of the form data POSTed to your server from the Toopher Pairing iframe.  You should replace the commented blocks in the `except` with code appropriate for the condition described in the comment.
+
+```python
+try:
+    # returns a Pairing or User
+    postback_object = iframe_api.process_postback(form_data)
+except toopher.UserDisableError as e:
+    # User has disabled Toopher authentication
+except toopher.SignatureValidationError as e:
+    # postback was not valid
+    # (missing keys, incorrect session token, signature has expired, signature invalid)
+except toopher.ToopherApiError as e:
+    # postback resource type was not valid
+```
+
