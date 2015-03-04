@@ -35,6 +35,8 @@ class ToopherIframe(object):
                 'username':username,
                 'reset_email':reset_email
                 }
+        params.update(kwargs)
+
         return self._get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
 
     def get_authentication_url(self, username, reset_email='None', request_token='None', action_name='Log In', requester_metadata='None', **kwargs):
