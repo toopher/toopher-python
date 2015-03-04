@@ -128,7 +128,7 @@ class ToopherIframe(object):
         try:
             computed_signature = self._calculate_signature(data)
         except Exception as e:
-            raise SignatureValidationError('Error while calculating signature: %' + e.args)
+            raise SignatureValidationError('Error while calculating signature: {0}'.format(e.args[0]))
 
         if not maybe_sig == computed_signature:
             raise SignatureValidationError('Computed signature does not match submitted signature: {0} vs {1}'.format(computed_signature, maybe_sig))
