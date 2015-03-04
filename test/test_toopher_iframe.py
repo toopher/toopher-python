@@ -2,8 +2,11 @@ import unittest
 import time
 import urllib
 import toopher
+import logging
 
 class ToopherIframeTests(unittest.TestCase):
+    logging.disable(logging.CRITICAL)
+
     toopher.DEFAULT_BASE_URL = 'https://api.toopher.test/v1'
 
     request_token = 's9s7vsb'
@@ -134,6 +137,16 @@ class ToopherIframeTests(unittest.TestCase):
         except toopher.SignatureValidationError as e:
             self.assertEqual(e.message, 'Session token does not match expected value!')
 
+    def test_process_postback_bad_resource_type_raises_error(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['resource_type'] = 'invalid'
+        data['toopher_sig'] = 'xEY+oOtJcdMsmTLp6eOy9isO/xQ='
+        try:
+            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
+            self.fail('ToopherApiError was not raise for invalid postback resource type')
+        except toopher.ToopherApiError as e:
+            self.assertEqual(e.message, 'The postback resource type is not valid: invalid')
+
     def test_process_postback_with_704_fails(self):
         data = self._get_auth_request_postback_data_as_dict()
         data['error_code'] = 704
@@ -144,35 +157,13 @@ class ToopherIframeTests(unittest.TestCase):
         except toopher.UserDisabledError as e:
             self.assertEqual(e.message, 'The specified user has disabled Toopher authentication.')
 
-    def test_process_postback_with_705_fails(self):
-        data = self._get_auth_request_postback_data_as_dict()
-        data['error_code'] = 705
-        data['error_message'] = 'No matching user exists'
+    def test_process_postback_with_bad_secret_raises_error(self):
+        iframe_api = toopher.ToopherIframe('abcdefg', 1, 'https://api.toopher.test/v1')
         try:
-            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
-            self.fail('UserUnknownError was not raised for error code 705')
-        except toopher.UserUnknownError as e:
-            self.assertEqual(e.message, 'No matching user exists')
-
-    def test_process_postback_with_706_fails(self):
-        data = self._get_auth_request_postback_data_as_dict()
-        data['error_code'] = 706
-        data['error_message'] = 'No matching terminal exists'
-        try:
-            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
-            self.fail('TerminalUnknownError was not raised for error code 706')
-        except toopher.TerminalUnknownError as e:
-            self.assertEqual(e.message, 'No matching terminal exists')
-
-    def test_process_postback_with_707_fails(self):
-        data = self._get_auth_request_postback_data_as_dict()
-        data['error_code'] = 707
-        data['error_message'] = 'Not allowed: This pairing has been deactivated.'
-        try:
-            self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(data), ToopherIframeTests.request_token)
-            self.fail('PairingDeactivatedError was not raised for error code 707')
-        except toopher.PairingDeactivatedError as e:
-            self.assertEqual(e.message, 'Not allowed: This pairing has been deactivated.')
+            iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(), ToopherIframeTests.request_token)
+            self.fail('SignatureValidationError was not raised while calculating signature with bad secret')
+        except toopher.SignatureValidationError as e:
+            self.assertEqual(e.message, "Error while calculating signature: 'int' object has no attribute 'encode'")
 
     def test_is_authentication_granted_is_true_with_auth_request_granted(self):
         data = self._get_urlencoded_auth_request_postback_data()
@@ -208,6 +199,11 @@ class ToopherIframeTests(unittest.TestCase):
         expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=jdoe%40example.com&expires=1300&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=NjwH5yWPE2CCJL8v%2FMNknL%2BeTpE%3D'
         self.assertEqual(expected, self.iframe_api.get_user_management_url('jdoe', 'jdoe@example.com'))
 
+    def test_get_user_manage_url_removes_ttl_from_kwargs(self):
+        expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=jdoe%40example.com&expires=1500&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=%2BQrbKZH2NDxURKE9Yjb6wxegeAM%3D'
+        url = self.iframe_api.get_user_management_url('jdoe', 'jdoe@example.com', ttl=500)
+        self.assertEqual(expected, url)
+
     def test_get_authentication_url(self):
         expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&reset_email=jdoe%40example.com&session_token=s9s7vsb&expires=1300&action_name=Log+In&requester_metadata=None&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=YN%2BkKNTaoypsB37fsjvMS8vsG5A%3D'
         self.assertEqual(expected, self.iframe_api.get_authentication_url('jdoe', 'jdoe@example.com', ToopherIframeTests.request_token))
@@ -215,3 +211,8 @@ class ToopherIframeTests(unittest.TestCase):
     def test_get_authentication_url_without_inline_pairing(self):
         expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&reset_email=jdoe%40example.com&session_token=s9s7vsb&allow_inline_pairing=False&expires=1300&action_name=Log+In&requester_metadata=None&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=Vt%2B%2FKZzF%2BqtLswtVUDWCq5Y97IM%3D'
         self.assertEqual(expected, self.iframe_api.get_authentication_url('jdoe', 'jdoe@example.com', ToopherIframeTests.request_token, allow_inline_pairing=False))
+
+    def test_get_authentication_url_removes_ttl_from_kwargs(self):
+        expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&reset_email=jdoe%40example.com&session_token=None&expires=1500&action_name=Log+In&requester_metadata=None&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=EtlblFjm2cbmQHWxwXL0lc3J2pY%3D'
+        url = self.iframe_api.get_authentication_url('jdoe', 'jdoe@example.com', ttl=500)
+        self.assertEqual(expected, url)
