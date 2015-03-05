@@ -24,21 +24,6 @@ class ToopherIframe(object):
         api_uri = api_uri if api_uri else DEFAULT_BASE_URL
         self.base_uri = api_uri.rstrip('/')
 
-    def get_user_management_url(self, username, reset_email, **kwargs):
-        if not 'ttl' in kwargs:
-            ttl = DEFAULT_IFRAME_TTL
-        else:
-            ttl = kwargs.pop('ttl')
-
-        params = {
-                'v':IFRAME_VERSION,
-                'username':username,
-                'reset_email':reset_email
-                }
-        params.update(kwargs)
-
-        return self._get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
-
     def get_authentication_url(self, username, reset_email='None', request_token='None', action_name='Log In', requester_metadata='None', **kwargs):
         if not 'ttl' in kwargs:
             ttl = DEFAULT_IFRAME_TTL
@@ -56,6 +41,21 @@ class ToopherIframe(object):
         params.update(kwargs)
 
         return self._get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
+
+    def get_user_management_url(self, username, reset_email, **kwargs):
+        if not 'ttl' in kwargs:
+            ttl = DEFAULT_IFRAME_TTL
+        else:
+            ttl = kwargs.pop('ttl')
+
+        params = {
+                'v':IFRAME_VERSION,
+                'username':username,
+                'reset_email':reset_email
+                }
+        params.update(kwargs)
+
+        return self._get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
 
     def process_postback(self, urlencoded_form_data, request_token=None, **kwargs):
         toopher_data = self._urldecode_iframe_data(urlencoded_form_data)
