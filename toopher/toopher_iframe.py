@@ -81,7 +81,7 @@ class ToopherIframe(object):
         try:
             authentication_request = self.process_postback(data, request_token)
             if isinstance(authentication_request, AuthenticationRequest):
-                return True if authentication_request.granted and not authentication_request.pending else False
+                return authentication_request.granted and not authentication_request.pending
             else:
                 logging.warning('The postback did not return an AuthenticationRequest')
                 return False
