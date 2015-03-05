@@ -92,6 +92,7 @@ except toopher.ToopherApiError as e:
 
 if not authentication_request.pending and authentication_request.granted:
     # Success!
+```
 
 ```python
 try:
