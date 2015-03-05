@@ -82,6 +82,9 @@ There are two ways to validate postback data:
 try:
     # returns an AuthenticationRequest
     authentication_request = iframe_api.process_postback(form_data)
+
+    if not authentication_request.pending and authentication_request.granted:
+        # Success!
 except toopher.UserDisableError as e:
     # User has disabled Toopher authentication
 except toopher.SignatureValidationError as e:
@@ -89,14 +92,10 @@ except toopher.SignatureValidationError as e:
     # (missing keys, incorrect session token, signature has expired, signature invalid)
 except toopher.ToopherApiError as e:
     # postback resource type was not valid
-
-if not authentication_request.pending and authentication_request.granted:
-    # Success!
 ```
 
 ```python
-try:
-    # returns boolean indicating if AuthenticationRequest was granted
+# returns boolean indicating if user should be granted access
 authentication_request_granted = iframe_api.is_authentication_granted(form_data)
 
 if authentication_request_granted:
