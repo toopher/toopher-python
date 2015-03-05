@@ -86,7 +86,7 @@ class ToopherIframe(object):
                 logging.warning('The postback did not return an AuthenticationRequest')
                 return False
         except UserDisabledError as e:
-            logging.error(e)
+            logging.info(e)
             return True
         except Exception as e:
             logging.error(e)
