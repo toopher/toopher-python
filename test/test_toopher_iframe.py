@@ -74,14 +74,37 @@ class ToopherIframeTests(unittest.TestCase):
     def test_process_postback_good_signature_returns_authentication_request(self):
         auth_request = self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(), ToopherIframeTests.request_token)
         self.assertEqual(type(auth_request), toopher.AuthenticationRequest)
+        self.assertEqual(auth_request.id, '1')
+        self.assertFalse(auth_request.pending)
+        self.assertTrue(auth_request.granted)
+        self.assertFalse(auth_request.automated)
+        self.assertEqual(auth_request.reason, 'it is a test')
+        self.assertEqual(auth_request.reason_code, '100')
+        self.assertEqual(auth_request.terminal.id, '1')
+        self.assertEqual(auth_request.terminal.name, 'terminal name')
+        self.assertEqual(auth_request.terminal.requester_specified_id, 'requester specified id')
+        self.assertEqual(auth_request.user.id, '1')
+        self.assertEqual(auth_request.user.name, 'user name')
+        self.assertTrue(auth_request.user.toopher_authentication_enabled)
+        self.assertEqual(auth_request.action.id, '1')
+        self.assertEqual(auth_request.action.name, 'action name')
 
     def test_process_postback_good_signature_returns_pairing(self):
         pairing = self.iframe_api.process_postback(self._get_urlencoded_pairing_postback_data(), ToopherIframeTests.request_token)
         self.assertEqual(type(pairing), toopher.Pairing)
+        self.assertEqual(pairing.id, '1')
+        self.assertTrue(pairing.enabled)
+        self.assertFalse(pairing.pending)
+        self.assertEqual(pairing.user.id, '1')
+        self.assertEqual(pairing.user.name, 'user name')
+        self.assertTrue(pairing.user.toopher_authentication_enabled)
 
     def test_process_postback_good_signature_returns_user(self):
         user = self.iframe_api.process_postback(self._get_urlencoded_user_postback_data(), ToopherIframeTests.request_token)
         self.assertEqual(type(user), toopher.User)
+        self.assertEqual(user.id, '1')
+        self.assertEqual(user.name, 'user name')
+        self.assertTrue(user.toopher_authentication_enabled)
 
     def test_process_postback_bad_signature_fails(self):
         data = self._get_auth_request_postback_data_as_dict()
