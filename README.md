@@ -40,8 +40,8 @@ pairing = api.pair("username@yourservice.com")
 # Step 2 - Authenticate a log in
 # With pairing_id and terminal_name
 auth = api.authenticate(pairing.id, "my computer")
-# With username and requester_specified_id
-auth = api.authenticate("username", requester_specified_id = "requester_specified_id")
+# With username and terminal name and/or requester_specified_id
+auth = api.authenticate("username", terminal_name="terminal_name", requester_specified_id = "requester_specified_id")
 
 # Once they've responded you can then check the status
 auth.refresh_from_server()
