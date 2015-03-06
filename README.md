@@ -5,6 +5,9 @@
 #### Introduction
 ToopherPython is a Toopher API library that simplifies the task of interfacing with the Toopher API from Python code.  This project wrangles all the required OAuth and JSON functionality so you can focus on just using the API.
 
+#### Python Version
+>=2.6.0
+
 #### Learn the Toopher API
 Make sure you visit [https://dev.toopher.com](https://dev.toopher.com) to get acquainted with the Toopher API fundamentals.  The documentation there will tell you the details about the operations this API wrapper library provides.
 
@@ -84,10 +87,23 @@ except PairingDeactivatedError:
 ```
 
 #### Dependencies
-This library uses the [Requests](http://docs.python-requests.org/en/latest/) library to handle OAuth signing and to make the web requests.  If you install using pip (or easy_install) they'll be installed automatically for you. 
+This library uses the [Requests](http://docs.python-requests.org/en/latest/) library and [OAuthLib](https://pypi.python.org/pypi/oauthlib) to handle OAuth signing and to make the web requests.
+
+Toopher uses [pip](https://pypi.python.org/pypi/pip) to install packages.
+
+To ensure all dependencies are up-to-date run:
+```shell
+$ pip install -r requirements.txt
+```
 
 #### Try it out
 Check out `demo.py` for an example program that walks you through the whole process!  Just download the contents of this repo, make sure you have the dependencies listed above installed, and then run it like-a-this:
 ```shell
 $ python ./demo.py
+```
+
+#### Tests
+To run tests enter:
+```shell
+$ nosetests test
 ```
