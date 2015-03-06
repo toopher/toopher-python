@@ -52,9 +52,6 @@ if (auth.pending == False and auth.granted == True):
 	# Success!
 ```
 
-#### Handling Errors
-If any request runs into an error a `ToopherApiError` will be thrown with more details on what went wrong.
-
 #### Zero-Storage usage option
 Requesters can choose to integrate the Toopher API in a way does not require storing any per-user data such as Pairing ID and Terminal ID - all of the storage
 is handled by the Toopher API Web Service, allowing your local database to remain unchanged.  If the Toopher API needs more data, it will `raise()` a specific
@@ -85,6 +82,9 @@ except PairingDeactivatedError:
     # typically because they deleted the pairing.  You can prompt
     # the user to re-pair with a new mobile device.
 ```
+
+#### Handling Errors
+If any request runs into an error a `ToopherApiError` will be thrown with more details on what went wrong.
 
 #### Dependencies
 This library uses the [Requests](http://docs.python-requests.org/en/latest/) library and [OAuthLib](https://pypi.python.org/pypi/oauthlib) to handle OAuth signing and to make the web requests.
