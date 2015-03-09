@@ -208,10 +208,23 @@ class ToopherIframeTests(unittest.TestCase):
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_user_postback_data(), self.request_token)
         self.assertFalse(authentication_granted)
 
-    def test_is_authentication_granted_returns_false_when_missing_keys(self):
+    def test_is_authentication_granted_returns_false_when_signature_validation_error_is_raised(self):
         data = self._get_auth_request_postback_data_as_dict()
         del data['id']
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
+        self.assertFalse(authentication_granted)
+
+    def test_is_authentication_granted_returns_false_when_toopher_api_error_is_raised(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['resource_type'] = 'invalid'
+        authentication_granted = self.iframe_api.is_authentication_granted(data, self.request_token)
+        self.assertFalse(authentication_granted)
+
+    def test_is_authentication_granted_returns_false_when_user_disabled_error_is_raised(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['error_code'] = 704
+        data['error_message'] = 'The specified user has disabled Toopher authentication.'
+        authentication_granted = self.iframe_api.is_authentication_granted(data, self.request_token)
         self.assertFalse(authentication_granted)
 
     def test_get_user_management_url(self):
