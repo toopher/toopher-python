@@ -110,6 +110,10 @@ class ToopherIframeTests(unittest.TestCase):
         auth_request = self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(), ToopherIframeTests.request_token, ttl=100)
         self.assertEqual(type(auth_request), toopher.AuthenticationRequest)
 
+    def test_process_postback_good_signature_without_request_token_returns_authentication_request(self):
+        auth_request = self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data())
+        self.assertEqual(type(auth_request), toopher.AuthenticationRequest)
+
     def test_process_postback_bad_signature_fails(self):
         data = self._get_auth_request_postback_data_as_dict()
         data['toopher_sig'] = 'invalid'
