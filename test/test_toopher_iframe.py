@@ -46,8 +46,8 @@ class ToopherIframeTests(unittest.TestCase):
         data = auth_request_data if auth_request_data else self._get_auth_request_postback_data_as_dict()
         return {'toopher_iframe_data': urllib.urlencode(data)}
 
-    def _get_urlencoded_pairing_postback_data(self):
-        return {'toopher_iframe_data': urllib.urlencode({
+    def _get_pairing_postback_data_as_dict(self):
+        return {
             'id': '1',
             'enabled': 'true',
             'pending': 'false',
@@ -58,10 +58,14 @@ class ToopherIframeTests(unittest.TestCase):
             'session_token': ToopherIframeTests.request_token,
             'timestamp': '1000',
             'resource_type': 'pairing'
-        })}
+        }
 
-    def _get_urlencoded_user_postback_data(self):
-        return {'toopher_iframe_data': urllib.urlencode({
+    def _get_urlencoded_pairing_postback_data(self, pairing_data=None):
+        data = pairing_data if pairing_data else self._get_pairing_postback_data_as_dict()
+        return {'toopher_iframe_data': urllib.urlencode(data)}
+
+    def _get_user_postback_data_as_dict(self):
+        return {
             'id': '1',
             'name': 'user name',
             'toopher_authentication_enabled': 'true',
@@ -69,41 +73,48 @@ class ToopherIframeTests(unittest.TestCase):
             'session_token': ToopherIframeTests.request_token,
             'timestamp': '1000',
             'resource_type': 'requester_user'
-        })}
+        }
+
+    def _get_urlencoded_user_postback_data(self, user_data=None):
+        data = user_data if user_data else self._get_user_postback_data_as_dict()
+        return {'toopher_iframe_data': urllib.urlencode(data)}
 
     def test_process_postback_good_signature_returns_authentication_request(self):
-        auth_request = self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(), ToopherIframeTests.request_token)
+        auth_data = self._get_auth_request_postback_data_as_dict()
+        auth_request = self.iframe_api.process_postback(self._get_urlencoded_auth_request_postback_data(auth_data), ToopherIframeTests.request_token)
         self.assertEqual(type(auth_request), toopher.AuthenticationRequest)
-        self.assertEqual(auth_request.id, '1')
+        self.assertEqual(auth_request.id, auth_data.get('id'))
         self.assertFalse(auth_request.pending)
         self.assertTrue(auth_request.granted)
         self.assertFalse(auth_request.automated)
-        self.assertEqual(auth_request.reason, 'it is a test')
-        self.assertEqual(auth_request.reason_code, '100')
-        self.assertEqual(auth_request.terminal.id, '1')
-        self.assertEqual(auth_request.terminal.name, 'terminal name')
-        self.assertEqual(auth_request.terminal.requester_specified_id, 'requester specified id')
-        self.assertEqual(auth_request.user.id, '1')
-        self.assertEqual(auth_request.user.name, 'user name')
+        self.assertEqual(auth_request.reason, auth_data.get('reason'))
+        self.assertEqual(auth_request.reason_code, auth_data.get('reason_code'))
+        self.assertEqual(auth_request.terminal.id, auth_data.get('terminal_id'))
+        self.assertEqual(auth_request.terminal.name, auth_data.get('terminal_name'))
+        self.assertEqual(auth_request.terminal.requester_specified_id, auth_data.get('terminal_requester_specified_id'))
+        self.assertEqual(auth_request.user.id, auth_data.get('pairing_user_id'))
+        self.assertEqual(auth_request.user.name, auth_data.get('user_name'))
         self.assertTrue(auth_request.user.toopher_authentication_enabled)
-        self.assertEqual(auth_request.action.id, '1')
-        self.assertEqual(auth_request.action.name, 'action name')
+        self.assertEqual(auth_request.action.id, auth_data.get('action_id'))
+        self.assertEqual(auth_request.action.name, auth_data.get('action_name'))
 
     def test_process_postback_good_signature_returns_pairing(self):
-        pairing = self.iframe_api.process_postback(self._get_urlencoded_pairing_postback_data(), ToopherIframeTests.request_token)
+        pairing_data = self._get_pairing_postback_data_as_dict()
+        pairing = self.iframe_api.process_postback(self._get_urlencoded_pairing_postback_data(pairing_data), ToopherIframeTests.request_token)
         self.assertEqual(type(pairing), toopher.Pairing)
-        self.assertEqual(pairing.id, '1')
+        self.assertEqual(pairing.id, pairing_data.get('id'))
         self.assertTrue(pairing.enabled)
         self.assertFalse(pairing.pending)
-        self.assertEqual(pairing.user.id, '1')
-        self.assertEqual(pairing.user.name, 'user name')
+        self.assertEqual(pairing.user.id, pairing_data.get('pairing_user_id'))
+        self.assertEqual(pairing.user.name, pairing_data.get('user_name'))
         self.assertTrue(pairing.user.toopher_authentication_enabled)
 
     def test_process_postback_good_signature_returns_user(self):
-        user = self.iframe_api.process_postback(self._get_urlencoded_user_postback_data(), ToopherIframeTests.request_token)
+        user_data = self._get_user_postback_data_as_dict()
+        user = self.iframe_api.process_postback(self._get_urlencoded_user_postback_data(user_data), ToopherIframeTests.request_token)
         self.assertEqual(type(user), toopher.User)
-        self.assertEqual(user.id, '1')
-        self.assertEqual(user.name, 'user name')
+        self.assertEqual(user.id, user_data.get('id'))
+        self.assertEqual(user.name, user_data.get('name'))
         self.assertTrue(user.toopher_authentication_enabled)
 
     def test_process_postback_good_signature_with_extras_returns_authentication_request(self):
