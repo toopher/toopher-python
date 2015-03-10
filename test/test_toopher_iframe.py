@@ -259,9 +259,14 @@ class ToopherIframeTests(unittest.TestCase):
         expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=None&expires=1300&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=yX3zPLJeLnc5Scdrz0juB2FO2hQ%3D'
         self.assertEqual(expected, self.iframe_api.get_user_management_url('jdoe'))
 
-    def test_get_authentication_url(self):
-        expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&reset_email=jdoe%40example.com&session_token=s9s7vsb&expires=1300&action_name=Log+In&requester_metadata=None&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=YN%2BkKNTaoypsB37fsjvMS8vsG5A%3D'
-        self.assertEqual(expected, self.iframe_api.get_authentication_url('jdoe', 'jdoe@example.com', self.request_token))
+    def test_get_authentication_url_only_username(self):
+        expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&reset_email=None&session_token=None&expires=1300&action_name=Log+In&requester_metadata=None&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=Udj%2BxFeLQgSKzKyntCIOq5mODSs%3D'
+        url = self.iframe_api.get_authentication_url('jdoe')
+        self.assertEqual(expected, url)
+
+    def test_get_authentication_url_with_optional_args(self):
+        expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&reset_email=jdoe%40example.com&session_token=s9s7vsb&expires=1300&action_name=it+is+a+test&requester_metadata=metadata&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=2TydgMnUwWoiwfpljKpSaFg0Luo%3D'
+        self.assertEqual(expected, self.iframe_api.get_authentication_url('jdoe', 'jdoe@example.com', self.request_token, 'it is a test', 'metadata'))
 
     def test_get_authentication_url_with_optional_args_and_extras(self):
         expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&reset_email=jdoe%40example.com&session_token=s9s7vsb&allow_inline_pairing=False&expires=1100&action_name=it+is+a+test&automation_allowed=False&requester_metadata=metadata&v=2&challenge_required=True&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=hKogqI%2FgjKXpYIH%2BjNDhRSi22b4%3D'
@@ -276,7 +281,3 @@ class ToopherIframeTests(unittest.TestCase):
         url = self.iframe_api.get_authentication_url('jdoe', 'jdoe@example.com', ttl=500)
         self.assertEqual(expected, url)
 
-    def test_get_authentication_url_only_username(self):
-        expected = 'https://api.toopher.test/v1/web/authenticate?username=jdoe&reset_email=None&session_token=None&expires=1300&action_name=Log+In&requester_metadata=None&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=Udj%2BxFeLQgSKzKyntCIOq5mODSs%3D'
-        url = self.iframe_api.get_authentication_url('jdoe')
-        self.assertEqual(expected, url)
