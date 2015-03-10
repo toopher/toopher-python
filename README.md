@@ -57,9 +57,6 @@ auth_iframe_url = iframe_api.get_authentication_url(username);
 
 ### Step 2: Validate the postback data
 
-After the Toopher-IFRAME results are posted back to server, the postback data can be validated one of two ways:
-
-#### 1. Check the authentication request status
 The simplest way to validate the postback data is to call `is_authentication_granted` to check if the authentication request was granted.
 
 ```python
@@ -69,33 +66,6 @@ authentication_request_granted = iframe_api.is_authentication_granted(form_data)
 if authentication_request_granted:
     # Success!
 ```
-
-#### 2. Process the postback
-Additional information regarding the AuthenticationRequest is easily obtained by using `process_postback`. Call `process_postback()` to verify that the result is valid. `process_postback()` returns one of the following:
-  * an AuthenticationRequest object if the signature is valid (authentication url)
-  * a `UserDisabledError`, `SignatureValidationError` or `ToopherAPIError` if the server encounters an error while processing postback
-
-If no errors were returned, the result of the authentication can be checked by evaluating `not authentication_request.pending and authentication_request.granted`.
-
-```python
-try:
-    # Try to process the postback from the Toopher IFRAME and receive an AuthenticationRequest object.
-    authentication_request = iframe_api.process_postback(form_data)
-
-    # If you got here, you just need to check the status of the authentication request.
-    if not authentication_request.pending and authentication_request.granted:
-        #Success!
-
-# There are three distinct errors ToopherAPI can return if the postback is not valid.
-except toopher.UserDisableError as e:
-    # You have marked this user as Toopher disabled in the Toopher API
-except toopher.SignatureValidationError as e:
-    # The postback was not valid for one of the following reasons:
-    # missing keys, incorrect session token, expired signature or invalid signature.
-except toopher.ToopherApiError as e:
-    # The postback resource type was not valid.
-```
-
 
 ### Handling Errors
 If any request runs into an error a `ToopherApiError` will be thrown with more details on what went wrong.
