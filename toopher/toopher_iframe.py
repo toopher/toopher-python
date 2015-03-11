@@ -24,7 +24,7 @@ class ToopherIframe(object):
         api_uri = api_uri if api_uri else DEFAULT_BASE_URL
         self.base_uri = api_uri.rstrip('/')
 
-    def get_authentication_url(self, username, reset_email='None', request_token='None', action_name='Log In', requester_metadata='None', **kwargs):
+    def get_authentication_url(self, username, reset_email='', request_token='', action_name='Log In', requester_metadata='', **kwargs):
         if not 'ttl' in kwargs:
             ttl = DEFAULT_IFRAME_TTL
         else:
@@ -38,11 +38,12 @@ class ToopherIframe(object):
             'session_token':request_token,
             'requester_metadata':requester_metadata
         }
+        print params
         params.update(kwargs)
 
         return self._get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
 
-    def get_user_management_url(self, username, reset_email='None', **kwargs):
+    def get_user_management_url(self, username, reset_email='', **kwargs):
         if not 'ttl' in kwargs:
             ttl = DEFAULT_IFRAME_TTL
         else:
@@ -57,7 +58,7 @@ class ToopherIframe(object):
 
         return self._get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
 
-    def process_postback(self, urlencoded_form_data, request_token=None, **kwargs):
+    def process_postback(self, urlencoded_form_data, request_token='', **kwargs):
         toopher_data = self._urldecode_iframe_data(urlencoded_form_data)
 
         if 'error_code' in toopher_data:
@@ -77,7 +78,7 @@ class ToopherIframe(object):
             else:
                 raise ToopherApiError('The postback resource type is not valid: {0}'.format(resource_type))
 
-    def is_authentication_granted(self, data, request_token=None, **kwargs):
+    def is_authentication_granted(self, data, request_token='', **kwargs):
         try:
             authentication_request = self.process_postback(data, request_token, **kwargs)
             if isinstance(authentication_request, AuthenticationRequest):
