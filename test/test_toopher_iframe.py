@@ -210,7 +210,17 @@ class ToopherIframeTests(unittest.TestCase):
     def test_is_authentication_granted_is_true_with_auth_request_granted(self):
         data = self._get_urlencoded_auth_request_postback_data()
         authentication_granted = self.iframe_api.is_authentication_granted(data, ToopherIframeTests.request_token)
-        self.assertTrue(authentication_granted, 'Postback should have been granted with AuthentiationRequest.granted = True')
+        self.assertTrue(authentication_granted, 'Postback should have been granted with AuthenticationRequest.granted = True')
+
+    def test_is_authentication_granted_is_true_with_request_request_granted_and_extras(self):
+        data = self._get_urlencoded_auth_request_postback_data()
+        authentication_granted = self.iframe_api.is_authentication_granted(data, ToopherIframeTests.request_token, ttl=100)
+        self.assertTrue(authentication_granted, 'Postback should have been granted with AuthenticationRequest.granted = True')
+
+    def test_is_authentication_granted_is_true_with_auth_request_granted_without_request_token(self):
+        data = self._get_urlencoded_auth_request_postback_data()
+        authentication_granted = self.iframe_api.is_authentication_granted(data)
+        self.assertTrue(authentication_granted, 'Postback should have been granted with AuthenticationRequest.granted = True')
 
     def test_is_authentication_granted_is_false_with_auth_request_not_granted(self):
         data = self._get_auth_request_postback_data_as_dict()

@@ -79,7 +79,7 @@ class ToopherIframe(object):
 
     def is_authentication_granted(self, data, request_token=None, **kwargs):
         try:
-            authentication_request = self.process_postback(data, request_token)
+            authentication_request = self.process_postback(data, request_token, **kwargs)
             if isinstance(authentication_request, AuthenticationRequest):
                 return authentication_request.granted and not authentication_request.pending
             else:
