@@ -246,15 +246,16 @@ class ToopherIframeTests(unittest.TestCase):
     def test_is_authentication_granted_returns_false_when_toopher_api_error_is_raised(self):
         data = self._get_auth_request_postback_data_as_dict()
         data['resource_type'] = 'invalid'
-        authentication_granted = self.iframe_api.is_authentication_granted(data, self.request_token)
+        data['toopher_sig'] = 'xEY+oOtJcdMsmTLp6eOy9isO/xQ='
+        authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
         self.assertFalse(authentication_granted)
 
-    def test_is_authentication_granted_returns_false_when_user_disabled_error_is_raised(self):
+    def test_is_authentication_granted_returns_true_when_user_disabled_error_is_raised(self):
         data = self._get_auth_request_postback_data_as_dict()
         data['error_code'] = 704
         data['error_message'] = 'The specified user has disabled Toopher authentication.'
-        authentication_granted = self.iframe_api.is_authentication_granted(data, self.request_token)
-        self.assertFalse(authentication_granted)
+        authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
+        self.assertTrue(authentication_granted)
 
     def test_get_user_management_url(self):
         expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=jdoe%40example.com&expires=1300&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=NjwH5yWPE2CCJL8v%2FMNknL%2BeTpE%3D'
