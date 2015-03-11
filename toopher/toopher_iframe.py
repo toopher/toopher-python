@@ -31,14 +31,12 @@ class ToopherIframe(object):
             ttl = kwargs.pop('ttl')
 
         params = {
-            'v':IFRAME_VERSION,
             'username':username,
             'reset_email':reset_email,
             'action_name':action_name,
             'session_token':request_token,
             'requester_metadata':requester_metadata
         }
-        print params
         params.update(kwargs)
 
         return self._get_oauth_signed_url(self.base_uri + '/web/authenticate', params, ttl)
@@ -50,7 +48,6 @@ class ToopherIframe(object):
             ttl = kwargs.pop('ttl')
 
         params = {
-                'v':IFRAME_VERSION,
                 'username':username,
                 'reset_email':reset_email
                 }
@@ -192,4 +189,5 @@ class ToopherIframe(object):
 
     def _get_oauth_signed_url(self, uri, params, ttl):
         params['expires'] = str(int(time.time()) + ttl)
+        params['v'] = IFRAME_VERSION
         return self.client.sign(uri + '?' + urllib.urlencode(params))[0]
