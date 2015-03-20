@@ -266,8 +266,9 @@ class ToopherIframeTests(unittest.TestCase):
         self.assertEqual(expected, self.iframe_api.get_user_management_url('jdoe', 'jdoe@example.com', ttl=100))
 
     def test_get_user_management_url_with_extras(self):
-        expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=&expires=1100&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=CtakenrFTqmVw%2BwPxvrgIM%2BDiwk%3D'
-        self.assertEqual(expected, self.iframe_api.get_user_management_url('jdoe', ttl=100))
+        expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=&foo=bar&expires=1100&v=2' \
+                   '&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=5DE7uRWNHNb0%2B76yqUuzoDpdjVg%3D'
+        self.assertEqual(expected, self.iframe_api.get_user_management_url('jdoe', ttl=100, foo='bar'))
 
     def test_get_user_management_url_removes_ttl_from_kwargs(self):
         expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=jdoe%40example.com&expires=1500&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=%2BQrbKZH2NDxURKE9Yjb6wxegeAM%3D'
