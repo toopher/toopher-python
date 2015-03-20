@@ -210,24 +210,28 @@ class ToopherIframeTests(unittest.TestCase):
     def test_is_authentication_granted_is_true_with_auth_request_granted(self):
         data = self._get_urlencoded_auth_request_postback_data()
         authentication_granted = self.iframe_api.is_authentication_granted(data, ToopherIframeTests.request_token)
-        self.assertTrue(authentication_granted, 'Postback should have been granted with AuthenticationRequest.granted = True')
+        self.assertTrue(authentication_granted, 'Authentication should be granted with '
+                                                'AuthenticationRequest.granted = True')
 
     def test_is_authentication_granted_is_true_with_request_request_granted_and_extras(self):
         data = self._get_urlencoded_auth_request_postback_data()
         authentication_granted = self.iframe_api.is_authentication_granted(data, ToopherIframeTests.request_token, ttl=100)
-        self.assertTrue(authentication_granted, 'Postback should have been granted with AuthenticationRequest.granted = True')
+        self.assertTrue(authentication_granted, 'Authentication should be granted with '
+                                                'AuthenticationRequest.granted = True and extras')
 
     def test_is_authentication_granted_is_true_with_auth_request_granted_without_request_token(self):
         data = self._get_urlencoded_auth_request_postback_data()
         authentication_granted = self.iframe_api.is_authentication_granted(data)
-        self.assertTrue(authentication_granted, 'Postback should have been granted with AuthenticationRequest.granted = True')
+        self.assertTrue(authentication_granted, 'Authentication should be granted with '
+                                                'AuthenticationRequest.granted = True and without request token')
 
     def test_is_authentication_granted_is_false_with_auth_request_not_granted(self):
         data = self._get_auth_request_postback_data_as_dict()
         data['granted'] = 'false'
         data['toopher_sig'] = 'nADNKdly9zA2IpczD6gvDumM48I='
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
-        self.assertFalse(authentication_granted, 'Postback should not have been granted with AuthenticationRequest not granted')
+        self.assertFalse(authentication_granted, 'Authentication should not be granted with '
+                                                 'AuthenticationRequest.granted = False')
 
     def test_is_authentication_granted_is_false_with_auth_request_granted_and_pending_true(self):
         data = self._get_auth_request_postback_data_as_dict()
@@ -235,36 +239,38 @@ class ToopherIframeTests(unittest.TestCase):
         data['pending'] = 'true'
         data['toopher_sig'] = 'vmWBQCy8Py5PVkMZRppbCG7cm0w='
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
-        self.assertTrue(authentication_granted, 'Postback should not have been granted with AuthenticationRequest '
-                                                 'granted and pending true')
+        self.assertFalse(authentication_granted, 'Authentication should not be granted with '
+                                                 'AuthenticationRequest.granted = True and pending = True')
 
     def test_is_authentication_granted_returns_false_when_pairing_is_returned(self):
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_pairing_postback_data(), self.request_token)
-        self.assertFalse(authentication_granted)
+        self.assertFalse(authentication_granted, 'Authentication should not be granted when Pairing is returned')
 
     def test_is_authentication_granted_returns_false_when_user_is_returned(self):
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_user_postback_data(), self.request_token)
-        self.assertFalse(authentication_granted)
+        self.assertFalse(authentication_granted, 'Authentication should not be granted when User is returned')
 
     def test_is_authentication_granted_returns_false_when_signature_validation_error_is_raised(self):
         data = self._get_auth_request_postback_data_as_dict()
         del data['id']
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
-        self.assertFalse(authentication_granted)
+        self.assertFalse(authentication_granted, 'Authentication should not be granted when '
+                                                 'SignatureValidationError is raised')
 
     def test_is_authentication_granted_returns_false_when_toopher_api_error_is_raised(self):
         data = self._get_auth_request_postback_data_as_dict()
         data['resource_type'] = 'invalid'
         data['toopher_sig'] = 'xEY+oOtJcdMsmTLp6eOy9isO/xQ='
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
-        self.assertFalse(authentication_granted)
+        self.assertFalse(authentication_granted, 'Authentication should not be granted when ToopherApiError is raised')
 
     def test_is_authentication_granted_returns_true_when_user_disabled_error_is_raised(self):
         data = self._get_auth_request_postback_data_as_dict()
         data['error_code'] = 704
         data['error_message'] = 'The specified user has disabled Toopher authentication.'
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
-        self.assertTrue(authentication_granted)
+        self.assertTrue(authentication_granted, 'Authentication should be granted when UserDisabledError '
+                                                'is raised')
 
     def test_get_user_management_url_only_username(self):
         expected = 'https://api.toopher.test/v1/web/manage_user?username=jdoe&reset_email=&expires=1300&v=2&oauth_nonce=12345678&oauth_timestamp=1000&oauth_version=1.0&oauth_signature_method=HMAC-SHA1&oauth_consumer_key=abcdefg&oauth_signature=SA7CAUj%2B5QcGO%2BMmdPv9ubbaozk%3D'
