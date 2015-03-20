@@ -229,6 +229,15 @@ class ToopherIframeTests(unittest.TestCase):
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
         self.assertFalse(authentication_granted, 'Postback should not have been granted with AuthenticationRequest not granted')
 
+    def test_is_authentication_granted_is_false_with_auth_request_granted_and_pending_true(self):
+        data = self._get_auth_request_postback_data_as_dict()
+        data['granted'] = 'true'
+        data['pending'] = 'true'
+        data['toopher_sig'] = 'vmWBQCy8Py5PVkMZRppbCG7cm0w='
+        authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_auth_request_postback_data(data), self.request_token)
+        self.assertTrue(authentication_granted, 'Postback should not have been granted with AuthenticationRequest '
+                                                 'granted and pending true')
+
     def test_is_authentication_granted_returns_false_when_pairing_is_returned(self):
         authentication_granted = self.iframe_api.is_authentication_granted(self._get_urlencoded_pairing_postback_data(), self.request_token)
         self.assertFalse(authentication_granted)
