@@ -20,12 +20,13 @@ def initialize_api():
     secret = os.environ.get('TOOPHER_CONSUMER_SECRET')
     
     if not (key or secret):
-        print_text_with_underline('Setup Credentials (set environment variables to prevent prompting)')
-        print 'Enter your requester credential details (from https://dev.toopher.com)'
+        print_text_with_underline('Setup Credentials')
+        print 'Enter your requester credential details (from https://dev.toopher.com).'
+        print 'Hint: Set the TOOPHER_CONSUMER_SECRET and TOOPHER_CONSUMER_SECRET environment variables to avoid this prompt.'
         while not key:
-            key = raw_input('TOOPHER_CONSUMER_KEY=')
+            key = raw_input('TOOPHER_CONSUMER_KEY: ')
         while not secret:
-            secret = raw_input('TOOPHER_CONSUMER_SECRET=')
+            secret = raw_input('TOOPHER_CONSUMER_SECRET: ')
             
     return toopher.ToopherApi(key, secret, os.environ.get('TOOPHER_BASE_URL'))
 
@@ -48,7 +49,7 @@ def pair_device_with_toopher(api):
             pairing = api.pair(user_name, pairing_phrase)
             break
         except ToopherApiError, e:
-            print 'The pairing phrase was not accepted (reason: %s)' % e
+            print 'The pairing phrase was not accepted (Reason: %s)' % e
             
     while True:
         print
@@ -58,47 +59,43 @@ def pair_device_with_toopher(api):
         try:
             pairing.refresh_from_server()
             if pairing.pending:
-                print 'The pairing has not been authorized by the phone yet'
+                print 'The pairing has not been authorized by the phone yet.'
             elif pairing.enabled:
-                print 'Pairing complete'
+                print 'Pairing complete!'
                 break
             else:
-                print 'The pairing has been denied'
+                print 'The pairing has been denied.'
                 break
         except ToopherApiError, e:
             raise
-            print 'Could not check pairing status (reason: %s)' % e
+            print 'Could not check pairing status (Reason: %s)' % e
 
     return pairing
 
 def authenticate_with_toopher(api, pairing):
-    requester_specified_id = None
     while True:
         print_text_with_underline('Step 2: Authenticate log in')
         terminal_name = raw_input('Enter a terminal name for this authentication request [%s]: ' % DEFAULT_TERMINAL_NAME)
         if not terminal_name:
             terminal_name = DEFAULT_TERMINAL_NAME
 
-        if not requester_specified_id:
-            requester_specified_id = uuid.uuid4()
-
         print 'Sending authentication request...'
         
         try:
-            auth_request = api.authenticate(pairing.user.name, terminal_name=terminal_name, requester_specified_id=requester_specified_id)
+            auth_request = api.authenticate(pairing.user.name, terminal_name=terminal_name)
         except ToopherApiError, e:
-            print 'Error initiating authentication (reason: %s)' % e
+            print 'Error initiating authentication (Reason: %s)' % e
             break
         
         while True:
             print
-            raw_input('Response to authentication request on phone (if prompted) and then press return to continue.')
+            raw_input('Respond to authentication request on phone and then press return to continue.')
             print 'Checking status of authentication request...'
             
             try:
                 auth_request.refresh_from_server()
             except ToopherApiError, e:
-                print 'Could not check authentication request status (reason: %s)' % e
+                print 'Could not check authentication request status (Reason: %s)' % e
                 continue
             
             if auth_request.pending:
@@ -109,7 +106,7 @@ def authenticate_with_toopher(api, pairing):
                 print 'The request was ' + automation + result + "!"
                 break
             
-        raw_input('Press return to authenticate again, or Ctrl-C to exit')
+        raw_input('Press return to authenticate again, or Ctrl-C to exit.')
         print
 
 def demo():
