@@ -64,7 +64,7 @@ class ToopherIframe(object):
             raise error(error_message)
         else:
             validated_data = self._validate_data(toopher_data, request_token, kwargs)
-            toopher_api = ToopherApi(self.key, self.secret)
+            toopher_api = ToopherApi(self.key, self.secret, self.base_uri)
             resource_type = validated_data['resource_type']
             if resource_type == 'authentication_request':
                 return AuthenticationRequest(self._create_authentication_request_dict(validated_data), toopher_api)
