@@ -81,6 +81,10 @@ class ApiRawRequester(object):
         url = self.base_url + endpoint
         return self._request(url, 'GET', kwargs)
 
+    def get_raw(self, endpoint):
+        url = self.base_url + endpoint
+        return self._request(url, 'GET', raw_request=True)
+
     def post(self, endpoint, **kwargs):
         url = self.base_url + endpoint
         return self._request(url, 'POST', kwargs)
@@ -205,8 +209,8 @@ class Pairing(ToopherBase):
         self._update(result)
 
     def get_qr_code_image(self):
-        url = self.api.advanced.raw.base_url + '/qr/pairings/' + self.id
-        return self.api.advanced.raw._request(url, 'GET', raw_request=True)
+        url = '/qr/pairings/' + self.id
+        return self.api.advanced.raw.get_raw(url)
 
     def get_reset_link(self, **kwargs):
         if not 'security_question' in kwargs:
