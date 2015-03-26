@@ -568,10 +568,7 @@ class ToopherBaseTests(unittest.TestCase):
             }
         }
         pairing = toopher.Pairing(response, toopher.ToopherApi('key', 'secret'))
-        try:
-            pickled_pairing = pickle.loads(pickle.dumps(pairing))
-        except RuntimeError as e:
-            self.fail('Unable to unpickle a pickled object: %s' % e)
+        pickled_pairing = pickle.loads(pickle.dumps(pairing))
 
         self.assertEqual(pairing.id, pickled_pairing.id)
         self.assertEqual(pairing.user.id, pickled_pairing.user.id)
