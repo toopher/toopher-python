@@ -15,10 +15,7 @@ class HttpClientMock(object):
         self.last_called_headers = headers
 
         uri = uri.split(toopher.DEFAULT_BASE_URL)[1][1:]
-        if uri in self.paths:
-            return ResponseMock(self.paths[uri])
-        else:
-            return ResponseMock((400, '{}'))
+        return ResponseMock(self.paths[uri])
 
 
 class ResponseMock(requests.Response):
@@ -117,10 +114,9 @@ class UserTests(unittest.TestCase):
                             '[]'
             )
         })
-        try:
-            user.reset()
-        except toopher.ToopherApiError as e:
-            self.fail('pairing.email_reset_link() returned a status code of >= 400: %s' % e)
+        user.reset()
+        self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
+        self.assertEqual(self.api.advanced.raw.client.last_called_data['name'], self.name)
 
     def test_update_with_incomplete_response_raises_exception(self):
         response = {
