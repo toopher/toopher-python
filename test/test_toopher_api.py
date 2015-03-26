@@ -576,10 +576,3 @@ class ToopherBaseTests(unittest.TestCase):
         self.assertTrue(pickled_pairing.enabled)
         self.assertTrue(pickled_pairing.pending)
         self.assertEqual(dir(pairing), dir(pickled_pairing))
-
-
-def main():
-    unittest.main()
-
-if __name__ == '__main__':
-    main()
