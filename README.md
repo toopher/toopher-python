@@ -90,3 +90,6 @@ To run tests using [nose](http://nose.readthedocs.org/en/latest/) enter:
 ```shell
 $ nosetests test
 ```
+
+## License
+ToopherPython is licensed under the MIT License. See LICENSE.txt for the full license text.
