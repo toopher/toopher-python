@@ -55,8 +55,8 @@ class ToopherIframe(object):
 
         return self._get_oauth_signed_url(self.base_uri + '/web/manage_user', params, ttl)
 
-    def process_postback(self, urlencoded_form_data, request_token='', **kwargs):
-        toopher_data = self._urldecode_iframe_data(urlencoded_form_data)
+    def process_postback(self, urlencoded_toopher_data, request_token='', **kwargs):
+        toopher_data = self._urldecode_iframe_data(urlencoded_toopher_data)
 
         if 'error_code' in toopher_data:
             error_message = toopher_data['error_message']
@@ -91,7 +91,7 @@ class ToopherIframe(object):
             return False
 
     def _urldecode_iframe_data(self, data):
-        data_dict = urlparse.parse_qs(data['toopher_iframe_data'])
+        data_dict = urlparse.parse_qs(data)
         return dict((k,v[0]) for (k,v) in data_dict.items())
 
     def _validate_data(self, data, request_token, kwargs):

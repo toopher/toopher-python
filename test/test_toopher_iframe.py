@@ -44,7 +44,7 @@ class ToopherIframeTests(unittest.TestCase):
 
     def _get_urlencoded_auth_request_postback_data(self, auth_request_data = None):
         data = auth_request_data if auth_request_data else self._get_auth_request_postback_data_as_dict()
-        return {'toopher_iframe_data': urllib.urlencode(data)}
+        return urllib.urlencode(data)
 
     def _get_pairing_postback_data_as_dict(self):
         return {
@@ -62,7 +62,7 @@ class ToopherIframeTests(unittest.TestCase):
 
     def _get_urlencoded_pairing_postback_data(self, pairing_data=None):
         data = pairing_data if pairing_data else self._get_pairing_postback_data_as_dict()
-        return {'toopher_iframe_data': urllib.urlencode(data)}
+        return urllib.urlencode(data)
 
     def _get_user_postback_data_as_dict(self):
         return {
@@ -77,7 +77,7 @@ class ToopherIframeTests(unittest.TestCase):
 
     def _get_urlencoded_user_postback_data(self, user_data=None):
         data = user_data if user_data else self._get_user_postback_data_as_dict()
-        return {'toopher_iframe_data': urllib.urlencode(data)}
+        return urllib.urlencode(data)
 
     def test_process_postback_good_signature_returns_authentication_request(self):
         auth_data = self._get_auth_request_postback_data_as_dict()
