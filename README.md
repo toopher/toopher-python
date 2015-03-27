@@ -60,8 +60,11 @@ auth_iframe_url = iframe_api.get_authentication_url(username);
 The simplest way to validate the postback data is to call `is_authentication_granted` to check if the authentication request was granted.
 
 ```python
+# Retrieve the postback data as a string from POST parameter 'iframe_postback_data'
+postback_data = request.args['iframe_postback_data']
+
 # Returns boolean indicating if user should be granted access
-authentication_request_granted = iframe_api.is_authentication_granted(form_data)
+authentication_request_granted = iframe_api.is_authentication_granted(postback_data)
 
 if authentication_request_granted:
     # Success!
