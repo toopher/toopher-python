@@ -29,7 +29,7 @@ You have complete control over what actions you want to authenticate using Tooph
 
 ```python
 # Step 2 - Authenticate a log in
-authentication_request = api.authenticate(pairing.id, "terminal name")
+authentication_request = api.authenticate("username@yourservice.com", "terminal name")
 
 # Once they've responded you can then check the status
 authentication_request.refresh_from_server()
