@@ -91,7 +91,7 @@ class ToopherIframe(object):
             return False
 
     def _urldecode_iframe_data(self, data):
-        data_dict = urlparse.parse_qs(data)
+        data_dict = urlparse.parse_qs(data, True)
         return dict((k,v[0]) for (k,v) in data_dict.items())
 
     def _validate_data(self, data, request_token, kwargs):
