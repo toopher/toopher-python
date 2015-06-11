@@ -170,7 +170,7 @@ class Users(ToopherObjectFactory):
 
     def get_by_name(self, username):
         url = '/users'
-        users = self.api.advanced.raw.get(url, user_name=username)
+        users = self.api.advanced.raw.get(url, name=username)
 
         if len(users) > 1:
             raise ToopherApiError('Multiple users with name = %s' % username)
