@@ -314,7 +314,7 @@ class User(ToopherBase):
 
     def reset(self):
         url = '/users/reset'
-        params = {'name': self.name}
+        params = {'user_name': self.name}
         self.api.advanced.raw.post(url, **params)
 
     def _update(self, json_response):
