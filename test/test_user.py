@@ -95,7 +95,7 @@ class UserTests(unittest.TestCase):
         })
         user.reset()
         self.assertEqual(self.api.advanced.raw.client.last_called_method, 'POST')
-        self.assertEqual(self.api.advanced.raw.client.last_called_data['name'], self.name)
+        self.assertEqual(self.api.advanced.raw.client.last_called_data['user_name'], self.name)
 
     def test_update_with_incomplete_response_raises_exception(self):
         response = {
