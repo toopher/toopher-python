@@ -1,12 +1,12 @@
 from oauthlib import oauth1
 import urllib
-import urlparse
+from urllib.parse import urlparse
 import hashlib
 import hmac
 import base64
 import time
 import logging
-from toopher_api import *
+from .toopher_api import *
 
 DEFAULT_BASE_URL = 'https://api.toopher.com/v1'
 DEFAULT_IFRAME_TTL = 300
