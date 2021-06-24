@@ -5,8 +5,7 @@ ToopherPython is a Toopher API library that simplifies the task of interfacing w
   focus on just using the API.
 
 ### Python Version
-* 2.6
-* 2.7
+* 3.6
 
 ### Documentation
 Make sure you visit [https://dev.toopher.com](https://dev.toopher.com) to get acquainted with the Toopher API fundamentals.  The documentation there will tell you the details about the operations this API wrapper library provides.
