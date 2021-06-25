@@ -8,4 +8,3 @@ oauthlib==0.6.0
 requests==2.0.1
 requests-oauthlib==0.4.0
 urllib3==1.7.1
-Werkzeug==0.9.4
